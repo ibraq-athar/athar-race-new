@@ -1,0 +1,547 @@
+<title>لوحة أثر</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: RTL operations board — summary tiles, markets, the Athar race, then the full branch table. Warm paper neutrals with an oud-brown accent and amber highlight; semantic colors separate. */
+:root{
+  --bg:#f7f4ef; --surface:#fffdf9; --surface-2:#f1ece4; --line:#e2dbcf; --line-strong:#cfc5b5;
+  --fg:#241d16; --fg-2:#5c5247; --fg-3:#8a7f72;
+  --accent:#5a3b2a; --accent-fg:#ffffff; --amber:#c98500; --amber-soft:#fff2cf;
+  --good:#1f7a3a; --good-soft:#dff3e4; --warn:#b36b00; --warn-soft:#fdebc8; --bad:#b3261e; --bad-soft:#f9dcd9;
+  --bar:#8a5a3c; --bar-track:#e8e1d6; --marker:#241d16;
+  --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --radius:10px; --shadow:0 1px 2px rgba(36,29,22,.06),0 4px 14px rgba(36,29,22,.05);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#161311; --surface:#1f1b18; --surface-2:#27221e; --line:#352e28; --line-strong:#4a4037;
+  --fg:#f1ebe3; --fg-2:#c4b9ac; --fg-3:#8f8375;
+  --accent:#d9b48f; --accent-fg:#1a120c; --amber:#e3a21b; --amber-soft:#3b2d0c;
+  --good:#5fc77e; --good-soft:#143322; --warn:#e8a63a; --warn-soft:#3a2a10; --bad:#f07a73; --bad-soft:#3d1a18;
+  --bar:#c08a62; --bar-track:#2f2924; --marker:#f1ebe3; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#161311; --surface:#1f1b18; --surface-2:#27221e; --line:#352e28; --line-strong:#4a4037;
+  --fg:#f1ebe3; --fg-2:#c4b9ac; --fg-3:#8f8375;
+  --accent:#d9b48f; --accent-fg:#1a120c; --amber:#e3a21b; --amber-soft:#3b2d0c;
+  --good:#5fc77e; --good-soft:#143322; --warn:#e8a63a; --warn-soft:#3a2a10; --bad:#f07a73; --bad-soft:#3d1a18;
+  --bar:#c08a62; --bar-track:#2f2924; --marker:#f1ebe3; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55;margin:0}
+.wrap{direction:rtl;max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
+h1{font-size:24px}
+h2{font-size:17px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--fg-2)}
+.small{font-size:12px;color:var(--fg-3)}
+.eyebrow{font-size:11px;letter-spacing:.06em;color:var(--fg-3);text-transform:uppercase}
+
+/* header */
+.head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:14px}
+.head .brand{display:flex;align-items:center;gap:12px}
+.mark{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:700;font-size:20px;flex:none}
+.status{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:var(--surface)}
+.pill.live{border-color:var(--good);color:var(--good)}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+button,.btn{font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);color:var(--fg);padding:8px 14px;cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+
+/* update panel */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.panel.update{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;align-items:end}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:12px;color:var(--fg-2)}
+.field input[type=file],.field input[type=date],.field select,.field input[type=search],.field textarea{font:inherit;padding:7px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--fg);width:100%;min-width:0}
+.field textarea{min-height:38px;resize:vertical}
+.update .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.notice{padding:10px 12px;border-radius:8px;font-size:13px;background:var(--surface-2);border:1px solid var(--line)}
+.notice.ok{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.notice.err{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tile .v{font-size:26px;font-weight:700;line-height:1.15}
+.tile .l{font-size:12px;color:var(--fg-2)}
+.tile .d{font-size:12px;color:var(--fg-3)}
+.tile .d.good{color:var(--good)} .tile .d.bad{color:var(--bad)} .tile .d.warn{color:var(--warn)}
+.meter{height:6px;border-radius:3px;background:var(--bar-track);position:relative;margin-top:6px;overflow:visible}
+.meter>i{position:absolute;inset-block:0;right:0;border-radius:3px;background:var(--bar)}
+.meter>b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--marker);border-radius:1px}
+
+/* two-column blocks */
+.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+
+/* market bars */
+.mkt{display:flex;flex-direction:column;gap:10px}
+.mrow{display:grid;grid-template-columns:110px 1fr 150px;gap:10px;align-items:center}
+@media (max-width:560px){.mrow{grid-template-columns:90px 1fr 110px}}
+.mrow .nm{font-weight:600}
+.mrow .nm small{display:block;font-weight:400;color:var(--fg-3);font-size:11px}
+.mrow .bar{height:16px;background:var(--bar-track);border-radius:4px;position:relative}
+.mrow .bar>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:4px 0 0 4px}
+.mrow .bar>i.full{border-radius:4px}
+.mrow .bar>b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--marker)}
+.mrow .val{font-size:12px;color:var(--fg-2);text-align:left}
+.mrow .val strong{color:var(--fg);font-size:14px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--fg-3)}
+.legend i{display:inline-block;width:12px;height:8px;background:var(--bar);border-radius:2px;margin-inline-start:4px;vertical-align:middle}
+.legend b{display:inline-block;width:2px;height:12px;background:var(--marker);margin-inline-start:6px;vertical-align:middle}
+
+/* trend */
+.trend{position:relative}
+.trend svg{width:100%;height:auto;display:block}
+.trend text{font-family:var(--font);fill:var(--fg-3);font-size:11px}
+.trend .tt{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px;font-size:12px;box-shadow:var(--shadow);white-space:nowrap;display:none}
+
+/* race */
+.race{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.cat{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface-2);min-width:0}
+.cat.a{border-color:var(--amber);background:var(--amber-soft)}
+.cat .ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cat .ch b{font-size:15px}
+.cat ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.cat li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:baseline;font-size:13px}
+.cat li .r{color:var(--fg-3);font-size:12px}
+.cat li .s{min-width:0}
+.cat li .s small{display:block;color:var(--fg-3);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat li .p{font-weight:600}
+.cat .empty{color:var(--fg-3);font-size:13px}
+.chip{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid transparent}
+.chip.A{background:var(--amber-soft);color:var(--amber);border-color:var(--amber)}
+.chip.B,.chip.C,.chip.D,.chip.E{background:var(--surface-2);color:var(--fg-2);border-color:var(--line-strong)}
+.chip.flag{background:var(--warn-soft);color:var(--warn)}
+.chip.good{background:var(--good-soft);color:var(--good)}
+[data-note]{position:relative;cursor:help}
+[data-note]:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.chip.flag[data-note]::after{content:"";position:absolute;top:0;left:0;border-top:6px solid var(--bad);border-right:6px solid transparent;border-top-left-radius:2px}
+.note{position:fixed;z-index:50;max-width:260px;padding:7px 10px;border-radius:6px;background:var(--amber-soft);color:var(--fg);border:1px solid var(--amber);box-shadow:var(--shadow);font-size:12px;line-height:1.5;direction:rtl;pointer-events:none;white-space:normal}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* table */
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}
+
+@media (max-width:760px){.toolbar{grid-template-columns:1fr 1fr}}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius)}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{position:sticky;top:0;background:var(--surface-2);font-weight:600;font-size:12px;color:var(--fg-2);cursor:pointer;user-select:none}
+th.sorted{color:var(--fg)}
+tr:hover td{background:var(--surface-2)}
+td.ach{min-width:140px}
+.mini{display:inline-block;width:70px;height:6px;background:var(--bar-track);border-radius:3px;vertical-align:middle;margin-inline-start:6px;position:relative}
+.mini>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:3px}
+.mini>b{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:var(--marker)}
+.cur{font-size:11px;color:var(--fg-3)}
+.rc{font-size:11.5px;font-weight:600;color:var(--fg-3)} .rc.up{color:var(--good)} .rc.dn{color:var(--bad)}
+.pace{font-weight:600}
+.pace.g{color:var(--good)} .pace.w{color:var(--warn)} .pace.b{color:var(--bad)}
+.tfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--fg-3)}
+
+/* employees */
+.emp{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:6px 20px}
+.emp .e{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.emp .e .r{color:var(--fg-3);font-size:12px}
+.emp .e small{display:block;color:var(--fg-3);font-size:11px}
+
+details{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:12px 16px}
+summary{cursor:pointer;font-weight:600}
+details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
+@media (prefers-reduced-motion:no-preference){.meter>i,.mrow .bar>i{transition:width .5s ease}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="brand">
+      <div class="mark">أ</div>
+      <div>
+        <h1>لوحة أثر</h1>
+        <div class="muted">متابعة يومية للمبيعات مقابل المستهدف وسباق جوائز «أثر» — IBRAQ</div>
+      </div>
+    </div>
+    <div class="status">
+      <span class="pill" id="pillAsof">البيانات حتى —</span>
+      <span class="pill" id="pillDays">—</span>
+      <span class="pill" id="pillSrc">نسخة مضمّنة</span>
+      <button id="btnToggleUpdate">تحديث البيانات</button>
+    </div>
+  </header>
+
+  <section class="panel update" id="updatePanel" hidden>
+    <div class="field">
+      <label for="fPos">ملف المبيعات بالموظف (Pivot من Odoo، xlsx)</label>
+      <input type="file" id="fPos" accept=".xlsx,.xls">
+    </div>
+    <div class="field">
+      <label for="fAsof">المبيعات حتى تاريخ (يُقرأ تلقائياً من ملف فيه أعمدة الأيام)</label>
+      <input type="date" id="fAsof">
+    </div>
+    <div class="field">
+      <label for="fTgt">ملف المستهدف الشهري (اختياري — مرة كل شهر)</label>
+      <input type="file" id="fTgt" accept=".xlsx,.xls">
+    </div>
+    <div class="actions">
+      <button class="primary" id="btnApply">احتساب وتحديث اللوحة</button>
+      <span class="small" id="saveHint">يُحفظ التحديث للجميع عند توفر الصلاحية</span>
+    </div>
+    <div class="notice" id="notice" hidden></div>
+  </section>
+
+  <section class="tiles" id="tiles"></section>
+
+  <div class="grid2">
+    <section class="card">
+      <div class="hd"><h2>الأسواق — نسبة التحقيق حتى اليوم</h2><span class="small" id="mktSub"></span></div>
+      <div class="mkt" id="markets"></div>
+      <div class="legend"><span><i></i>التحقيق الفعلي</span><span><b></b>المفترض عند هذا اليوم</span></div>
+    </section>
+    <section class="card">
+      <div class="hd"><h2>المسار اليومي — الإجمالي بالريال</h2><span class="small" id="trendSub"></span></div>
+      <div class="trend" id="trend"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="hd">
+      <h2>سباق جوائز أثر — لو استمرت الوتيرة الحالية إلى نهاية الشهر</h2>
+      <span class="small">شرط الدخول 100% · كل دولة لها حصة (السعودية 34، والإمارات وعُمان والكويت/البحرين جائزتان لكل منها، والحصة غير المكتملة تنتقل للسعودية) · الأول في كل دولة صغيرة جوال والثاني سبيكة · السيارة سباق واحد للجميع (≥ 300 ألف ر.س)</span>
+    </div>
+    <div class="small" id="raceFill"></div>
+    <div class="race" id="race"></div>
+  </section>
+
+  <section class="card">
+    <div class="hd"><h2>جميع الفروع</h2><span class="small" id="tblSub"></span></div>
+    <div class="toolbar">
+      <div class="field"><input type="search" id="q" placeholder="بحث: فرع، مدينة، موظف"></div>
+      <div class="field"><select id="selCountry"><option value="">كل الأسواق</option></select></div>
+      <div class="field"><select id="selRegion"><option value="">كل المناطق</option></select></div>
+      <div class="field"><select id="selState"><option value="">كل الحالات</option><option value="track">على المسار</option><option value="off">خلف المسار</option><option value="flag">تحتاج مراجعة</option><option value="award">مرشّح لجائزة</option></select></div>
+    </div>
+    <div class="tscroll"><table id="tbl"><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
+    <div class="tfoot"><span id="tcount"></span><span>المبيعات والمستهدف بعملة كل دولة، ونسبة التحقيق تُحسب داخل العملة نفسها · الفرز بالمبالغ يحوّلها للريال أولاً · الإجماليات وأعلى الموظفين وحد السيارة بالريال بعد التحويل</span></div>
+  </section>
+
+  <section class="card">
+    <div class="hd"><h2>أعلى 20 موظفاً مبيعات على مستوى الشركة</h2><span class="small">بالريال السعودي بعد التحويل · حسابات الفروع مستبعدة</span></div>
+    <div class="emp" id="emps"></div>
+  </section>
+
+  <details>
+    <summary>كيف تُحتسب الأرقام</summary>
+    <p>نسبة التحقيق = مبيعات الفرع حتى التاريخ ÷ مستهدف الشهر. «المفترض» = الأيام المنقضية ÷ أيام الشهر. المتوقع = المبيعات ÷ الأيام المنقضية × أيام الشهر. الفرع على المسار إذا كانت نسبة تحقيقه ≥ المفترض.</p>
+    <p>الجوائز: الفئة A سباق واحد على مستوى الشركة بين الفروع المتوقع بلوغها 100% ومبيعات ≥ 300 ألف ريال، وهي خارج حصص الدول. بعدها تُختار الفائزون بالجوائز الأربعين حسب حصة كل دولة: السعودية 34، والإمارات 2، وعُمان 2، والكويت والبحرين 2، بأخذ الأعلى نسبة تحقيق داخل كل دولة من الفروع المؤهلة. الدول الصغيرة (الإمارات، عُمان، الكويت والبحرين): الأول جوال والثاني سبيكة ذهب. السعودية: 7 جوالات و10 آيباد و10 ساعات و7 سبائك حسب الترتيب. الفرع الواحد جائزة واحدة، وإذا لم تكتمل حصة دولة لعدم وجود فروع كافية بلغت 100%، ينتقل مقعدها للسعودية (أعلى فرع سعودي مؤهل بعد الـ34)، وتترقّى الجوائز بالترتيب ويأخذ الداخل الجديد آخر جائزة. وإذا لم يكفِ عدد الفروع المؤهلة (100% فعلياً بنهاية الشهر) لملء المقاعد، تسقط الجوائز المتبقية ولا تُرحَّل (قرار 14/10). الموظف الفائز هو الأعلى مبيعات بحسابه الشخصي داخل الفرع؛ حسابات الفروع المشتركة مستبعدة، ويُرفع للمراجعة أي فرع يتجاوز فيه موظف واحد 60% من مبيعاته.</p>
+    <p>أسعار التحويل الثابتة المعتمدة في الشركة: درهم إماراتي 1.02، دينار بحريني 10، ريال عُماني 9.75، دينار كويتي 12.30، ريال قطري 1.03. فترات الإقصاء والمخالفات (MenaMe) لا تدخل في هذه اللوحة وتُطبَّق عند الاحتساب النهائي.</p>
+  </details>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script id="embed" type="application/json">{}</script>
+<script>
+(function(){
+'use strict';
+const EMBED = JSON.parse(document.getElementById('embed').textContent);
+// أسعار التحويل الثابتة المعتمدة في الشركة (أسماء، 12 أكتوبر 2026)
+const FX = {KSA:1, UAE:1.02, Oman:9.75, Kuwait:12.30, Bahrain:10, Qatar:1.03};
+const CUR = {KSA:'ر.س', UAE:'د.إ', Oman:'ر.ع', Kuwait:'د.ك', Bahrain:'د.ب', Qatar:'ر.ق'};
+const AR = {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'};
+const MARKET = {KSA:'KSA', UAE:'UAE', Oman:'Oman', Kuwait:'KW-BH', Bahrain:'KW-BH', Qatar:'Qatar'};
+const MARKET_AR = {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', 'KW-BH':'الكويت والبحرين', Qatar:'قطر'};
+const QUOTA = {KSA:34, UAE:2, Oman:2, 'KW-BH':2};
+const MIN_A = 300000;
+const EXCLUDE = new Set(['EXBUAE']);
+const PRIZE = {A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'};
+const EMP_RE = /(^\d{3,}\s*-)|(-\s*\d{3,}$)/;
+const nf0 = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
+const pct = (x,d=0)=> (x*100).toFixed(d)+'%';
+const $ = id=>document.getElementById(id);
+
+let state = {raw:EMBED.raw, targets:EMBED.targets, history:{}};
+let branches=[], summary={}, sortKey='achievement', sortDir=-1;
+
+/* ---------- compute ---------- */
+function compute(raw, targets){
+  const asof = new Date(raw.asof+'T00:00:00');
+  const dim = new Date(asof.getFullYear(), asof.getMonth()+1, 0).getDate();
+  const day = asof.getDate(), de = raw.elapsed || day, frac = de/dim;   // elapsed: finished days while today is live
+  const out=[], unmatched=[];
+  for(const [code,s] of Object.entries(raw.stores)){
+    if(EXCLUDE.has(code)) continue;
+    const t = targets[code];
+    if(!t){ unmatched.push({store:code, sales:s.sales}); continue; }
+    const emps = s.users.filter(u=>EMP_RE.test(u[0].trim())).map(u=>({user:u[0],sales:u[1]})).sort((a,b)=>b.sales-a.sales);
+    emps.forEach(e=>e.share = s.sales>0? e.sales/s.sales : 0);
+    const ach = t.target? s.sales/t.target : 0;
+    const proj = de? s.sales/de*dim : 0;
+    out.push({store:code, country:t.country, market:MARKET[t.country], region:t.region, city:t.city,
+      target:t.target, sales:s.sales, sales_sar:s.sales*FX[t.country], achievement:ach, pace:frac?ach/frac:0,
+      projected:proj, projected_pct:t.target?proj/t.target:0, projected_sar:proj*FX[t.country],
+      needed_daily:Math.max(0,(t.target-s.sales)/Math.max(1,dim-de)), avg_daily:de?s.sales/de:0,
+      top:emps[0]||null, employees:emps, review:!!(emps[0]&&emps[0].share>0.6), award:null});
+  }
+  out.sort((a,b)=>b.achievement-a.achievement);
+  out.forEach((b,i)=>b.rank=i+1);
+  // مقارنة بأمس (من أعمدة الأيام): تغيّر نسبة التحقيق وتغيّر المركز
+  if(raw.prev){
+    const pa=b=>{const v=raw.prev[b.store]||0; return b.target? v/b.target : 0;};
+    const pr=[...out].sort((x,y)=>pa(y)-pa(x)); const rp={}; pr.forEach((b,i)=>rp[b.store]=i+1);
+    out.forEach(b=>{ b.dAch=b.achievement-pa(b); b.rankPrev=rp[b.store]; b.rankChg=rp[b.store]-b.rank; });
+  }
+  // projected awards
+  const elig = out.filter(b=>b.projected_pct>=1).sort((a,b)=>b.projected_pct-a.projected_pct);
+  const car = elig.find(b=>b.projected_sar>=MIN_A)||null;
+  if(car) car.award='A';
+  // قرار 14/10 (الخيار ب): الأول في كل دولة صغيرة جوال والثاني سبيكة؛ السعودية 34 من المجمّع العام
+  const fill={}, small=new Map();
+  for(const m of ['UAE','Oman','KW-BH']){
+    const list=elig.filter(b=>b.market===m && b!==car).slice(0,2);
+    fill[m]=list.length; list.forEach((b,i)=>{ const c=i===0?'B':'E'; b.award=c; small.set(b,c); });
+  }
+  const uB=[...small.values()].filter(c=>c==='B').length, uE=small.size-uB;
+  const ksa=elig.filter(b=>b.market==='KSA' && b!==car).slice(0,34); fill.KSA=ksa.length;
+  // المقعد الفاضي في دولة صغيرة لا يسقط: ينتقل لأعلى فرع مؤهل بعدها، والجوائز تترقّى بالترتيب
+  // قرار 14/10: المقعد الفاضي يذهب للسعودية فقط (أعلى سعودي بعد الـ34)
+  const extra=elig.filter(b=>b.market==='KSA' && b!==car).slice(34, 34+6-small.size);
+  extra.forEach(b=>b.moved=true);
+  // الداخلون بالمقاعد المنقولة يأخذون آخر الجوائز، وأصحاب الحصص يترقّون بالترتيب
+  const byP=(a,b)=>b.projected_pct-a.projected_pct;
+  const pool=[...[...ksa].sort(byP), ...[...extra].sort(byP)];
+  const seq=[...Array(10-uB).fill('B'),...Array(10).fill('C'),...Array(10).fill('D'),...Array(10-uE).fill('E')];
+  pool.forEach((b,i)=>{ if(seq[i]) b.award=seq[i]; });
+  const byC={};
+  for(const b of out){ const m=byC[b.country]||(byC[b.country]={sales:0,target:0,n:0,on:0,at100:0}); m.sales+=b.sales; m.target+=b.target; m.n++; if(b.pace>=1)m.on++; if(b.achievement>=1)m.at100++; }
+  const sum = {asof:raw.asof, de, day, dim, frac, n:out.length, unmatched,
+    sales_sar:out.reduce((a,b)=>a+b.sales_sar,0), target_sar:out.reduce((a,b)=>a+b.target*FX[b.country],0),
+    on:out.filter(b=>b.pace>=1).length, at100:out.filter(b=>b.achievement>=1).length, review:out.filter(b=>b.review).length,
+    awards:out.filter(b=>b.award).length, fill, moved:extra.length, byC};
+  return {branches:out, summary:sum};
+}
+
+/* ---------- render ---------- */
+function paceClass(p){ return p>=1?'g':(p>=0.85?'w':'b'); }
+function renderTiles(){
+  const s=summary, ach=s.sales_sar/s.target_sar, left=s.dim-s.de;
+  const needDaily = Math.max(0,(s.target_sar-s.sales_sar)/Math.max(1,left)), avgDaily=s.sales_sar/s.de;
+  const tiles=[
+    {v:nf0.format(s.sales_sar), l:'إجمالي المبيعات (ر.س) حتى '+s.asof, d:'من مستهدف '+nf0.format(s.target_sar), meter:ach},
+    {v:pct(ach,1), l:'نسبة التحقيق للشركة', d:(ach>=s.frac?'فوق المفترض ':'تحت المفترض ')+pct(s.frac,1), cls:ach>=s.frac?'good':'bad'},
+    {v:pct(ach/s.frac,0), l:'مؤشر الوتيرة (100% = على المسار)', d:'المتوقع نهاية الشهر '+pct(ach/s.frac,0), cls:ach/s.frac>=1?'good':'warn'},
+    {v:s.on+' / '+s.n, l:'فروع على المسار', d:s.at100+' فرع بلغ 100% فعلياً', cls:'good'},
+    {v:nf0.format(needDaily), l:'المطلوب يومياً (ر.س) لبلوغ المستهدف', d:'المعدل الحالي '+nf0.format(avgDaily)+' / يوم', cls:needDaily>avgDaily?'warn':'good'},
+    {v:s.awards+' / 41', l:'جوائز مرشّحة حسب الوتيرة', d:s.review+' فرع يحتاج مراجعة (موظف >60%)', cls:s.review?'warn':'good'},
+  ];
+  $('tiles').innerHTML = tiles.map(t=>`<div class="tile"><div class="v num">${t.v}</div><div class="l">${t.l}</div><div class="d ${t.cls||''}">${t.d}</div>${t.meter!==undefined?`<div class="meter"><i style="width:${Math.min(100,t.meter*100)}%"></i><b style="right:${Math.min(100,s.frac*100)}%"></b></div>`:''}</div>`).join('');
+  $('pillAsof').textContent='البيانات حتى '+s.asof;
+  $('pillDays').textContent=`اليوم ${s.day} من ${s.dim} · باقي ${left} يوم`;
+}
+function renderMarkets(){
+  const order=['KSA','UAE','Oman','Kuwait','Bahrain','Qatar'];
+  $('markets').innerHTML = order.filter(c=>summary.byC[c]).map(c=>{
+    const m=summary.byC[c], a=m.target?m.sales/m.target:0;
+    return `<div class="mrow"><div class="nm">${AR[c]}<small>${m.n} فرع · ${m.on} على المسار</small></div>
+      <div class="bar"><i class="${a>=1?'full':''}" style="width:${Math.min(100,a*100)}%"></i><b style="right:${Math.min(100,summary.frac*100)}%"></b></div>
+      <div class="val num"><strong>${pct(a,1)}</strong><br>${nf0.format(m.sales)} / ${nf0.format(m.target)} ${CUR[c]}</div></div>`;
+  }).join('');
+  $('mktSub').textContent='المفترض اليوم '+pct(summary.frac,1);
+}
+function renderTrend(){
+  const s=summary, hist=Object.values(state.history).filter(h=>h.asof.slice(0,7)===s.asof.slice(0,7)).sort((a,b)=>a.asof<b.asof?-1:1);
+  const pts = hist.map(h=>({d:new Date(h.asof+'T00:00:00').getDate(), v:h.sales_sar}));
+  if(!pts.length) pts.push({d:s.de,v:s.sales_sar});
+  const W=560,H=240,L=58,R=12,T=14,B=30, T0=s.target_sar;
+  const maxV=Math.max(T0, ...pts.map(p=>p.v))*1.04;
+  const x=d=>L+(d-1)/(s.dim-1)*(W-L-R), y=v=>T+(1-v/maxV)*(H-T-B);
+  const ticks=[0,.25,.5,.75,1].map(f=>f*maxV);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="المبيعات التراكمية مقابل خط المستهدف">`;
+  ticks.forEach(v=>{svg+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v>=1e6?(v/1e6).toFixed(1)+'M':nf0.format(v/1000)+'K'}</text>`;});
+  [1,5,10,15,20,25,s.dim].forEach(d=>{svg+=`<text x="${x(d)}" y="${H-10}" text-anchor="middle">${d}</text>`;});
+  svg+=`<line x1="${x(1)}" y1="${y(0)}" x2="${x(s.dim)}" y2="${y(T0)}" stroke="var(--fg-3)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  svg+=`<text x="${x(s.dim)-4}" y="${y(T0)-6}" text-anchor="end">المستهدف ${nf0.format(T0/1e6*10)/10}M</text>`;
+  const path=pts.map((p,i)=>(i?'L':'M')+x(p.d).toFixed(1)+' '+y(p.v).toFixed(1)).join(' ');
+  if(pts.length>1) svg+=`<path d="${path} L${x(pts[pts.length-1].d).toFixed(1)} ${y(0)} L${x(pts[0].d).toFixed(1)} ${y(0)} Z" fill="var(--bar)" opacity=".12"/><path d="${path}" fill="none" stroke="var(--bar)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  pts.forEach((p,i)=>{const last=i===pts.length-1; svg+=`<circle data-i="${i}" cx="${x(p.d)}" cy="${y(p.v)}" r="${last?5:3.5}" fill="var(--bar)" stroke="var(--surface)" stroke-width="2"/>`;});
+  const lp=pts[pts.length-1]; svg+=`<text x="${x(lp.d)}" y="${y(lp.v)-10}" text-anchor="${lp.d>s.dim*0.7?'end':'middle'}" style="fill:var(--fg);font-weight:600">${nf0.format(lp.v/1e6*100)/100}M</text>`;
+  svg+='</svg><div class="tt" id="trendTT"></div>';
+  $('trend').innerHTML=svg;
+  $('trendSub').textContent = pts.length>1? `${pts.length} نقاط يومية محفوظة` : 'ستُرسم النقاط يوماً بيوم مع كل تحديث';
+  const tt=$('trendTT'), box=$('trend');
+  box.querySelectorAll('circle').forEach(c=>{
+    c.addEventListener('mouseenter',e=>{const p=pts[+c.dataset.i]; tt.style.display='block'; tt.innerHTML=`يوم ${p.d}: <b class="num">${nf0.format(p.v)}</b> ر.س<br><span class="small">${pct(p.v/T0,1)} من المستهدف</span>`; const r=box.getBoundingClientRect(), cr=c.getBoundingClientRect(); tt.style.left=(cr.left-r.left-tt.offsetWidth/2)+'px'; tt.style.top=(cr.top-r.top-tt.offsetHeight-10)+'px';});
+    c.addEventListener('mouseleave',()=>tt.style.display='none');
+  });
+}
+function renderRace(){
+  const cats=['A','B','C','D','E'];
+  const html=cats.map(c=>{
+    const list=branches.filter(b=>b.award===c).sort((a,b)=>b.projected_pct-a.projected_pct);
+    const quotaNote = c==='A'?'سباق واحد على مستوى الشركة':`${list.length} / 10 · ${Object.keys(QUOTA).map(m=>MARKET_AR[m]+' '+list.filter(b=>b.market===m).length).join(' · ')}`;
+    const cap=c==='A'?1:10, vac=cap-list.length;
+    const items = list.map((b,i)=>`<li><span class="r num">${i+1}</span><span class="s"><b>${b.store}</b> <span class="small">${AR[b.country]} · ${b.city}</span>${b.moved?' <span class="chip good">منقولة</span>':''}<small>${b.top?'<bdi dir="ltr">'+b.top.user+'</bdi> · '+pct(b.top.share)+(b.review?` <span tabindex="0" data-note="${reviewNote(b)}">⚠</span>`:''):'—'}</small></span><span class="p num">${pct(b.projected_pct)}</span></li>`).join('') + (vac>0?`<li class="empty">🔓 ${vac===1?'مقعد شاغر':vac+' مقاعد شاغرة'} — ${c==='A'?'لا يوجد فرع كبير مؤهل بعد':'لا يكفي عدد الفروع المؤهلة لملئها'}</li>`:'');
+    const sub = c==='A'&&list[0]? `الآن ${pct(list[0].achievement,1)} · المتوقع ${nf0.format(list[0].projected_sar)} ر.س (الحد ${nf0.format(MIN_A)})` : quotaNote;
+    const team = c==='A'&&list[0]? `<div class="small">فريق الفرع: الثاني <bdi dir="ltr">${list[0].employees[1]?list[0].employees[1].user:'—'}</bdi> (جوال) · الثالث <bdi dir="ltr">${list[0].employees[2]?list[0].employees[2].user:'—'}</bdi> (آيباد) · البقية قسيمة 250 ر.س عند بلوغ 100%</div>` : '';
+    return `<div class="cat ${c==='A'?'a':''}"><div class="ch"><b>${c} · ${PRIZE[c]}</b><span class="small">${sub}</span></div><ol>${items}</ol>${team}</div>`;
+  }).join('');
+  $('race').innerHTML=html;
+  $('raceFill').textContent = 'حصص الدول المكتملة بالوتيرة الحالية: '+Object.keys(QUOTA).map(m=>`${MARKET_AR[m]} ${summary.fill[m]}/${QUOTA[m]}`).join(' · ')+(summary.moved? ` — ${summary.moved} جوائز من الحصص غير المكتملة انتقلت لأعلى الفروع المؤهلة بعدها (مُعلَّمة «منقولة»).` : ' — كل الحصص مكتملة.');
+}
+const reviewNote = b => `موظف واحد (\u2066${b.top.user}\u2069) عليه ${pct(b.top.share)} من مبيعات الفرع، والحد 60%. تُراجع مبيعاته قبل اعتماد النتيجة.`;
+const COLS=[
+  {k:'rank',t:'#',f:b=>`${b.rank}${b.rankChg!==undefined?` <span class="rc ${b.rankChg>0?'up':b.rankChg<0?'dn':''}">${b.rankChg>0?'▲'+b.rankChg:b.rankChg<0?'▼'+(-b.rankChg):'—'}</span>`:''}`},
+  {k:'store',t:'الفرع',f:b=>`<b>${b.store}</b>`},
+  {k:'city',t:'المدينة / السوق',f:b=>`${b.city} <span class="small">${AR[b.country]}</span>`},
+  {k:'sales_sar',t:'المبيعات',f:b=>`${nf0.format(b.sales)} <span class="cur">${CUR[b.country]}</span>`},
+  {k:'target_sar',t:'المستهدف',f:b=>`${nf0.format(b.target)} <span class="cur">${CUR[b.country]}</span>`, s:b=>b.target*FX[b.country]},
+  {k:'achievement',t:'التحقيق',f:b=>`<span class="num">${pct(b.achievement,1)}</span><span class="mini"><i style="width:${Math.min(100,b.achievement*100)}%"></i><b style="right:${Math.min(100,summary.frac*100)}%"></b></span>`,cls:'ach'},
+  {k:'dAch',t:'تغيّر اليوم',f:b=>b.dAch===undefined?'<span class="small">—</span>':`<span class="rc ${b.dAch>0.0005?'up':''}">${b.dAch>0?'+':''}${(b.dAch*100).toFixed(1)} نقطة</span>`, s:b=>b.dAch||0},
+  {k:'pace',t:'الوتيرة',f:b=>`<span class="pace ${paceClass(b.pace)}">${pct(b.pace)}</span>`},
+  {k:'projected_pct',t:'المتوقع',f:b=>pct(b.projected_pct)},
+  {k:'needed_daily',t:'مطلوب/يوم',f:b=>`${nf0.format(b.needed_daily)} <span class="cur">${CUR[b.country]}</span>`, s:b=>b.needed_daily*FX[b.country]},
+  {k:'top',t:'الموظف الأعلى',f:b=>b.top?`<bdi dir="ltr">${b.top.user}</bdi> <span class="small num">${pct(b.top.share)}</span>${b.review?` <span class="chip flag" tabindex="0" data-note="${reviewNote(b)}">مراجعة</span>`:''}`:'<span class="small">—</span>', s:b=>b.top?b.top.sales:0},
+  {k:'award',t:'الجائزة المتوقعة',f:b=>b.award?`<span class="chip ${b.award}">${b.award} · ${PRIZE[b.award]}</span>`:'', s:b=>b.award?6-'ABCDE'.indexOf(b.award):0},
+];
+function renderHead(){
+  $('thead').innerHTML=COLS.map(c=>`<th data-k="${c.k}" class="${sortKey===c.k?'sorted':''}">${c.t}${sortKey===c.k?(sortDir<0?' ▼':' ▲'):''}</th>`).join('');
+  $('thead').querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else {sortKey=k; sortDir=(k==='store'||k==='city'||k==='rank')?1:-1;} renderHead(); renderTable();}));
+}
+function renderTable(){
+  const q=$('q').value.trim().toLowerCase(), c=$('selCountry').value, r=$('selRegion').value, st=$('selState').value;
+  let rows=branches.filter(b=>(!c||b.country===c)&&(!r||b.region===r)
+    &&(!st||(st==='track'&&b.pace>=1)||(st==='off'&&b.pace<1)||(st==='flag'&&b.review)||(st==='award'&&b.award))
+    &&(!q||[b.store,b.city,b.region,...(b.employees.map(e=>e.user))].join(' ').toLowerCase().includes(q)));
+  const col=COLS.find(x=>x.k===sortKey); const sv=b=>col.s?col.s(b):b[sortKey];
+  rows.sort((a,b)=>{const x=sv(a),y=sv(b); return (typeof x==='string'? x.localeCompare(y) : (x-y))*sortDir;});
+  $('tbody').innerHTML=rows.map(b=>`<tr>${COLS.map(c=>`<td class="num ${c.cls||''}">${c.f(b)}</td>`).join('')}</tr>`).join('');
+  $('tcount').textContent=`${rows.length} من ${branches.length} فرع`;
+}
+function renderEmps(){
+  const all=[]; branches.forEach(b=>b.employees.forEach(e=>all.push({...e, store:b.store, country:b.country, sar:e.sales*FX[b.country]})));
+  all.sort((a,b)=>b.sar-a.sar);
+  $('emps').innerHTML=all.slice(0,20).map((e,i)=>`<div class="e"><span class="r num">${i+1}</span><span><bdi dir="ltr">${e.user}</bdi><small>${e.store} · ${AR[e.country]} · ${pct(e.share)} من مبيعات الفرع</small></span><span class="num"><b>${nf0.format(e.sar)}</b></span></div>`).join('');
+}
+function fillFilters(){
+  const cs=[...new Set(branches.map(b=>b.country))], rs=[...new Set(branches.map(b=>b.region))].sort();
+  $('selCountry').innerHTML='<option value="">كل الأسواق</option>'+cs.map(c=>`<option value="${c}">${AR[c]}</option>`).join('');
+  $('selRegion').innerHTML='<option value="">كل المناطق</option>'+rs.map(r=>`<option value="${r}">${r}</option>`).join('');
+}
+function renderAll(){
+  ({branches, summary} = compute(state.raw, state.targets));
+  renderTiles(); renderMarkets(); renderTrend(); renderRace(); fillFilters(); renderHead(); renderTable(); renderEmps();
+  $('tblSub').textContent = summary.unmatched.length? 'مستبعد (بلا مستهدف): '+summary.unmatched.map(u=>u.store).join('، ') : '';
+}
+
+/* ---------- parsing uploads ---------- */
+const MONTHS={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+function parsePos(wb){
+  // صيغتان: عمود إجمالي واحد، أو أعمدة يومية (01 Oct 2026 …) + عمود Total أخير
+  const ws=wb.Sheets[wb.SheetNames[0]]; const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+  let dates=[];
+  for(const r of rows.slice(0,4)){
+    const f=[]; r.forEach((c,i)=>{const m=typeof c==='string'&&c.match(/^(\d{2}) (\w{3}) (\d{4})$/); if(m&&MONTHS[m[2]]) f.push([i,`${m[3]}-${String(MONTHS[m[2]]).padStart(2,'0')}-${m[1]}`]);});
+    if(f.length>=2){dates=f;break;}
+  }
+  const vc=dates.length?dates[dates.length-1][0]+1:1;
+  const stores={}, daily={}; dates.forEach(([,d])=>daily[d]={}); let store=null, n=0;
+  for(const r of rows){ const name=r[0]; if(typeof name!=='string') continue; const ind=name.length-name.replace(/^ +/,'').length, nm=name.trim();
+    if(ind===10){store=nm.toUpperCase(); stores[store]={sales:+r[vc]||0,users:[]}; n++; dates.forEach(([i,d])=>daily[d][store]=+r[i]||0);}
+    else if(ind===15&&store){stores[store].users.push([nm,+r[vc]||0]);}
+  }
+  if(!n) throw new Error('لم أتعرف على هيكل ملف المبيعات (شركة › فرع › مستخدم). تأكدي أنه تصدير Pivot من Odoo كما هو.');
+  for(const k of EXCLUDE){ delete stores[k]; for(const d in daily) delete daily[d][k]; }
+  return {stores, daily, lastDay: dates.length?dates[dates.length-1][1]:null};
+}
+function historyFromDaily(daily){
+  // نقاط تراكمية لكل يوم بالريال، من أعمدة الأيام
+  const days=Object.keys(daily).sort(); const cum={}; const out={};
+  for(const d of days){
+    for(const [k,v] of Object.entries(daily[d])) cum[k]=(cum[k]||0)+v;
+    let sales=0; const byC={};
+    for(const [k,v] of Object.entries(cum)){ const t=state.targets[k]; if(!t) continue; const c=t.country; sales+=v*FX[c]; const m=byC[c]||(byC[c]={sales:0,target:0,n:0,on:0}); m.sales+=v; m.target+=t.target; m.n++; }
+    out[d]={asof:d, sales_sar:sales, target_sar:summary.target_sar, byC, stores:Object.fromEntries(Object.entries(cum).map(([k,v])=>[k,Math.round(v)]))};
+  }
+  return out;
+}
+function parseTargets(wb){
+  const ws=wb.Sheets[wb.SheetNames[0]]; const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true}); const t={};
+  for(const r of rows.slice(1)){ if(r[4]==null||r[5]==null) continue; t[String(r[4]).trim().toUpperCase()]={country:r[1],region:r[2],city:r[3],target:+r[5]||0}; }
+  if(!Object.keys(t).length) throw new Error('ملف المستهدف فارغ أو بأعمدة مختلفة (#, Country, Region, City, Store, Target).');
+  return t;
+}
+function readWb(file){ return new Promise((res,rej)=>{const fr=new FileReader(); fr.onload=e=>{try{res(XLSX.read(new Uint8Array(e.target.result),{type:'array'}));}catch(x){rej(x);}}; fr.onerror=rej; fr.readAsArrayBuffer(file);}); }
+function notice(msg,cls){const n=$('notice'); n.hidden=false; n.className='notice '+(cls||''); n.textContent=msg;}
+
+/* ---------- shared store (db) ---------- */
+let db=null, canWrite=null;
+async function initDb(){
+  try{
+    db = await claude.use('db');
+    const user = await claude.use('user');
+    canWrite = user? await user.can('data.write') : null;
+    if(!db){ $('saveHint').textContent='التحديث يظهر لك فقط في هذا الجهاز (المخزن المشترك غير متاح)'; return; }
+    const [latest, tg, hist] = await Promise.all([db.doc('athar/latest').get(), db.doc('athar/targets').get(), db.collection('athar/latest/history').get()]);
+    hist.docs.forEach(d=>{const h=d.data(); if(h&&h.asof) state.history[h.asof]=h;});
+    if(tg.exists && tg.data().targets) state.targets = tg.data().targets;
+    if(latest.exists){ const L=latest.data(); if(L.raw && L.raw.asof >= state.raw.asof){ state.raw=L.raw; $('pillSrc').textContent='آخر تحديث محفوظ'; $('pillSrc').classList.add('live'); } }
+    if(canWrite===false) $('saveHint').textContent='صلاحيتك للعرض فقط: التحديث يظهر لك ولا يُحفظ للآخرين';
+    renderAll();
+  }catch(e){ console.warn('db init',e); }
+}
+async function saveShared(daily){
+  if(!db || canWrite===false) return false;
+  try{
+    const h = {asof:summary.asof, sales_sar:summary.sales_sar, target_sar:summary.target_sar, byC:summary.byC, stores:Object.fromEntries(branches.map(b=>[b.store,Math.round(b.sales)]))};
+    await db.doc('athar/latest').set({raw:state.raw, savedAt:new Date().toISOString()});
+    await db.doc('athar/targets').set({targets:state.targets, month:summary.asof.slice(0,7)});
+    const pts = daily ? historyFromDaily(daily) : {[summary.asof]:h};
+    for(const [d,pt] of Object.entries(pts)){ await db.doc('athar/latest/history/'+d).set(pt); state.history[d]=pt; }
+    renderTrend();
+    return true;
+  }catch(e){ console.warn('save',e); return false; }
+}
+
+/* ---------- hover notes (مثل تعليقات Excel) ---------- */
+const noteBox=document.createElement('div'); noteBox.className='note'; noteBox.hidden=true; noteBox.setAttribute('role','tooltip'); document.body.appendChild(noteBox);
+let noteFor=null;
+function showNote(el){
+  noteFor=el; noteBox.textContent=el.dataset.note; noteBox.hidden=false;
+  const r=el.getBoundingClientRect(), w=noteBox.offsetWidth, h=noteBox.offsetHeight;
+  let x=r.left+r.width/2-w/2; x=Math.max(8,Math.min(x,window.innerWidth-w-8));
+  let y=r.top-h-8; if(y<8) y=r.bottom+8;
+  noteBox.style.left=x+'px'; noteBox.style.top=y+'px';
+}
+function hideNote(){ noteFor=null; noteBox.hidden=true; }
+document.addEventListener('mouseover',e=>{const el=e.target.closest&&e.target.closest('[data-note]'); if(el) showNote(el);});
+document.addEventListener('mouseout',e=>{const el=e.target.closest&&e.target.closest('[data-note]'); if(el&&!el.contains(e.relatedTarget)) hideNote();});
+document.addEventListener('focusin',e=>{const el=e.target.closest&&e.target.closest('[data-note]'); if(el) showNote(el);});
+document.addEventListener('focusout',e=>{if(e.target.closest&&e.target.closest('[data-note]')) hideNote();});
+document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('[data-note]'); if(el){ noteFor===el?hideNote():showNote(el); } else if(noteFor) hideNote();});
+window.addEventListener('scroll',hideNote,true);
+
+/* ---------- events ---------- */
+$('btnToggleUpdate').addEventListener('click',()=>{const p=$('updatePanel'); p.hidden=!p.hidden; if(!p.hidden&&!$('fAsof').value){const d=new Date(); d.setDate(d.getDate()-1); $('fAsof').value=d.toISOString().slice(0,10);}});
+$('btnApply').addEventListener('click',async()=>{
+  const btn=$('btnApply'); btn.disabled=true;
+  try{
+    const fp=$('fPos').files[0], ft=$('fTgt').files[0], asof=$('fAsof').value;
+    if(ft){ state.targets=parseTargets(await readWb(ft)); }
+    let pendingDaily=null;
+    if(fp){ const P=parsePos(await readWb(fp)); const day=P.lastDay||asof; if(!day) throw new Error('حددي التاريخ الذي تنتهي عنده بيانات المبيعات.'); if(P.lastDay) $('fAsof').value=P.lastDay; state.raw={asof:day, stores:P.stores}; if(P.lastDay){ const ds=Object.keys(P.daily).sort(); if(ds.length>1){ const prev={}; ds.slice(0,-1).forEach(d=>{for(const [k,v] of Object.entries(P.daily[d])) prev[k]=(prev[k]||0)+v;}); state.raw.prev=prev; state.raw.prevAsof=ds[ds.length-2]; } } if(P.lastDay) pendingDaily=P.daily; }
+    if(!fp&&!ft) throw new Error('اختاري ملف المبيعات أو ملف المستهدف أولاً.');
+    { renderAll(); window.atharNoReload=true; const saved=await saveShared(pendingDaily); notice(saved?`تم التحديث حتى ${summary.asof} وحُفظ للجميع.`:`تم التحديث حتى ${summary.asof} (لم يُحفظ في المخزن المشترك).`, 'ok'); }
+    $('fPos').value=''; $('fTgt').value='';
+  }catch(e){ notice('تعذر التحديث: '+(e.message||e),'err'); }
+  btn.disabled=false;
+});
+['q','selCountry','selRegion','selState'].forEach(id=>$(id).addEventListener('input',renderTable));
+
+renderAll();
+// خارج Claude: المسار اليومي يُبنى من أعمدة الأيام المضمّنة في الصفحة (EMBED.daily)
+if(EMBED.daily){ Object.assign(state.history, historyFromDaily(EMBED.daily)); renderTrend(); }
+if(window.claude&&window.claude.use) initDb();
+})();
+</script>

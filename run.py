@@ -222,6 +222,8 @@ def build(a, refresh=None):
 
     os.makedirs(os.path.join(a.out, "data"), exist_ok=True)
     pub = public_data(stores, daily, targets, asof, elapsed)
+    pub["built"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())   # shown as "last updated" (GCC time)
+    pub["tz"] = os.environ.get("ODOO_TZ") or "Asia/Riyadh"
     render(os.path.join(ROOT, "templates", "public.html"), pub, os.path.join(a.out, "index.html"), refresh)
     json.dump(pub, open(os.path.join(a.out, "data", "public.json"), "w", encoding="utf-8"), ensure_ascii=False)
     if not a.public_only:

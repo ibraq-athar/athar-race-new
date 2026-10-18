@@ -306,6 +306,7 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
       <span class="pill"><span class="dot"></span>البيانات حتى <b id="pAsof">—</b></span>
       <span class="pill">اليوم <b id="pDay">—</b></span>
       <span class="pill">باقي <b id="pLeft">—</b> يوم</span>
+      <span class="pill" id="pUpdWrap" hidden>آخر تحديث <b id="pUpd">—</b></span>
     </div>
   </header>
 
@@ -373,6 +374,8 @@ const monthAr = new Date(D.asof+'T00:00:00').toLocaleDateString('ar-SA-u-ca-greg
 
 $('sub').textContent = `برنامج حوافز المبيعات · ${monthAr}`;
 $('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.dim}`; $('pLeft').textContent = left;
+// وقت آخر سحب للبيانات بتوقيت الخليج (يظهر فقط إذا كان مسجّلاً في البيانات)
+if(D.built){ try{ $('pUpd').textContent = new Date(D.built).toLocaleString('ar-SA-u-ca-gregory-nu-latn',{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).replace('،',' ·'); $('pUpdWrap').hidden=false; }catch(e){} }
 
 /* ticker */
 function loop(t, items, speed){
