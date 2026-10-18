@@ -1,0 +1,94 @@
+# Rebuilds the PUBLIC board «سباق أثر» from the Odoo BI API about every 10 minutes and publishes it
+# on GitHub Pages (https://ibraq-athar.github.io/athar-race-new/). Runs on GitHub: no laptop needed.
+#
+# Repository secrets (Settings > Secrets and variables > Actions):
+#   ODOO_API_URL      https://ibraqperfumes.odoo.com/api/bi/v1/pos/sales/detail
+#   ODOO_API_TOKEN    the API bearer token
+#   TARGET_XLSX_B64   the monthly target file, base64-encoded (update it every month)
+#
+# This repository is public, and so are its Actions logs. Therefore:
+#   * the build's own output is discarded (it prints sales totals);
+#   * only index.html (percentages and names, no amounts) is published;
+#   * the days already downloaded are kept between runs ENCRYPTED with the API token.
+name: Update Athar race board
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"        # every 5 minutes (UTC); GitHub may start it a few minutes late
+  workflow_dispatch: {}           # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: athar-board
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -q -r requirements.txt
+
+      - name: Restore saved days (encrypted)
+        uses: actions/cache/restore@v4
+        with:
+          path: cache.enc
+          key: api-cache-${{ github.run_id }}
+          restore-keys: api-cache-
+
+      - name: Build the public board (output hidden — it contains amounts)
+        env:
+          ODOO_API_URL: ${{ secrets.ODOO_API_URL }}
+          ODOO_API_TOKEN: ${{ secrets.ODOO_API_TOKEN }}
+          TARGET_XLSX_B64: ${{ secrets.TARGET_XLSX_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$ODOO_API_URL" ] || [ -z "$ODOO_API_TOKEN" ] || [ -z "$TARGET_XLSX_B64" ]; then
+            echo "Missing secret: ODOO_API_URL, ODOO_API_TOKEN and TARGET_XLSX_B64 are all required"; exit 1
+          fi
+          mkdir -p data/api_cache
+          printf '%s' "$TARGET_XLSX_B64" | base64 -d > data/target.xlsx
+          if [ -f cache.enc ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -pass env:ODOO_API_TOKEN -in cache.enc 2>/dev/null \
+              | tar -xz -C data 2>/dev/null || echo "Saved days not usable; downloading the month again"
+          fi
+          python run.py --api --target data/target.xlsx --public-only --out site --reload 10 > /dev/null
+          mkdir -p public
+          cp site/index.html public/index.html
+          if grep -q '"sales"\|"target"' public/index.html; then
+            echo "Refusing to publish: the page contains amounts"; exit 1
+          fi
+          tar -cz -C data api_cache | openssl enc -aes-256-cbc -pbkdf2 -pass env:ODOO_API_TOKEN -out cache.enc
+          rm -rf data site
+          echo "Board built at $(date -u '+%Y-%m-%d %H:%M') UTC"
+
+      - name: Save days for the next run (encrypted)
+        uses: actions/cache/save@v4
+        with:
+          path: cache.enc
+          key: api-cache-${{ github.run_id }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
