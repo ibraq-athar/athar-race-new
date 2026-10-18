@@ -1,0 +1,605 @@
+<title>مسابقة أثر</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Changa:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: an exchange-floor board for branch teams — ticker tape, the car race hero, then a leaderboard. Deliberately single-theme dark like a trading screen; gold for prizes, green/red only for movement. No amounts anywhere: percentages, ranks and names. */
+:root{
+  --bg:#0f1218; --surface:#171c25; --surface-2:#1f2633; --line:#2a3344; --line-strong:#3a4659;
+  --fg:#f2f0ea; --fg-2:#b8bcc6; --fg-3:#7d8494;
+  --gold:#e6b64a; --gold-soft:#3a2d10; --gold-ink:#1a1304;
+  --up:#3fcf7a; --up-soft:#10301d; --down:#f0655c; --down-soft:#3a1715; --flat:#7d8494;
+  --bar:#4f8cff; --bar-track:#242c3a; --marker:#f2f0ea;
+  --display:"Changa","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --mine-0:#14202e; --hero-0:#1c1a12; --hero-1:#171c25; --next-1:#151a22; --road-dash:#2b3546; --gold-deep:#8a6a1e;
+  --radius:12px; color-scheme:dark;
+}
+/* Light («فاتح») theme — chosen with the header button, remembered on the device */
+:root[data-theme="light"]{
+  --bg:#f5f3ee; --surface:#ffffff; --surface-2:#f0ede6; --line:#e3ded3; --line-strong:#cdc5b6;
+  --fg:#1c1f26; --fg-2:#454b57; --fg-3:#6b7180;
+  --gold:#a8760a; --gold-soft:#f7ecd0; --gold-ink:#ffffff;
+  --up:#1d8a4b; --up-soft:#ddf2e5; --down:#c4362d; --down-soft:#f9e1de; --flat:#6b7180;
+  --bar:#2d6be0; --bar-track:#e3e8f0; --marker:#1c1f26;
+  --mine-0:#e7effc; --hero-0:#fbf2dc; --hero-1:#ffffff; --next-1:#f8f6f1; --road-dash:#cdd5e1; --gold-deep:#d9b25a;
+  color-scheme:light;
+}
+.theme-btn{cursor:pointer;color:var(--fg);font:inherit;font-size:13px}
+.theme-btn:hover{border-color:var(--line-strong)}
+.theme-btn:focus-visible{outline:2px solid var(--bar);outline-offset:2px}
+.theme-btn .ts{display:none}
+.meta .pill{white-space:nowrap}
+/* phones: compact header pills, news label on its own row so the moving news gets the full width */
+@media (max-width:640px){
+  .head{gap:10px}
+  .meta{width:100%;gap:6px}
+  .meta .pill{font-size:12px;padding:4px 10px}
+  .theme-btn .tl{display:none} .theme-btn .ts{display:inline}
+  .news{flex-direction:column}
+  .nlabel{display:block;text-align:start;padding:7px 12px;font-size:14px;width:100%}
+  .nmore{float:left;margin-top:-1px}
+  .nlist{padding:12px}
+  .nlabel small{display:block;font-size:11.5px;margin-top:1px}
+  .ntape{padding:9px 0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
+.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;text-wrap:balance;font-family:var(--display);font-weight:700;line-height:1.2}
+h1{font-size:30px} h2{font-size:20px} h3{font-size:16px}
+.num{font-variant-numeric:tabular-nums}
+.small{font-size:12.5px;color:var(--fg-3)}
+.muted{color:var(--fg-2)}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+
+/* header */
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
+.head .t{display:flex;align-items:center;gap:12px}
+.mark{width:48px;height:48px;border-radius:12px;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;flex:none}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:13px;border:1px solid var(--line);background:var(--surface)}
+.pill b{font-family:var(--display)}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px var(--up-soft)}
+
+/* ticker */
+.tape{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);padding:8px 0}
+.tape .track{display:flex;width:max-content;white-space:nowrap;animation:tape var(--dur,600s) linear infinite;will-change:transform}
+.tape .copy{display:flex;gap:28px;padding-inline-end:28px}
+.tape:hover .track{animation-play-state:paused}
+@keyframes tape{from{transform:translateX(0)}to{transform:translateX(50%)}}
+@media (prefers-reduced-motion:reduce){.tape{overflow:auto}.tape .track{animation:none;width:auto}.tape .copy{flex-wrap:wrap;gap:8px 20px;padding:0 12px;white-space:normal}.tape .copy+.copy{display:none}}
+.tape .it{font-family:var(--display);font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:rtl}
+.tape .it .s{color:var(--fg-2);font-weight:500}
+.tape .it .a{font-weight:700}
+.tape .it .d{font-size:12px}
+
+/* news ticker */
+.news{display:flex;align-items:stretch;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;background:var(--surface)}
+.nlabel{flex:none;background:var(--gold);color:var(--gold-ink);font-family:var(--display);font-weight:800;font-size:15px;padding:8px 14px;display:flex;flex-direction:column;justify-content:center;line-height:1.15}
+.nlabel small{font-family:var(--font);font-weight:600;font-size:11px;opacity:.75}
+button.nlabel{border:0;cursor:pointer;text-align:start;align-items:flex-start}
+button.nlabel:focus-visible{outline:2px solid var(--bar);outline-offset:-3px}
+.nmore{display:inline-block;margin-top:5px;font-family:var(--font);font-weight:700;font-size:11.5px;padding:2px 9px;border-radius:999px;background:rgba(0,0,0,.14)}
+button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
+.nlist{border:1px solid var(--line-strong);border-radius:10px;background:var(--surface);padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px 22px}
+.nlist .g h3{font-size:15px;margin:0 0 4px;display:flex;justify-content:space-between;gap:8px}
+.nlist .g h3 small{font-family:var(--font);font-weight:600;color:var(--fg-3);font-size:12px}
+.nlist .row{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.nlist .row .u{font-weight:600}
+.nlist .row .b{color:var(--fg-3);font-size:12.5px}
+.nlist .row .p{color:var(--fg-2);font-size:12.5px;margin-inline-start:auto}
+.nlist .close{grid-column:1/-1;justify-self:start;cursor:pointer;font:inherit;font-size:13px;color:var(--fg);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:999px;padding:5px 14px}
+.ntape{flex:1;border:0;min-width:0;padding:10px 0}
+.ntape .copy{gap:34px;padding-inline-end:34px}
+.nw{font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:rtl}
+.nw .tag{font-family:var(--display);font-weight:700;font-size:12.5px;padding:1px 8px;border-radius:999px}
+.nw.in .tag{background:var(--up-soft);color:var(--up)} .nw.up .tag{background:var(--up-soft);color:var(--up)}
+.nw.near .tag{background:var(--gold-soft);color:var(--gold)}
+.nw .u{font-weight:600}
+.nw .b{color:var(--fg-3);font-size:12.5px}
+.nw .p{color:var(--fg-2);font-size:12.5px}
+
+/* my branch */
+.mine{background:linear-gradient(135deg,var(--mine-0),var(--surface) 70%);border:1px solid var(--bar);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:14px}
+.mhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.mhead label{display:flex;flex-direction:column;gap:2px}
+.mhead label b{font-family:var(--display);font-size:19px}
+.mhead label span{font-size:12.5px;color:var(--fg-2)}
+.mform{display:flex;gap:8px;flex:1;min-width:220px;max-width:420px}
+.combo{position:relative;flex:1;min-width:0}
+.combo input{width:100%}
+.sug{position:absolute;top:calc(100% + 4px);inset-inline:0;z-index:30;max-height:320px;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.45);padding:4px 0}
+.sug .g{position:sticky;top:0;background:var(--surface-2);font-size:11.5px;color:var(--fg-3);padding:5px 12px;font-weight:600}
+.sug .o{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;cursor:pointer;font-size:13.5px}
+.sug .o b{font-family:var(--display)}
+.sug .o small{color:var(--fg-3);font-size:12px}
+.sug .o:hover,.sug .o.act{background:var(--surface-2)}
+.sug .none{padding:10px 12px;font-size:13px;color:var(--fg-3)}
+.mform input{flex:1;min-width:0;font:inherit;padding:9px 12px;border:1px solid var(--line-strong);border-radius:9px;background:var(--surface-2);color:var(--fg)}
+.mform input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.mygrid{display:grid;grid-template-columns:auto 1fr;gap:16px 22px;align-items:start}
+@media (max-width:640px){.mygrid{grid-template-columns:1fr}}
+.mybig{display:flex;flex-direction:column;gap:2px;min-width:150px}
+.mybig .n{font-family:var(--display);font-size:22px;font-weight:700}
+.mybig .n small{font-size:12.5px;color:var(--fg-3);font-weight:500;font-family:var(--font)}
+.mybig .v{font-family:var(--display);font-size:46px;font-weight:800;line-height:1.05}
+.mybig .pj{font-size:13px;color:var(--fg-2)}
+.mybig .pj b{color:var(--fg)}
+.mymsg{display:flex;flex-direction:column;gap:10px;min-width:0}
+.status{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;font-family:var(--display);font-weight:700;font-size:16px;padding:5px 14px;border-radius:999px}
+.status.in{background:var(--up-soft);color:var(--up)} .status.car{background:var(--gold-soft);color:var(--gold)} .status.out{background:var(--surface-2);color:var(--fg)}
+.tip{background:var(--surface-2);border-radius:9px;padding:10px 12px;font-size:14px;line-height:1.6}
+.tip b{color:var(--gold);font-family:var(--display)}
+.tip.good b{color:var(--up)}
+.tip .cmp{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.tip .cmp div{display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center;font-size:12px;color:var(--fg-2)}
+.tip .cmp i{display:block;height:10px;border-radius:5px;background:var(--bar)}
+.tip .cmp i.need{background:linear-gradient(90deg,var(--gold),var(--gold-deep))}
+.tip .note{display:block;margin-top:6px;font-size:11.5px;color:var(--fg-3)}
+.team{font-size:13px;color:var(--fg-2)}
+.empty-mine{font-size:14px;color:var(--fg-2)}
+
+/* collapsed prize lists */
+.cat:not(.open) li.more{display:none}
+.cat .morebtn{align-self:flex-start;font-size:12.5px;padding:5px 12px;border-radius:999px;background:transparent;border:1px solid var(--line-strong);color:var(--fg-2)}
+.cat li .p small{display:block;font-family:var(--font);font-size:10.5px;font-weight:500;color:var(--fg-3);text-align:left}
+.explain{font-size:13px;color:var(--fg-2);background:var(--surface-2);border-radius:9px;padding:9px 12px;line-height:1.6}
+.explain b{color:var(--fg)}
+
+/* next in line */
+.card.next{border-color:var(--line-strong);background:linear-gradient(180deg,var(--surface),var(--next-1))}
+.nextg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+.nx{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;background:var(--surface-2);border-radius:9px;padding:9px 12px;min-width:0}
+.nx .r{font-family:var(--display);font-weight:700;color:var(--fg-3);font-size:13px}
+.nx .n{min-width:0}
+.nx .n b{display:block;font-family:var(--display)}
+.nx .n small{display:block;color:var(--fg-3);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nx .g{text-align:left}
+.nx .g .a{font-family:var(--display);font-weight:700;font-size:16px}
+.push{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(90deg,var(--gold-soft),transparent);border:1px solid var(--gold);border-radius:10px;padding:12px 16px}
+.push .bolt{font-size:30px;line-height:1}
+.push .t{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.push .t b{font-family:var(--display);font-size:19px;color:var(--gold);line-height:1.3}
+.push .t span{font-size:13px;color:var(--fg-2)}
+@media (prefers-reduced-motion:no-preference){.push .bolt{animation:zap 1.6s ease-in-out infinite}@keyframes zap{50%{transform:scale(1.18)}}}
+.pcs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pc{font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.pc em{font-style:normal;color:var(--gold);font-weight:600}
+.nx .g small{display:block;font-size:11.5px;color:var(--gold);font-weight:600;white-space:nowrap}
+
+/* hero car race */
+.hero{background:linear-gradient(135deg,var(--hero-0),var(--hero-1) 60%);border:1px solid var(--gold);border-radius:var(--radius);padding:18px 18px 16px;display:grid;grid-template-columns:1.2fr 1fr;gap:18px;position:relative;overflow:hidden}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.hero .lead{display:flex;flex-direction:column;gap:8px;min-width:0}
+.hero .eyebrow{font-size:12px;letter-spacing:.08em;color:var(--gold);font-weight:600}
+.hero .big{font-family:var(--display);font-size:52px;font-weight:800;line-height:1;color:var(--gold)}
+.hero .who{font-size:18px;font-weight:600}
+.hero .who small{display:block;font-size:13px;color:var(--fg-2);font-weight:400}
+.race{height:14px;background:var(--bar-track);border-radius:7px;position:relative;margin-top:4px}
+.race>i{position:absolute;inset-block:0;right:0;border-radius:7px;background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
+.race>b{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--marker)}
+.race .lbl{position:absolute;top:18px;font-size:11px;color:var(--fg-3);transform:translateX(50%)}
+.track4{display:flex;flex-direction:column;gap:12px;min-width:0}
+.track4 .th{display:flex;flex-direction:column;gap:2px}
+.track4 .th b{font-family:var(--display);font-size:17px}
+.track4 .th span{font-size:12.5px;color:var(--fg-2)}
+.lane{display:flex;flex-direction:column;gap:5px}
+.lane .ln{display:grid;grid-template-columns:18px auto 1fr auto;gap:8px;align-items:baseline;min-width:0}
+.lane .ln .r{font-family:var(--display);font-weight:700;color:var(--fg-3)}
+.lane .ln b{font-family:var(--display);font-size:15px}
+.lane .ln small{color:var(--fg-3);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lane .ln .a{font-family:var(--display);font-weight:700;font-size:16px}
+.lane.lead1 .ln .a,.lane.lead1 .ln b{color:var(--gold)}
+.road{position:relative;height:12px;background:repeating-linear-gradient(90deg,var(--bar-track) 0 14px,var(--road-dash) 14px 18px);border-radius:6px;margin-inline:0 14px}
+.road>i{position:absolute;inset-block:0;right:0;border-radius:6px;background:var(--bar)}
+.lane.lead1 .road>i{background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
+.road .car{position:absolute;top:50%;transform:translate(50%,-55%);font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.road .fin{position:absolute;top:-6px;bottom:-6px;width:6px;transform:translateX(50%);background:repeating-linear-gradient(0deg,#f2f0ea 0 3px,#0f1218 3px 6px);border-radius:1px}
+.lane .gap{font-size:11.5px;color:var(--fg-3)}
+.track4 .note{font-size:11.5px;color:var(--fg-3);border-top:1px solid var(--line);padding-top:8px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .v{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.15}
+.stat .l{font-size:12.5px;color:var(--fg-2)}
+.stat .d{font-size:12px;color:var(--fg-3)}
+
+/* cards */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+
+/* markets */
+.mkt{display:flex;flex-direction:column;gap:10px}
+.mrow{display:grid;grid-template-columns:104px 1fr 64px;gap:10px;align-items:center}
+.mrow .nm{font-weight:600}
+.mrow .nm small{display:block;font-weight:400;color:var(--fg-3);font-size:11.5px}
+.mrow .bar{height:14px;background:var(--bar-track);border-radius:4px;position:relative}
+.mrow .bar>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:4px 0 0 4px}
+.mrow .bar>b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--marker)}
+.mrow .val{font-family:var(--display);font-weight:700;font-size:17px;text-align:left}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--fg-3)}
+.legend i{display:inline-block;width:12px;height:8px;background:var(--bar);border-radius:2px;margin-inline-start:4px;vertical-align:middle}
+.legend b{display:inline-block;width:2px;height:12px;background:var(--marker);margin-inline-start:6px;vertical-align:middle}
+
+/* movers */
+.movers{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:6px 22px}
+@media (max-width:520px){.movers{grid-template-columns:1fr}}
+.mv{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
+.mv .n small{color:var(--fg-3);font-size:11.5px;margin-inline-start:6px}
+.mv .a{font-family:var(--display);font-weight:700}
+.mv .d{font-family:var(--display);font-weight:700;font-size:13px;min-width:54px;text-align:left}
+
+/* prize boards */
+.prizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.cat{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:var(--surface-2);display:flex;flex-direction:column;gap:8px;min-width:0}
+.cat .ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cat .ch b{font-family:var(--display);font-size:17px}
+.cat .ch .ico{font-size:20px}
+.cat ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.cat li{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:baseline;font-size:13.5px}
+.cat li .r{color:var(--fg-3);font-size:12px;font-family:var(--display)}
+.cat li .s{min-width:0}
+.cat li .s b{display:block}
+.cat li .s small{display:block;color:var(--fg-3);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat li .p{font-family:var(--display);font-weight:700}
+.cat .empty{color:var(--fg-3);font-size:13px}
+.cat li.vac{border:1px dashed var(--gold);border-radius:8px;padding:7px 8px;background:var(--gold-soft)}
+.cat li.vac b{color:var(--gold)}
+.cat li.vac .s small{white-space:normal;overflow:visible;color:var(--fg-2)}
+.cat li.vac .p{color:var(--gold);font-family:var(--display);font-size:18px}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid transparent;vertical-align:middle}
+.chip.A{background:var(--gold-soft);color:var(--gold);border-color:var(--gold)}
+.chip.B,.chip.C,.chip.D,.chip.E{background:var(--surface);color:var(--fg-2);border-color:var(--line-strong)}
+.chip.q{background:var(--up-soft);color:var(--up)}
+.chip.mv{background:var(--surface);color:var(--fg-3);border-color:var(--line)}
+
+/* leaderboard */
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px}
+@media (max-width:640px){.toolbar{grid-template-columns:1fr 1fr}}
+.toolbar input,.toolbar select{font:inherit;padding:8px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);width:100%;min-width:0}
+.toolbar input:focus-visible,.toolbar select:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.board{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:44px minmax(0,1.4fr) minmax(120px,1fr) 70px 64px minmax(0,1.2fr);gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line)}
+.row.hdr{font-size:12px;color:var(--fg-3);border-bottom-color:var(--line-strong);position:sticky;top:env(safe-area-inset-top,0px);background:var(--surface);z-index:1}
+.row:not(.hdr):hover{background:var(--surface-2)}
+.row.q{box-shadow:inset 3px 0 0 var(--up)}
+@media (max-width:640px){.row{grid-template-columns:36px minmax(0,1.4fr) 86px 60px}.row .cpace,.row .cemp{display:none}}
+.row .rk{font-family:var(--display);font-weight:700;color:var(--fg-2)}
+.row .rk small{display:block;font-size:10.5px;font-weight:600}
+.row .nm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .nm small{color:var(--fg-3);font-size:11.5px}
+.row .ach{display:flex;align-items:center;gap:8px}
+.row .ach .v{font-family:var(--display);font-weight:700;min-width:52px}
+.mini{flex:1;height:7px;background:var(--bar-track);border-radius:4px;position:relative;min-width:40px}
+.mini>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:4px}
+.mini>i.full{background:var(--up)}
+.mini>b{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:var(--marker)}
+.row .dl{font-family:var(--display);font-weight:700;font-size:13px}
+.row .emp{font-size:12.5px;color:var(--fg-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--fg-3);padding-top:8px}
+button{font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--fg);padding:7px 14px;cursor:pointer}
+
+/* trend */
+.trend svg{width:100%;height:auto;display:block}
+.trend text{font-family:var(--font);fill:var(--fg-3);font-size:11px}
+
+details{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:12px 16px}
+summary{cursor:pointer;font-weight:600}
+details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
+</style>
+
+<div class="wrap">
+  <script>(function(){var t=null;try{t=localStorage.getItem('athar_theme');}catch(e){} if(t==='light') document.documentElement.setAttribute('data-theme','light');})();</script>
+  <header class="head">
+    <div class="t">
+      <div class="mark">أ</div>
+      <div>
+        <h1>مسابقة أثر</h1>
+        <div class="muted" id="sub">—</div>
+      </div>
+    </div>
+    <div class="meta">
+      <button type="button" class="pill theme-btn" id="themeBtn" aria-label="تبديل بين الوضع الداكن والفاتح"></button>
+      <span class="pill"><span class="dot"></span>البيانات حتى <b id="pAsof">—</b></span>
+      <span class="pill">اليوم <b id="pDay">—</b></span>
+      <span class="pill">باقي <b id="pLeft">—</b> يوم</span>
+    </div>
+  </header>
+
+  <div class="news" id="newsBar" hidden>
+    <button type="button" class="nlabel" id="newsAll" aria-expanded="false" aria-controls="newsList">أخبار التأهيل<small id="newsDate"></small><span class="nmore" id="newsMore">📋 عرض كل الأخبار</span></button>
+    <div class="tape ntape" aria-label="أخبار التأهيل اليوم"><div class="track" id="news"></div></div>
+  </div>
+  <div class="nlist" id="newsList" hidden>
+  </div>
+
+  <section class="mine" id="mine">
+    <div class="mhead">
+      <label for="myIn"><b>📍 فرعي</b><span>اكتب اسم فرعك أو اليوزر حقك وتنحفظ عندك</span></label>
+      <div class="mform"><div class="combo"><input id="myIn" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mySug" placeholder="اكتب أو اختر: ZAHRAN، جدة، 6216…"><div class="sug" id="mySug" role="listbox" hidden></div></div><button id="myClear" hidden>تغيير</button></div>
+    </div>
+    <div id="myCard"></div>
+  </section>
+
+  <section class="hero" id="hero"></section>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="card">
+    <div class="hd"><h2>🚀 الأكثر صعوداً اليوم</h2><span class="small">أكبر زيادة في نسبة التحقيق خلال آخر يوم</span></div>
+    <div class="movers" id="movers"></div>
+  </section>
+
+  <section class="card">
+    <div class="hd"><h2>لوحة الجوائز المتوقعة</h2><span class="small" id="prizeSub"></span></div>
+    <div class="explain">💡 <b>كيف ينحسب الترشيح؟</b> نفترض إن كل فرع بيكمّل بنفس سرعته الحالية لين آخر الشهر. اللي متوقع يتجاوز 100% يدخل السباق. الرقم الكبير جنب كل فرع = تحقيقه اليوم، والصغير تحته = المتوقع بنهاية الشهر.</div>
+    <div class="prizes" id="prizes"></div>
+  </section>
+
+  <section class="card next">
+    <div class="hd"><h2>🎯 على بُعد خطوة من الجوائز</h2><span class="small">الفروع التالية في الطابور — دفعة بسيطة وتدخل مراكز الجوائز</span></div>
+    <div class="push" id="pushBanner"></div>
+    <div class="nextg" id="nextList"></div>
+    <div class="pcs" id="nextCountry"></div>
+  </section>
+
+
+
+  <details>
+    <summary>كيف تفوز؟</summary>
+    <p>نسبة التحقيق = مبيعات فرعك ÷ مستهدف الشهر. ما يدخل أي فرع السباق إلا إذا بلغ 100% فأكثر. الفروع المؤهلة تُرتَّب بنسبة التحقيق: الأعلى على مستوى الشركة (بشرط حجم مبيعات أدنى) يفوز بالسيارة، وبعدها 40 جائزة: 10 جوالات، 10 آيباد، 10 ساعات ذكية، 10 سبائك ذهب. في الإمارات وعُمان والكويت والبحرين: الأول في الدولة يأخذ جوالاً والثاني سبيكة ذهب. في السعودية: 7 جوالات و10 آيباد و10 ساعات و7 سبائك حسب الترتيب. لو ما بلغ أحد 100% في دولة، ينتقل مقعدها للسعودية وتترقّى الجوائز بالترتيب. ولو ما كفى عدد الفروع اللي وصلت 100% فعلياً بنهاية الشهر، الجوائز الباقية ما تنصرف ولا تنتقل للشهر اللي بعده — 100% شرط ما فيه استثناء. الفرع الواحد جائزة واحدة، والفائز من الفرع هو الموظف الأعلى مبيعات على حسابه الشخصي.</p>
+    <p>في فرع السيارة: الأول يأخذ السيارة، والثاني جوالاً، والثالث آيباد، وبقية الفريق قسيمة 250 ريال. الأرقام هنا مؤشر يومي مبني على الوتيرة الحالية، والنتيجة الرسمية تُعلن يوم 10 من الشهر التالي بعد التدقيق.</p>
+  </details>
+</div>
+
+<script id="embed" type="application/json">{}</script>
+<script>
+(function(){
+'use strict';
+const D = JSON.parse(document.getElementById('embed').textContent);
+const AR = {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'};
+const PRIZE = {A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'};
+const ICO = {A:'🚗', B:'📱', C:'💻', D:'⌚', E:'🥇'};
+const $ = id=>document.getElementById(id);
+const pct = (x,d=1)=>(x*100).toFixed(d)+'%';
+const pts = x=>{const v=x*100; return (v>0?'▲ ':v<0?'▼ ':'') + Math.abs(v).toFixed(1);};
+const cls = x=> x>0.0005?'up':x<-0.0005?'down':'flat';
+const bdi = s=>`<bdi dir="ltr">${s}</bdi>`;
+const left = D.dim - D.de;
+const monthAr = new Date(D.asof+'T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+
+$('sub').textContent = `برنامج حوافز المبيعات · ${monthAr}`;
+$('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.dim}`; $('pLeft').textContent = left;
+
+/* ticker */
+function loop(t, items, speed){
+  // حلقة بلا فراغ (نسختان متطابقتان) وسرعة ثابتة بالبكسل/ثانية
+  t.innerHTML=`<div class="copy">${items}</div><div class="copy" aria-hidden="true">${items}</div>`;
+  requestAnimationFrame(()=>{ const w=t.firstElementChild.getBoundingClientRect().width; t.style.setProperty('--dur', Math.max(20, Math.round(w/speed))+'s'); });
+}
+(function(){
+  // كل خبر إيجابي: الخروج يتحول إلى «قريب من العودة»، والنزول لا يُعلن
+  const N=(D.news||[]).filter(n=>n.k!=='down');
+  const prz=c=>c?`${ICO[c]} ${PRIZE[c]}`:'';
+  const ev=[];
+  // 🏁 تخطّى خط الـ100% اليوم
+  D.branches.filter(b=>b.a>=1&&b.a-b.d<1).forEach(b=>ev.push({g:'🏁 تخطّوا 100% اليوم',cls:'in',tag:'🏁 تخطّى 100%',u:b.top[0],b:b,p:'الفرع تأهّل رسمياً للسباق'}));
+  N.filter(n=>n.k==='in').forEach(n=>ev.push({g:'🟢 دخلوا التأهيل',cls:'in',tag:'🟢 دخل التأهيل',u:n.u,s:n.s,c:n.c,p:'← '+prz(n.aw)}));
+  N.filter(n=>n.k==='up').forEach(n=>ev.push({g:'🔼 ترقّوا لجائزة أعلى',cls:'up',tag:'🔼 ترقّى',u:n.u,s:n.s,c:n.c,p:prz(n.was)+' ← '+prz(n.aw)}));
+  // 🚀 أكبر قفزات اليوم في نسبة التحقيق، و🔥 أكبر صعود في الترتيب
+  [...D.branches].sort((a,b)=>b.d-a.d).slice(0,3).forEach(b=>ev.push({g:'🚀 أكبر قفزات اليوم',cls:'up',tag:'🚀 قفزة اليوم',u:b.top[0],b:b,p:'+'+(b.d*100).toFixed(1)+' نقطة'}));
+  [...D.branches].map(b=>({b,rc:b.rp-b.r})).filter(x=>x.rc>=10).sort((a,b)=>b.rc-a.rc).slice(0,3).forEach(x=>ev.push({g:'🔥 صعود قوي في الترتيب',cls:'up',tag:'🔥 صعد '+x.rc+' مركز',u:x.b.top[0],b:x.b,p:'الآن المركز '+x.b.r}));
+  N.filter(n=>n.k==='out').forEach(n=>ev.push({g:'🎯 قريبين من العودة',cls:'near',tag:'🎯 قريب من العودة',u:n.u,s:n.s,c:n.c,p:'دفعة بسيطة ويرجع للسباق'}));
+  if(!ev.length) return;
+  const items=ev.map(e=>{const s=e.b?e.b.s:e.s, c=e.b?e.b.c:e.c; return `<span class="nw ${e.cls}"><span class="tag">${e.tag}</span><span class="u">${e.u?bdi(e.u):''}</span><span class="b">${s} · ${AR[c]}</span><span class="p">${e.p}</span></span>`;}).join('');
+  loop($('news'), items, 55);
+  const nin=N.filter(n=>n.k==='in').length, nup=N.filter(n=>n.k==='up').length, n100=D.branches.filter(b=>b.a>=1&&b.a-b.d<1).length;
+  $('newsDate').textContent=`يوم ${+D.asof.slice(8)} · دخل ${nin} · ترقّى ${nup}${n100?' · تخطّى 100%: '+n100:''}`;
+  $('newsBar').hidden=false;
+  // القائمة الكاملة: نفس الأخبار مجمّعة حسب النوع
+  const groups=[]; ev.forEach(e=>{ let g=groups.find(x=>x.g===e.g); if(!g){ g={g:e.g,it:[]}; groups.push(g);} g.it.push(e); });
+  const list=$('newsList'), btn=$('newsAll'), more=$('newsMore');
+  list.innerHTML=groups.map(g=>`<div class="g"><h3>${g.g}<small>${g.it.length}</small></h3>${g.it.map(e=>{const s=e.b?e.b.s:e.s, c=e.b?e.b.c:e.c;
+    return `<div class="row"><span class="u">${e.u?bdi(e.u):'—'}</span><span class="b">${s} · ${AR[c]}</span><span class="p">${e.p.replace(/^← /,'متوقع: ')}</span></div>`;}).join('')}</div>`).join('')
+    +'<button type="button" class="close" id="newsClose">إغلاق القائمة ▴</button>';
+  const set=open=>{ list.hidden=!open; btn.setAttribute('aria-expanded',open); more.textContent=open?'▴ إخفاء القائمة':`📋 عرض كل الأخبار (${ev.length})`; };
+  btn.addEventListener('click',()=>set(list.hidden));
+  $('newsClose').addEventListener('click',()=>{ set(false); btn.focus(); });
+  set(false);
+})();
+
+/* hero */
+(function(){
+  const c=D.car[0]; const h=$('hero');
+  if(!c){ h.innerHTML='<div class="lead"><div class="eyebrow">سباق السيارة</div><div class="who">لا يوجد فرع مؤهل بعد — السباق مفتوح</div></div>'; return; }
+  h.innerHTML=`<div class="lead">
+    <div class="eyebrow">🚗 سباق السيارة — المتصدر الآن</div>
+    <div class="big num">${pct(c.a)}</div>
+    <div class="who">${c.s} <span class="small">${AR[c.c]}</span><small>الموظف المتصدر: ${c.top[0]?bdi(c.top[0]):'—'}${c.top[1]?' · الثاني: '+bdi(c.top[1]):''}${c.top[2]?' · الثالث: '+bdi(c.top[2]):''}</small></div>
+    <div class="small" style="margin-top:14px">${c.a>=1?'تجاوز خط الـ100% — الفرع مؤهل، والمنافسة الآن على الأعلى نسبة':'يحتاج '+((1-c.a)*100).toFixed(1)+' نقطة للوصول إلى 100%'}</div>
+  </div>
+  <div class="track4"><div class="th"><b>🏁 حلبة السيارة</b><span>أول من يعدّي خط النهاية بأعلى نسبة ياخذ السيارة</span></div>
+    ${D.car.slice(0,4).map((x,i)=>{const sc=Math.max(1.25,c.a*1.05), pos=Math.min(100,x.a/sc*100), fin=100/sc;
+      return `<div class="lane ${i===0?'lead1':''}"><div class="ln"><span class="r">${i+1}</span><b>${x.s}</b><small>${AR[x.c]}${x.top[0]?' · '+bdi(x.top[0]):''}</small><span class="a num">${pct(x.a)}</span></div>
+        <div class="road"><i style="width:${pos}%"></i><span class="car" style="right:${pos}%">🚗</span><span class="fin" style="right:${fin}%"></span></div>
+        <div class="gap">${x.a>=1?'✅ عدّى خط النهاية':'باقي '+((1-x.a)*100).toFixed(1)+' نقطة على خط النهاية'}</div></div>`;}).join('')}
+    <div class="note">السباق للفروع الكبيرة فقط (حجم مبيعاتها يكفي لجائزة السيارة)</div>
+  </div>`;
+})();
+
+/* stats */
+(function(){
+  const c=D.company, gap=(c.a-D.frac)*100;
+  const nearQ=D.branches.filter(b=>b.a<1&&b.p>=0.9&&b.p<1).length;
+  const inRace=D.branches.filter(b=>b.aw).length;
+  // مؤشرات محفّزة فقط — بدون أرقام الشركة السلبية
+  $('stats').innerHTML=[
+    {v:'🏁 '+c.at100, l:'فرع عدّى خط الـ100%', d:'تأهّل رسمياً للسباق', cls:'up'},
+    {v:inRace, l:'فرع في مراكز الجوائز الآن', d:'من أصل 41 جائزة'},
+    {v:nearQ, l:'فرع على بُعد خطوة', d:'قريب من مراكز الجوائز — ممكن تكون التالي'},
+    {v:left, l:'يوم باقي', d:'كل يوم يفرق في الترتيب'},
+  ].map(t=>`<div class="stat"><div class="v num ${t.cls||''}">${t.v}</div><div class="l">${t.l}</div><div class="d">${t.d}</div></div>`).join('');
+})();
+
+
+/* movers */
+(function(){
+  const up=[...D.branches].sort((a,b)=>b.d-a.d).slice(0,10);
+  $('movers').innerHTML=up.map(b=>`<div class="mv"><span class="n"><b>${b.s}</b><small>${AR[b.c]} · ${b.city}</small></span><span class="a num">${pct(b.a)}</span><span class="d num ${cls(b.d)}">${pts(b.d)}</span></div>`).join('');
+})();
+
+/* next in line: أقرب الفروع غير المرشّحة لمقعد جائزة */
+(function(){
+  const MK={KSA:'KSA',UAE:'UAE',Oman:'Oman',Kuwait:'KW-BH',Bahrain:'KW-BH'}, Q={KSA:34,UAE:2,Oman:2,'KW-BH':2};
+  const winners=D.branches.filter(b=>b.aw&&b.aw!=='A');
+  const lastSeat=winners.length?Math.min(...winners.map(b=>b.a)):D.frac;
+  // الدولة اللي حصتها ناقصة: يكفي فرعها يوصل وتيرة 100% (نسبة = المفترض اليوم)
+  // السعودية: يتجاوز آخر مقعد سعودي. الدولة الصغيرة: لو حصتها ناقصة يكفي وتيرة 100%، وإلا يتجاوز ثاني فائز في دولته
+  const ksaSeat=Math.min(...winners.filter(b=>MK[b.c]==='KSA').map(b=>b.a), 9);
+  const need=b=>{ const m=MK[b.c]; let t;
+    if(m==='KSA') t=ksaSeat;
+    else { const w=winners.filter(x=>MK[x.c]===m).map(x=>x.a); t = w.length<Q[m] ? D.frac : Math.min(...w); }
+    return Math.max(0.001,t-b.a); };
+  const list=D.branches.filter(b=>!b.aw).map(b=>({b,g:need(b)})).sort((x,y)=>x.g-y.g).slice(0,12);
+  const shown=new Set(list.map(x=>x.b.s));
+  const perC=['UAE','Oman','Kuwait','Bahrain'].map(c=>D.branches.filter(b=>b.c===c&&!b.aw&&!shown.has(b.s)).map(b=>({b,g:need(b)})).sort((x,y)=>x.g-y.g)[0]).filter(Boolean).filter(x=>!list.some(l=>l.b.c===x.b.c));
+  $('nextCountry').innerHTML=perC.length?'<span class="small">الأقرب في كل دولة:</span>'+perC.map(x=>`<span class="pc"><b>${x.b.s}</b> ${AR[x.b.c]}${x.b.top[0]?' · '+bdi(x.b.top[0]):''} · <bdi dir="ltr" class="num">${pct(x.b.a)}</bdi> · <em>ينقصه <bdi dir="ltr">${(x.g*100).toFixed(1)}</bdi> نقطة</em></span>`).join(''):'';
+  // كم فرع في الطابور ينقصه أقل من مبيعات يوم واحد عادي له (نسبته ÷ الأيام المنقضية)
+  const oneDay=list.filter(x=>x.g < x.b.a/D.de).length;
+  $('pushBanner').innerHTML=`<span class="bolt">⚡</span><span class="t"><b>بينك وبين الجوائز يوم واحد قوي!</b><span>${oneDay===list.length?'كل الفروع اللي تحت':oneDay+' من الفروع اللي تحت'} ينقصها أقل من مبيعات يوم واحد عادي. اقفل اليوم بقوة، وبكرة يطلع اسمك في «أخبار التأهيل» 🚀</span></span>`;
+  $('nextList').innerHTML=list.map((x,i)=>`<div class="nx"><span class="r">${i+1}</span><span class="n"><b>${x.b.s} <span class="small">${AR[x.b.c]}</span></b><small>${x.b.top[0]?bdi(x.b.top[0]):x.b.city}</small></span><span class="g"><span class="a num">${pct(x.b.a)}</span><small>+${(x.g*100).toFixed(1)} نقطة وتدخل</small></span></div>`).join('');
+})();
+
+/* my branch: أين فرعي وكم باقي لي — بلا مبالغ */
+(function(){
+  const MK={KSA:'KSA',UAE:'UAE',Oman:'Oman',Kuwait:'KW-BH',Bahrain:'KW-BH'}, Q={KSA:38,UAE:2,Oman:2,'KW-BH':2};
+  const R=D.dim-D.de;
+  const ws=D.branches.filter(b=>b.aw&&b.aw!=='A');
+  // النسبة المتوقعة اللي لازم يتجاوزها الفرع عشان يدخل الجوائز
+  function needP(b){ const m=MK[b.c]; const w=ws.filter(x=>MK[x.c]===m);
+    if(m==='KSA') return Math.max(1, w.length?Math.min(...w.map(x=>x.p))+0.001:1);
+    return (D.fill&&D.fill[m]<2) ? 1 : Math.max(1, Math.min(...w.map(x=>x.p))+0.001); }
+  const fmt=x=>Math.round(x*100);
+  const times=n=>n===1?'مرة وحدة':n===2?'مرتين':n<=10?n+' مرات':n+' مرة';
+  const places=n=>n===1?'مركز واحد':n===2?'مركزين':n<=10?n+' مراكز':n+' مركز';
+  // بدون أي أرقام مبيعات: وصف بالكلام + شريطين للمقارنة
+  const lvl=inc=> inc<0.10?'<b>شوي بس</b> فوق بيعكم المعتاد'
+                : inc<0.25?'<b>زيادة بسيطة</b> على بيعكم المعتاد'
+                : inc<0.50?'<b>زيادة واضحة</b> — الأيام الجاية لازم تكون أيام قوية'
+                : inc<0.90?'<b>زيادة كبيرة</b> — الأيام الجاية لازم تكون من أقوى أيامكم'
+                : inc<1.20?'<b>ضعف</b> بيعكم المعتاد تقريباً'
+                : '<b>أكثر من ضعف</b> بيعكم المعتاد';
+  const bars=inc=>`<div class="cmp"><div><span>بيعكم المعتاد</span><i style="width:${Math.min(100,100/(1+inc))}%"></i></div><div><span>المطلوب</span><i class="need" style="width:100%"></i></div></div>`;
+  function plain(inc, goal){ return `<div class="tip">${goal}<br>تحتاجون كل يوم ${lvl(inc)}.${bars(inc)}</div>`; }
+  function card(b){
+    const r=b.a/D.de;                     // معدل الفرع اليومي بالنقاط
+    const rc=b.rp-b.r;
+    const team=b.top.length?`<div class="team">⭐ المتصدر في فرعكم: ${bdi(b.top[0])}${b.top[1]?' · الثاني: '+bdi(b.top[1]):''}${b.top[2]?' · الثالث: '+bdi(b.top[2]):''}</div>`:'';
+    let status, tips=[];
+    if(b.aw==='A'){ status='<span class="status car">🚗 متصدرين سباق السيارة!</span>'; }
+    else if(b.aw){ status=`<span class="status in">✅ داخلين: ${ICO[b.aw]} ${PRIZE[b.aw]}</span>`; }
+    else { status='<span class="status out">🎯 لسا ما دخلتوا الجوائز</span>'; }
+    if(b.aw){
+      // هامش الأمان لبلوغ 100%
+      const slow=1-((1-b.a)/R)/r;
+      if(b.a>=1) tips.push(`<div class="tip good">🏁 <b>عدّيتوا 100%!</b> الحين كل يوم يرفع نسبتكم ويثبّت مركزكم.</div>`);
+      else if(slow>0){ const h=slow<0.10?'<b>هامشكم صغير</b> — أي نزول في البيع يطلعكم من 100%، حافظوا على نفس المستوى كل يوم.'
+                          : slow<0.30?'عندكم <b>هامش بسيط</b>: لو نزل بيعكم شوي بتظلون فوق 100%، بس لا تتراخون.'
+                          : 'عندكم <b>هامش مريح</b>: حتى لو نزل بيعكم بتظلون فوق 100%. بس الفروع اللي تحتكم قريبة، كمّلوا!';
+        tips.push(`<div class="tip good">🛡️ ${h}</div>`); }
+    } else {
+      const F=needP(b), gap=F-b.a, need=gap/R, inc=need/r-1;
+      if(inc<=0) tips.push(`<div class="tip good">على سرعتكم الحالية أنتم قريبين جداً — <b>زيادة بسيطة</b> وتدخلون.</div>`);
+      else tips.push(plain(inc, `📈 <b>عشان تدخلون الجوائز</b> خلال الـ${R} يوم الباقية:`));
+      // كرروا أحسن يوم
+      const short=gap-r*R;
+      if(b.bd>r && short>0){ const n=Math.ceil(short/(b.bd-r));
+        if(n<=R) tips.push(`<div class="tip">🔥 أحسن يوم لكم هالشهر كان <b>يوم ${b.bdd}</b>. لو كررتوه <b>${times(n)}</b> من الأيام الباقية، تدخلون الجوائز.</div>`); }
+      const inc100=((1-b.a)/R)/r-1;
+      if(F>1.001 && inc100>0) tips.push(`<div class="tip">🏁 وعشان توصلون 100% بس: تحتاجون ${lvl(inc100)}.</div>`);
+    }
+    if(rc>0) tips.push(`<div class="tip good">🔼 تقدمتوا <b>${places(rc)}</b> من أمس — كمّلوا!</div>`);
+    return `<div class="mygrid"><div class="mybig"><span class="n">${b.s} <small>${AR[b.c]} · ${b.city}</small></span><span class="v num ${b.a>=1?'up':''}">${pct(b.a)}</span><span class="pj">تحقيقكم اليوم · المتوقع بنهاية الشهر <b class="num">${pct(b.p,0)}</b></span></div>
+      <div class="mymsg">${status}${tips.join('')}${team}</div></div>`;
+  }
+  const idx={}; D.branches.forEach(b=>{ idx[b.s.toUpperCase()]=b; b.top.forEach(u=>{ const m=u.match(/\((\d+)\)/); if(m) idx[m[1]]=b; idx[u.split(' (')[0].toUpperCase()]=b; }); });
+  function find(q){ q=(q||'').trim().toUpperCase(); if(!q) return null; if(idx[q]) return idx[q];
+    const byCode=D.branches.find(b=>b.s.toUpperCase().startsWith(q))||D.branches.find(b=>b.s.toUpperCase().includes(q)); if(byCode) return byCode;
+    const k=Object.keys(idx).find(k=>k.includes(q)); return k?idx[k]:null; }
+  function show(q, save){
+    const b=find(q);
+    if(!b){ $('myCard').innerHTML = q? '<div class="empty-mine">ما لقيت فرع بهالاسم. جرّب كود الفرع مثل <b>ZAHRAN</b> أو رقم اليوزر.</div>' : '<div class="empty-mine">اكتب فرعك فوق، وبتشوف وين أنتم، وكم باقي لكم على الجوائز، ومين المتصدر عندكم.</div>'; $('myClear').hidden=true; return; }
+    $('myCard').innerHTML=card(b); $('myIn').value=b.s; $('myClear').hidden=false;
+    if(save){ try{ localStorage.setItem('athar_my', b.s); }catch(e){} }
+  }
+  let saved=null; try{ saved=localStorage.getItem('athar_my'); }catch(e){}
+  show(saved,false);
+  // قائمة اقتراحات خاصة: أبجدية حسب الدولة (ما تكشف الترتيب)، وتنزل للآخر بالتمرير
+  const ORDER=['KSA','UAE','Oman','Kuwait','Bahrain','Qatar'];
+  const all=[...D.branches].sort((x,y)=>ORDER.indexOf(x.c)-ORDER.indexOf(y.c)||x.s.localeCompare(y.s));
+  const sug=$('mySug'), inp=$('myIn'); let act=-1, cur=[];
+  function render(q){
+    q=(q||'').trim().toUpperCase();
+    // الأولوية: كود الفرع المطابق تماماً، ثم كود يبدأ بالنص، ثم كود يحتويه، ثم المدينة/الدولة/اليوزر
+    const score=b=>{ const S=b.s.toUpperCase(); if(!q) return 9; if(S===q) return 0; if(S.startsWith(q)) return 1; if(S.includes(q)) return 2;
+      if(b.city.toUpperCase().includes(q)||AR[b.c].includes(q)) return 3; if(b.top.some(u=>u.toUpperCase().includes(q))) return 4; return -1; };
+    cur=all.map(b=>[score(b),b]).filter(x=>x[0]>=0);
+    if(q) cur.sort((x,y)=>x[0]-y[0]||x[1].s.localeCompare(y[1].s));
+    cur=cur.map(x=>x[1]);
+    let html='', last=null;
+    cur.forEach((b,i)=>{ if(!q && b.c!==last){ html+=`<div class="g">${AR[b.c]} · ${all.filter(x=>x.c===b.c).length} فرع</div>`; last=b.c; }
+      const hit = q && !b.s.toUpperCase().includes(q) ? (b.top.find(u=>u.toUpperCase().includes(q))||'') : '';
+      html+=`<div class="o${i===act?' act':''}" role="option" data-s="${b.s}"><b>${b.s}</b><small>${hit?bdi(hit)+' · ':''}${AR[b.c]} · ${b.city}</small></div>`; });
+    sug.innerHTML = html || '<div class="none">ما لقيت فرع بهالاسم — جرّب كود الفرع أو المدينة أو رقم اليوزر</div>';
+    sug.hidden=false; inp.setAttribute('aria-expanded','true');
+  }
+  function close(){ sug.hidden=true; act=-1; inp.setAttribute('aria-expanded','false'); }
+  inp.addEventListener('focus',()=>{ act=-1; render(''); });
+  inp.addEventListener('input',()=>{ act=-1; render(inp.value); });
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); if(sug.hidden) render(inp.value); act=Math.max(0,Math.min(cur.length-1,act+(e.key==='ArrowDown'?1:-1))); render(inp.value); const el=sug.querySelector('.o.act'); if(el) el.scrollIntoView({block:'nearest'}); }
+    else if(e.key==='Enter'){ e.preventDefault(); const q=inp.value.trim().toUpperCase(); const exact=idx[q]; const b=act>=0?cur[act]:(exact||cur[0]); close(); show(b?b.s:inp.value,true); inp.blur(); }
+    else if(e.key==='Escape'){ close(); }
+  });
+  sug.addEventListener('mousedown',e=>{ const o=e.target.closest('.o'); if(!o) return; e.preventDefault(); close(); show(o.dataset.s,true); inp.blur(); });
+  document.addEventListener('mousedown',e=>{ if(!e.target.closest('.combo')) close(); });
+  $('myClear').addEventListener('click',()=>{ try{ localStorage.removeItem('athar_my'); }catch(e){} $('myIn').value=''; show(null,false); $('myIn').focus(); });
+})();
+
+/* prizes */
+(function(){
+  const cats=['A','B','C','D','E'];
+  $('prizes').innerHTML=cats.map(c=>{
+    const list=D.branches.filter(b=>b.aw===c).sort((a,b)=>b.p-a.p);
+    const cap=c==='A'?1:10, vac=cap-list.length;
+    // المقاعد الشاغرة تظهر كفرصة مفتوحة، مو كفراغ
+    const open = vac>0 ? `<li class="vac"><span class="r">🔓</span><span class="s"><b>${vac===1?'مقعد شاغر':vac+' مقاعد شاغرة'}</b><small>${c==='A'?'أول فرع كبير يعدّي 100% ياخذ السيارة':'أول فرع يوصل 100% ياخذه — ممكن يكون فرعك'}</small></span><span class="p">؟</span></li>` : '';
+    const items=list.map((b,i)=>`<li class="${i>=3?'more':''}"><span class="r num">${i+1}</span><span class="s"><b>${b.s} <span class="small">${AR[b.c]}</span>${b.mv?' <span class="chip mv">منقولة</span>':''}</b><small>${b.top[0]?bdi(b.top[0]):'—'}</small></span><span class="p num">${pct(b.a)}<small>متوقع ${pct(b.p,0)}</small></span></li>`).join('')+open;
+    const btn = list.length>3 ? `<button class="morebtn" data-n="${list.length}">عرض الكل (${list.length})</button>` : '';
+    return `<div class="cat"><div class="ch"><b><span class="ico">${ICO[c]}</span> ${PRIZE[c]}</b><span class="small">${c==='A'?'1':list.length+' / 10'}</span></div><ol>${items}</ol>${btn}</div>`;
+  }).join('');
+  $('prizes').querySelectorAll('.morebtn').forEach(bt=>bt.addEventListener('click',()=>{const c=bt.closest('.cat'); const o=c.classList.toggle('open'); bt.textContent=o?'أقل':`عرض الكل (${bt.dataset.n})`;}));
+  $('prizeSub').textContent=`لو استمرت الوتيرة الحالية إلى نهاية الشهر · ${D.branches.filter(b=>b.aw).length} جائزة مرشّحة من 41`;
+})();
+
+
+})();
+</script>
+<script>
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function label(){ var light=root.getAttribute('data-theme')==='light';
+    btn.innerHTML = light ? '🌙 <span class="tl">الوضع الداكن</span><span class="ts">داكن</span>' : '☀️ <span class="tl">الوضع الفاتح</span><span class="ts">فاتح</span>';
+    btn.setAttribute('aria-pressed', light ? 'true' : 'false'); }
+  btn.addEventListener('click', function(){
+    var light = root.getAttribute('data-theme')!=='light';
+    if(light) root.setAttribute('data-theme','light'); else root.removeAttribute('data-theme');
+    try{ localStorage.setItem('athar_theme', light?'light':'dark'); }catch(e){}
+    label();
+  });
+  label();
+})();
+</script>
