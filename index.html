@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مسابقة أثر</title></head><body>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Changa:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: an exchange-floor board for branch teams — ticker tape, the car race hero, then a leaderboard. Deliberately single-theme dark like a trading screen; gold for prizes, green/red only for movement. No amounts anywhere: percentages, ranks and names. */
+:root{
+  --bg:#0f1218; --surface:#171c25; --surface-2:#1f2633; --line:#2a3344; --line-strong:#3a4659;
+  --fg:#f2f0ea; --fg-2:#b8bcc6; --fg-3:#7d8494;
+  --gold:#e6b64a; --gold-soft:#3a2d10; --gold-ink:#1a1304;
+  --up:#3fcf7a; --up-soft:#10301d; --down:#f0655c; --down-soft:#3a1715; --flat:#7d8494;
+  --bar:#4f8cff; --bar-track:#242c3a; --marker:#f2f0ea;
+  --display:"Changa","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --mine-0:#14202e; --hero-0:#1c1a12; --hero-1:#171c25; --next-1:#151a22; --road-dash:#2b3546; --gold-deep:#8a6a1e;
+  --radius:12px; color-scheme:dark;
+}
+/* Light («فاتح») theme — chosen with the header button, remembered on the device */
+:root[data-theme="light"]{
+  --bg:#f5f3ee; --surface:#ffffff; --surface-2:#f0ede6; --line:#e3ded3; --line-strong:#cdc5b6;
+  --fg:#1c1f26; --fg-2:#454b57; --fg-3:#6b7180;
+  --gold:#a8760a; --gold-soft:#f7ecd0; --gold-ink:#ffffff;
+  --up:#1d8a4b; --up-soft:#ddf2e5; --down:#c4362d; --down-soft:#f9e1de; --flat:#6b7180;
+  --bar:#2d6be0; --bar-track:#e3e8f0; --marker:#1c1f26;
+  --mine-0:#e7effc; --hero-0:#fbf2dc; --hero-1:#ffffff; --next-1:#f8f6f1; --road-dash:#cdd5e1; --gold-deep:#d9b25a;
+  color-scheme:light;
+}
+.theme-btn{cursor:pointer;color:var(--fg);font:inherit;font-size:13px}
+.theme-btn:hover{border-color:var(--line-strong)}
+.theme-btn:focus-visible{outline:2px solid var(--bar);outline-offset:2px}
+.theme-btn .ts{display:none}
+.meta .pill{white-space:nowrap}
+/* phones: compact header pills, news label on its own row so the moving news gets the full width */
+@media (max-width:640px){
+  .head{gap:10px}
+  .meta{width:100%;gap:6px}
+  .meta .pill{font-size:12px;padding:4px 10px}
+  .theme-btn .tl{display:none} .theme-btn .ts{display:inline}
+  .news{flex-direction:column}
+  .nlabel{display:block;text-align:start;padding:7px 12px;font-size:14px;width:100%}
+  .nmore{float:left;margin-top:-1px}
+  .nlist{padding:12px}
+  .nlabel small{display:block;font-size:11.5px;margin-top:1px}
+  .ntape{padding:9px 0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
+.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;text-wrap:balance;font-family:var(--display);font-weight:700;line-height:1.2}
+h1{font-size:30px} h2{font-size:20px} h3{font-size:16px}
+.num{font-variant-numeric:tabular-nums}
+.small{font-size:12.5px;color:var(--fg-3)}
+.muted{color:var(--fg-2)}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+
+/* header */
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
+.head .t{display:flex;align-items:center;gap:12px}
+.mark{width:48px;height:48px;border-radius:12px;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;flex:none}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:13px;border:1px solid var(--line);background:var(--surface)}
+.pill b{font-family:var(--display)}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px var(--up-soft)}
+
+/* ticker */
+.tape{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);padding:8px 0}
+.tape .track{display:flex;width:max-content;white-space:nowrap;animation:tape var(--dur,600s) linear infinite;will-change:transform}
+.tape .copy{display:flex;gap:28px;padding-inline-end:28px}
+.tape:hover .track{animation-play-state:paused}
+@keyframes tape{from{transform:translateX(0)}to{transform:translateX(50%)}}
+@media (prefers-reduced-motion:reduce){.tape{overflow:auto}.tape .track{animation:none;width:auto}.tape .copy{flex-wrap:wrap;gap:8px 20px;padding:0 12px;white-space:normal}.tape .copy+.copy{display:none}}
+.tape .it{font-family:var(--display);font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:rtl}
+.tape .it .s{color:var(--fg-2);font-weight:500}
+.tape .it .a{font-weight:700}
+.tape .it .d{font-size:12px}
+
+/* news ticker */
+.news{display:flex;align-items:stretch;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;background:var(--surface)}
+.nlabel{flex:none;background:var(--gold);color:var(--gold-ink);font-family:var(--display);font-weight:800;font-size:15px;padding:8px 14px;display:flex;flex-direction:column;justify-content:center;line-height:1.15}
+.nlabel small{font-family:var(--font);font-weight:600;font-size:11px;opacity:.75}
+button.nlabel{border:0;cursor:pointer;text-align:start;align-items:flex-start}
+button.nlabel:focus-visible{outline:2px solid var(--bar);outline-offset:-3px}
+.nmore{display:inline-block;margin-top:5px;font-family:var(--font);font-weight:700;font-size:11.5px;padding:2px 9px;border-radius:999px;background:rgba(0,0,0,.14)}
+button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
+.nlist{border:1px solid var(--line-strong);border-radius:10px;background:var(--surface);padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px 22px}
+.nlist .g h3{font-size:15px;margin:0 0 4px;display:flex;justify-content:space-between;gap:8px}
+.nlist .g h3 small{font-family:var(--font);font-weight:600;color:var(--fg-3);font-size:12px}
+.nlist .row{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.nlist .row .u{font-weight:600}
+.nlist .row .b{color:var(--fg-3);font-size:12.5px}
+.nlist .row .p{color:var(--fg-2);font-size:12.5px;margin-inline-start:auto}
+.nlist .close{grid-column:1/-1;justify-self:start;cursor:pointer;font:inherit;font-size:13px;color:var(--fg);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:999px;padding:5px 14px}
+.ntape{flex:1;border:0;min-width:0;padding:10px 0}
+.ntape .copy{gap:34px;padding-inline-end:34px}
+.nw{font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:rtl}
+.nw .tag{font-family:var(--display);font-weight:700;font-size:12.5px;padding:1px 8px;border-radius:999px}
+.nw.in .tag{background:var(--up-soft);color:var(--up)} .nw.up .tag{background:var(--up-soft);color:var(--up)}
+.nw.near .tag{background:var(--gold-soft);color:var(--gold)}
+.nw .u{font-weight:600}
+.nw .b{color:var(--fg-3);font-size:12.5px}
+.nw .p{color:var(--fg-2);font-size:12.5px}
+
+/* my branch */
+.mine{background:linear-gradient(135deg,var(--mine-0),var(--surface) 70%);border:1px solid var(--bar);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:14px}
+.mhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.mhead label{display:flex;flex-direction:column;gap:2px}
+.mhead label b{font-family:var(--display);font-size:19px}
+.mhead label span{font-size:12.5px;color:var(--fg-2)}
+.mform{display:flex;gap:8px;flex:1;min-width:220px;max-width:420px}
+.combo{position:relative;flex:1;min-width:0}
+.combo input{width:100%}
+.sug{position:absolute;top:calc(100% + 4px);inset-inline:0;z-index:30;max-height:320px;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.45);padding:4px 0}
+.sug .g{position:sticky;top:0;background:var(--surface-2);font-size:11.5px;color:var(--fg-3);padding:5px 12px;font-weight:600}
+.sug .o{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;cursor:pointer;font-size:13.5px}
+.sug .o b{font-family:var(--display)}
+.sug .o small{color:var(--fg-3);font-size:12px}
+.sug .o:hover,.sug .o.act{background:var(--surface-2)}
+.sug .none{padding:10px 12px;font-size:13px;color:var(--fg-3)}
+.mform input{flex:1;min-width:0;font:inherit;padding:9px 12px;border:1px solid var(--line-strong);border-radius:9px;background:var(--surface-2);color:var(--fg)}
+.mform input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.mygrid{display:grid;grid-template-columns:auto 1fr;gap:16px 22px;align-items:start}
+@media (max-width:640px){.mygrid{grid-template-columns:1fr}}
+.mybig{display:flex;flex-direction:column;gap:2px;min-width:150px}
+.mybig .n{font-family:var(--display);font-size:22px;font-weight:700}
+.mybig .n small{font-size:12.5px;color:var(--fg-3);font-weight:500;font-family:var(--font)}
+.mybig .v{font-family:var(--display);font-size:46px;font-weight:800;line-height:1.05}
+.mybig .pj{font-size:13px;color:var(--fg-2)}
+.mybig .pj b{color:var(--fg)}
+.mymsg{display:flex;flex-direction:column;gap:10px;min-width:0}
+.status{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;font-family:var(--display);font-weight:700;font-size:16px;padding:5px 14px;border-radius:999px}
+.status.in{background:var(--up-soft);color:var(--up)} .status.car{background:var(--gold-soft);color:var(--gold)} .status.out{background:var(--surface-2);color:var(--fg)}
+.tip{background:var(--surface-2);border-radius:9px;padding:10px 12px;font-size:14px;line-height:1.6}
+.tip b{color:var(--gold);font-family:var(--display)}
+.tip.good b{color:var(--up)}
+.tip .cmp{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.tip .cmp div{display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center;font-size:12px;color:var(--fg-2)}
+.tip .cmp i{display:block;height:10px;border-radius:5px;background:var(--bar)}
+.tip .cmp i.need{background:linear-gradient(90deg,var(--gold),var(--gold-deep))}
+.tip .note{display:block;margin-top:6px;font-size:11.5px;color:var(--fg-3)}
+.team{font-size:13px;color:var(--fg-2)}
+.empty-mine{font-size:14px;color:var(--fg-2)}
+
+/* collapsed prize lists */
+.cat:not(.open) li.more{display:none}
+.cat .morebtn{align-self:flex-start;font-size:12.5px;padding:5px 12px;border-radius:999px;background:transparent;border:1px solid var(--line-strong);color:var(--fg-2)}
+.cat li .p small{display:block;font-family:var(--font);font-size:10.5px;font-weight:500;color:var(--fg-3);text-align:left}
+.explain{font-size:13px;color:var(--fg-2);background:var(--surface-2);border-radius:9px;padding:9px 12px;line-height:1.6}
+.explain b{color:var(--fg)}
+
+/* next in line */
+.card.next{border-color:var(--line-strong);background:linear-gradient(180deg,var(--surface),var(--next-1))}
+.nextg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+.nx{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;background:var(--surface-2);border-radius:9px;padding:9px 12px;min-width:0}
+.nx .r{font-family:var(--display);font-weight:700;color:var(--fg-3);font-size:13px}
+.nx .n{min-width:0}
+.nx .n b{display:block;font-family:var(--display)}
+.nx .n small{display:block;color:var(--fg-3);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nx .g{text-align:left}
+.nx .g .a{font-family:var(--display);font-weight:700;font-size:16px}
+.push{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(90deg,var(--gold-soft),transparent);border:1px solid var(--gold);border-radius:10px;padding:12px 16px}
+.push .bolt{font-size:30px;line-height:1}
+.push .t{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.push .t b{font-family:var(--display);font-size:19px;color:var(--gold);line-height:1.3}
+.push .t span{font-size:13px;color:var(--fg-2)}
+@media (prefers-reduced-motion:no-preference){.push .bolt{animation:zap 1.6s ease-in-out infinite}@keyframes zap{50%{transform:scale(1.18)}}}
+.pcs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pc{font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.pc em{font-style:normal;color:var(--gold);font-weight:600}
+.nx .g small{display:block;font-size:11.5px;color:var(--gold);font-weight:600;white-space:nowrap}
+
+/* hero car race */
+.hero{background:linear-gradient(135deg,var(--hero-0),var(--hero-1) 60%);border:1px solid var(--gold);border-radius:var(--radius);padding:18px 18px 16px;display:grid;grid-template-columns:1.2fr 1fr;gap:18px;position:relative;overflow:hidden}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.hero .lead{display:flex;flex-direction:column;gap:8px;min-width:0}
+.hero .eyebrow{font-size:12px;letter-spacing:.08em;color:var(--gold);font-weight:600}
+.hero .big{font-family:var(--display);font-size:52px;font-weight:800;line-height:1;color:var(--gold)}
+.hero .who{font-size:18px;font-weight:600}
+.hero .who small{display:block;font-size:13px;color:var(--fg-2);font-weight:400}
+.race{height:14px;background:var(--bar-track);border-radius:7px;position:relative;margin-top:4px}
+.race>i{position:absolute;inset-block:0;right:0;border-radius:7px;background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
+.race>b{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--marker)}
+.race .lbl{position:absolute;top:18px;font-size:11px;color:var(--fg-3);transform:translateX(50%)}
+.track4{display:flex;flex-direction:column;gap:12px;min-width:0}
+.track4 .th{display:flex;flex-direction:column;gap:2px}
+.track4 .th b{font-family:var(--display);font-size:17px}
+.track4 .th span{font-size:12.5px;color:var(--fg-2)}
+.lane{display:flex;flex-direction:column;gap:5px}
+.lane .ln{display:grid;grid-template-columns:18px auto 1fr auto;gap:8px;align-items:baseline;min-width:0}
+.lane .ln .r{font-family:var(--display);font-weight:700;color:var(--fg-3)}
+.lane .ln b{font-family:var(--display);font-size:15px}
+.lane .ln small{color:var(--fg-3);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lane .ln .a{font-family:var(--display);font-weight:700;font-size:16px}
+.lane.lead1 .ln .a,.lane.lead1 .ln b{color:var(--gold)}
+.road{position:relative;height:12px;background:repeating-linear-gradient(90deg,var(--bar-track) 0 14px,var(--road-dash) 14px 18px);border-radius:6px;margin-inline:0 14px}
+.road>i{position:absolute;inset-block:0;right:0;border-radius:6px;background:var(--bar)}
+.lane.lead1 .road>i{background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
+.road .car{position:absolute;top:50%;transform:translate(50%,-55%);font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.road .fin{position:absolute;top:-6px;bottom:-6px;width:6px;transform:translateX(50%);background:repeating-linear-gradient(0deg,#f2f0ea 0 3px,#0f1218 3px 6px);border-radius:1px}
+.lane .gap{font-size:11.5px;color:var(--fg-3)}
+.track4 .note{font-size:11.5px;color:var(--fg-3);border-top:1px solid var(--line);padding-top:8px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .v{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.15}
+.stat .l{font-size:12.5px;color:var(--fg-2)}
+.stat .d{font-size:12px;color:var(--fg-3)}
+
+/* cards */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+
+/* markets */
+.mkt{display:flex;flex-direction:column;gap:10px}
+.mrow{display:grid;grid-template-columns:104px 1fr 64px;gap:10px;align-items:center}
+.mrow .nm{font-weight:600}
+.mrow .nm small{display:block;font-weight:400;color:var(--fg-3);font-size:11.5px}
+.mrow .bar{height:14px;background:var(--bar-track);border-radius:4px;position:relative}
+.mrow .bar>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:4px 0 0 4px}
+.mrow .bar>b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--marker)}
+.mrow .val{font-family:var(--display);font-weight:700;font-size:17px;text-align:left}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--fg-3)}
+.legend i{display:inline-block;width:12px;height:8px;background:var(--bar);border-radius:2px;margin-inline-start:4px;vertical-align:middle}
+.legend b{display:inline-block;width:2px;height:12px;background:var(--marker);margin-inline-start:6px;vertical-align:middle}
+
+/* movers */
+.movers{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:6px 22px}
+@media (max-width:520px){.movers{grid-template-columns:1fr}}
+.mv{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
+.mv .n small{color:var(--fg-3);font-size:11.5px;margin-inline-start:6px}
+.mv .a{font-family:var(--display);font-weight:700}
+.mv .d{font-family:var(--display);font-weight:700;font-size:13px;min-width:54px;text-align:left}
+
+/* prize boards */
+.prizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.cat{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:var(--surface-2);display:flex;flex-direction:column;gap:8px;min-width:0}
+.cat .ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cat .ch b{font-family:var(--display);font-size:17px}
+.cat .ch .ico{font-size:20px}
+.cat ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.cat li{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:baseline;font-size:13.5px}
+.cat li .r{color:var(--fg-3);font-size:12px;font-family:var(--display)}
+.cat li .s{min-width:0}
+.cat li .s b{display:block}
+.cat li .s small{display:block;color:var(--fg-3);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat li .p{font-family:var(--display);font-weight:700}
+.cat .empty{color:var(--fg-3);font-size:13px}
+.cat li.vac{border:1px dashed var(--gold);border-radius:8px;padding:7px 8px;background:var(--gold-soft)}
+.cat li.vac b{color:var(--gold)}
+.cat li.vac .s small{white-space:normal;overflow:visible;color:var(--fg-2)}
+.cat li.vac .p{color:var(--gold);font-family:var(--display);font-size:18px}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid transparent;vertical-align:middle}
+.chip.A{background:var(--gold-soft);color:var(--gold);border-color:var(--gold)}
+.chip.B,.chip.C,.chip.D,.chip.E{background:var(--surface);color:var(--fg-2);border-color:var(--line-strong)}
+.chip.q{background:var(--up-soft);color:var(--up)}
+.chip.mv{background:var(--surface);color:var(--fg-3);border-color:var(--line)}
+
+/* leaderboard */
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px}
+@media (max-width:640px){.toolbar{grid-template-columns:1fr 1fr}}
+.toolbar input,.toolbar select{font:inherit;padding:8px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);width:100%;min-width:0}
+.toolbar input:focus-visible,.toolbar select:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.board{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:44px minmax(0,1.4fr) minmax(120px,1fr) 70px 64px minmax(0,1.2fr);gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line)}
+.row.hdr{font-size:12px;color:var(--fg-3);border-bottom-color:var(--line-strong);position:sticky;top:env(safe-area-inset-top,0px);background:var(--surface);z-index:1}
+.row:not(.hdr):hover{background:var(--surface-2)}
+.row.q{box-shadow:inset 3px 0 0 var(--up)}
+@media (max-width:640px){.row{grid-template-columns:36px minmax(0,1.4fr) 86px 60px}.row .cpace,.row .cemp{display:none}}
+.row .rk{font-family:var(--display);font-weight:700;color:var(--fg-2)}
+.row .rk small{display:block;font-size:10.5px;font-weight:600}
+.row .nm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .nm small{color:var(--fg-3);font-size:11.5px}
+.row .ach{display:flex;align-items:center;gap:8px}
+.row .ach .v{font-family:var(--display);font-weight:700;min-width:52px}
+.mini{flex:1;height:7px;background:var(--bar-track);border-radius:4px;position:relative;min-width:40px}
+.mini>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:4px}
+.mini>i.full{background:var(--up)}
+.mini>b{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:var(--marker)}
+.row .dl{font-family:var(--display);font-weight:700;font-size:13px}
+.row .emp{font-size:12.5px;color:var(--fg-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--fg-3);padding-top:8px}
+button{font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--fg);padding:7px 14px;cursor:pointer}
+
+/* trend */
+.trend svg{width:100%;height:auto;display:block}
+.trend text{font-family:var(--font);fill:var(--fg-3);font-size:11px}
+
+details{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:12px 16px}
+summary{cursor:pointer;font-weight:600}
+details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
+</style>
+
+<div class="wrap">
+  <script>(function(){var t=null;try{t=localStorage.getItem('athar_theme');}catch(e){} if(t==='light') document.documentElement.setAttribute('data-theme','light');})();</script>
+  <header class="head">
+    <div class="t">
+      <div class="mark">أ</div>
+      <div>
+        <h1>مسابقة أثر</h1>
+        <div class="muted" id="sub">—</div>
+      </div>
+    </div>
+    <div class="meta">
+      <button type="button" class="pill theme-btn" id="themeBtn" aria-label="تبديل بين الوضع الداكن والفاتح"></button>
+      <span class="pill"><span class="dot"></span>البيانات حتى <b id="pAsof">—</b></span>
+      <span class="pill">اليوم <b id="pDay">—</b></span>
+      <span class="pill">باقي <b id="pLeft">—</b> يوم</span>
+    </div>
+  </header>
+
+  <div class="news" id="newsBar" hidden>
+    <button type="button" class="nlabel" id="newsAll" aria-expanded="false" aria-controls="newsList">أخبار التأهيل<small id="newsDate"></small><span class="nmore" id="newsMore">📋 عرض كل الأخبار</span></button>
+    <div class="tape ntape" aria-label="أخبار التأهيل اليوم"><div class="track" id="news"></div></div>
+  </div>
+  <div class="nlist" id="newsList" hidden>
+  </div>
+
+  <section class="mine" id="mine">
+    <div class="mhead">
+      <label for="myIn"><b>📍 فرعي</b><span>اكتب اسم فرعك أو اليوزر حقك وتنحفظ عندك</span></label>
+      <div class="mform"><div class="combo"><input id="myIn" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mySug" placeholder="اكتب أو اختر: ZAHRAN، جدة، 6216…"><div class="sug" id="mySug" role="listbox" hidden></div></div><button id="myClear" hidden>تغيير</button></div>
+    </div>
+    <div id="myCard"></div>
+  </section>
+
+  <section class="hero" id="hero"></section>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="card">
+    <div class="hd"><h2>🚀 الأكثر صعوداً اليوم</h2><span class="small">أكبر زيادة في نسبة التحقيق خلال آخر يوم</span></div>
+    <div class="movers" id="movers"></div>
+  </section>
+
+  <section class="card">
+    <div class="hd"><h2>لوحة الجوائز المتوقعة</h2><span class="small" id="prizeSub"></span></div>
+    <div class="explain">💡 <b>كيف ينحسب الترشيح؟</b> نفترض إن كل فرع بيكمّل بنفس سرعته الحالية لين آخر الشهر. اللي متوقع يتجاوز 100% يدخل السباق. الرقم الكبير جنب كل فرع = تحقيقه اليوم، والصغير تحته = المتوقع بنهاية الشهر.</div>
+    <div class="prizes" id="prizes"></div>
+  </section>
+
+  <section class="card next">
+    <div class="hd"><h2>🎯 على بُعد خطوة من الجوائز</h2><span class="small">الفروع التالية في الطابور — دفعة بسيطة وتدخل مراكز الجوائز</span></div>
+    <div class="push" id="pushBanner"></div>
+    <div class="nextg" id="nextList"></div>
+    <div class="pcs" id="nextCountry"></div>
+  </section>
+
+
+
+  <details>
+    <summary>كيف تفوز؟</summary>
+    <p>نسبة التحقيق = مبيعات فرعك ÷ مستهدف الشهر. ما يدخل أي فرع السباق إلا إذا بلغ 100% فأكثر. الفروع المؤهلة تُرتَّب بنسبة التحقيق: الأعلى على مستوى الشركة (بشرط حجم مبيعات أدنى) يفوز بالسيارة، وبعدها 40 جائزة: 10 جوالات، 10 آيباد، 10 ساعات ذكية، 10 سبائك ذهب. في الإمارات وعُمان والكويت والبحرين: الأول في الدولة يأخذ جوالاً والثاني سبيكة ذهب. في السعودية: 7 جوالات و10 آيباد و10 ساعات و7 سبائك حسب الترتيب. لو ما بلغ أحد 100% في دولة، ينتقل مقعدها للسعودية وتترقّى الجوائز بالترتيب. ولو ما كفى عدد الفروع اللي وصلت 100% فعلياً بنهاية الشهر، الجوائز الباقية ما تنصرف ولا تنتقل للشهر اللي بعده — 100% شرط ما فيه استثناء. الفرع الواحد جائزة واحدة، والفائز من الفرع هو الموظف الأعلى مبيعات على حسابه الشخصي.</p>
+    <p>في فرع السيارة: الأول يأخذ السيارة، والثاني جوالاً، والثالث آيباد، وبقية الفريق قسيمة 250 ريال. الأرقام هنا مؤشر يومي مبني على الوتيرة الحالية، والنتيجة الرسمية تُعلن يوم 10 من الشهر التالي بعد التدقيق.</p>
+  </details>
+</div>
+
+<script id="embed" type="application/json">{"asof":"2026-10-18","prev":"2026-10-17","news":[],"de":17,"day":18,"dim":31,"frac":0.5484,"company":{"a":0.4722,"on":46,"at100":1,"n":226},"markets":{"KSA":{"a":0.4754,"n":189,"on":34,"at100":0},"UAE":{"a":0.3767,"n":13,"on":1,"at100":1},"Oman":{"a":0.6625,"n":12,"on":10,"at100":0},"Kuwait":{"a":0.3216,"n":11,"on":0,"at100":0},"Bahrain":{"a":0.3664,"n":1,"on":0,"at100":0}},"fill":{"UAE":0,"Oman":2,"KW-BH":0,"KSA":34},"moved":0,"branches":[{"s":"ZAHIA","c":"UAE","city":"Sharjah","a":1.277,"d":0.013,"p":2.329,"r":1,"rp":1,"aw":"A","mv":false,"top":["SHussein (1900)","Nabil (1453)","BMadani (1944)"],"bd":0.2392,"bdd":2},{"s":"BARKAOMN","c":"Oman","city":"Barka","a":0.8346,"d":0.0124,"p":1.522,"r":2,"rp":2,"aw":"B","mv":false,"top":["MSaid (4515)","YMohamed (4516)","AAlsubhi (5559)"],"bd":0.1427,"bdd":12},{"s":"NJRANFRONT","c":"KSA","city":"Najran","a":0.7968,"d":0.0,"p":1.453,"r":3,"rp":3,"aw":"B","mv":false,"top":["SAlyami (2732)","MAlyami (7160)","SAlMujibah (5452)"],"bd":0.1349,"bdd":1},{"s":"ARARMALL","c":"KSA","city":"Arar","a":0.7757,"d":0.0,"p":1.415,"r":4,"rp":4,"aw":"B","mv":false,"top":["HAlEnazi (3463)","AAlanazi (5457)","AAlanzi (4263)"],"bd":0.153,"bdd":15},{"s":"WATANIYAHB","c":"KSA","city":"Hafer Albatin","a":0.738,"d":0.0,"p":1.346,"r":5,"rp":5,"aw":"B","mv":false,"top":["BAlanzi (2242)","SAlshamri (3707)","KAlKhaldi (5848)"],"bd":0.1832,"bdd":5},{"s":"MJMAKRMMAL","c":"KSA","city":"Majmaah","a":0.7358,"d":0.0,"p":1.342,"r":6,"rp":6,"aw":"B","mv":false,"top":["AAlazmi (6178)","NAlmutairi (6148)","HAlreshdi (6149)"],"bd":0.1001,"bdd":3},{"s":"MUSCATCC","c":"Oman","city":"Muscat","a":0.7335,"d":0.0128,"p":1.338,"r":7,"rp":8,"aw":"E","mv":false,"top":["AAlbalushi (2718)","HALZADJALI (5239)","Said (1777)"],"bd":0.0671,"bdd":15},{"s":"AZAIBAOMN","c":"Oman","city":"Muscat","a":0.7313,"d":0.011,"p":1.334,"r":8,"rp":9,"aw":null,"mv":false,"top":["MAlAbri (6775)","NAlManji (4124)","Balrahbi (2289)"],"bd":0.1546,"bdd":12},{"s":"MEDTHEGATE","c":"KSA","city":"Medina","a":0.7238,"d":0.0474,"p":1.32,"r":9,"rp":13,"aw":"B","mv":false,"top":["AAlyanbuawi (3389)","SAlsuhaimi (3444)","AAlshahrani (5744)"],"bd":0.0953,"bdd":6},{"s":"RYDVIEWMAL","c":"KSA","city":"Riyadh","a":0.7234,"d":0.0,"p":1.319,"r":10,"rp":7,"aw":"B","mv":false,"top":["NAlMutairi (5540)","NAlghamdi (7172)","SAlotaibi (7292)"],"bd":0.0899,"bdd":9},{"s":"MCTLLUAMRT","c":"Oman","city":"Amerat","a":0.7229,"d":0.0027,"p":1.318,"r":11,"rp":10,"aw":null,"mv":false,"top":["MAldhamari (2821)","MAlsiyabi (2711)","Oobaid (7146)"],"bd":0.079,"bdd":13},{"s":"OMMAL","c":"Oman","city":"Muscat","a":0.7148,"d":0.0081,"p":1.303,"r":12,"rp":11,"aw":null,"mv":false,"top":["EAlhadhrami (4123)","JAlsariri (6041)","KAOUTAR (2078)"],"bd":0.0933,"bdd":9},{"s":"OMNHRMZPLZ","c":"Oman","city":"Al Swaiq","a":0.6967,"d":0.0074,"p":1.27,"r":13,"rp":12,"aw":null,"mv":false,"top":["AAlmasoudi (6044)","MAlRisi (5242)","AAlZaabi (7095)"],"bd":0.1619,"bdd":13},{"s":"RYDANUDPRK","c":"KSA","city":"Riyadh","a":0.6699,"d":0.002,"p":1.222,"r":14,"rp":14,"aw":"B","mv":false,"top":["FAlBuqami (4251)","HKhubrani (6057)","AAlhajri (7107)"],"bd":0.0925,"bdd":15},{"s":"KHJTHEZONE","c":"KSA","city":"Kharj","a":0.6589,"d":0.0,"p":1.202,"r":15,"rp":15,"aw":"B","mv":false,"top":["AMohammed (5616)","RAlabiati (5614)","SAlqannas (5908)"],"bd":0.0988,"bdd":8},{"s":"MCTLLUNZWA","c":"Oman","city":"Nazwa","a":0.65,"d":0.0164,"p":1.185,"r":16,"rp":17,"aw":null,"mv":false,"top":["AAlhashemi (2713)","Salrashdi (2852)","AAlamri (2820)"],"bd":0.0878,"bdd":15},{"s":"KHRJUNFIED","c":"KSA","city":"Kharj","a":0.6379,"d":0.0,"p":1.163,"r":17,"rp":16,"aw":"B","mv":false,"top":["KAlfaifi (6946)","IAldosari (2724)","MAlfaifi (6023)"],"bd":0.0783,"bdd":1},{"s":"JEDFALLSQR","c":"KSA","city":"Jeddah","a":0.6319,"d":0.0016,"p":1.152,"r":18,"rp":19,"aw":"C","mv":false,"top":["BAlsulami (5598)","TAlShaikh (6295)","MAlthagafi (7189)"],"bd":0.0555,"bdd":2},{"s":"KHRJHEDITY","c":"KSA","city":"Kharj","a":0.6312,"d":0.0,"p":1.151,"r":19,"rp":18,"aw":"C","mv":false,"top":["YAlshaheen (6072)","MAlZaid (3505)","FAlmobarak (2657)"],"bd":0.0871,"bdd":1},{"s":"DAMNOORAVE","c":"KSA","city":"Dammam","a":0.6258,"d":0.0018,"p":1.141,"r":20,"rp":20,"aw":"C","mv":false,"top":["AAbs (7290)","AAlzahrani (7282)","FAlhaiki (6954)"],"bd":0.0617,"bdd":1},{"s":"QOUZBLVRD","c":"KSA","city":"Qouz","a":0.6221,"d":0.0017,"p":1.135,"r":21,"rp":21,"aw":"C","mv":false,"top":["NIbrahim (5605)","IAhmed (5604)","YAlKhaldi (6607)"],"bd":0.0927,"bdd":3},{"s":"MCTLLUIBRI","c":"Oman","city":"Ibri","a":0.6163,"d":0.0065,"p":1.124,"r":22,"rp":22,"aw":null,"mv":false,"top":["AAlshahumi (4280)","GAlBadi (6774)","FAlBalushi (6773)"],"bd":0.0984,"bdd":16},{"s":"MEDZAMPLMN","c":"KSA","city":"Medina","a":0.6139,"d":0.0131,"p":1.12,"r":23,"rp":25,"aw":"C","mv":false,"top":["HAlafghani (3164)","AAlMadani (4262)","MBali (6099)"],"bd":0.052,"bdd":17},{"s":"MCTAVENUES","c":"Oman","city":"Muscat","a":0.6138,"d":0.0054,"p":1.119,"r":24,"rp":23,"aw":null,"mv":false,"top":["AAlBarwani (5240)","MAlsharji (2715)","HAlAwaisi (6912)"],"bd":0.1294,"bdd":12},{"s":"NAJKINGROD","c":"KSA","city":"Najran","a":0.6051,"d":0.0,"p":1.103,"r":25,"rp":24,"aw":"C","mv":false,"top":["MAlBadidi (3196)","YAlnajrani (2734)","SAlsayyah (5817)"],"bd":0.1486,"bdd":2},{"s":"MEDGOSIBLD","c":"KSA","city":"Medina","a":0.6037,"d":0.0046,"p":1.101,"r":26,"rp":27,"aw":"C","mv":false,"top":["NAlarari (6450)","MAlharbi (6442)","AAlharbi (6451)"],"bd":0.0488,"bdd":11},{"s":"ONZSOQJADD","c":"KSA","city":"Onaizah","a":0.6007,"d":0.0,"p":1.095,"r":27,"rp":26,"aw":"C","mv":false,"top":["HAloud (6837)","KalHarbi (3284)","RAlharbi (6089)"],"bd":0.0763,"bdd":10},{"s":"DWADMIMKAN","c":"KSA","city":"Dawadme","a":0.5959,"d":0.0019,"p":1.087,"r":28,"rp":28,"aw":"C","mv":false,"top":["AAlhariqi (7280)","AAlharthi (7293)","GAlotaibi (7237)"],"bd":0.0833,"bdd":2},{"s":"RYDTWIQDIS","c":"KSA","city":"Riyadh","a":0.5948,"d":0.0019,"p":1.085,"r":29,"rp":29,"aw":"C","mv":false,"top":["AAlbariqi (7143)","JKhubrani (6279)","TAlnami (7031)"],"bd":0.0597,"bdd":1},{"s":"ASEERGUNAI","c":"KSA","city":"Khamis Mushait","a":0.5934,"d":0.005,"p":1.082,"r":30,"rp":33,"aw":"D","mv":false,"top":["H Alribi (7180)","AAlsbaie (7198)","Aalshehrani (4266)"],"bd":0.087,"bdd":3},{"s":"JUBAIL","c":"KSA","city":"Jubail","a":0.5918,"d":0.0009,"p":1.079,"r":31,"rp":30,"aw":"D","mv":false,"top":["HAlOtaibi (6849)","YBousaeed (7278)","Wadha (2035)"],"bd":0.0672,"bdd":2},{"s":"HILTONMAK3","c":"KSA","city":"Makkah","a":0.5914,"d":0.0086,"p":1.078,"r":32,"rp":34,"aw":"D","mv":false,"top":["RAlluqmani (6227)","WGhulam (6690)","AAlkurani (7287)"],"bd":0.0577,"bdd":11},{"s":"MAJARDAH","c":"KSA","city":"Majardah","a":0.5911,"d":0.0019,"p":1.078,"r":33,"rp":31,"aw":"D","mv":false,"top":["MAlShahri (4180)","Aasiri (4889)","Salsheri (5683)"],"bd":0.1043,"bdd":1},{"s":"JEDMNRHPL","c":"KSA","city":"Jeddah","a":0.5895,"d":0.0004,"p":1.075,"r":34,"rp":32,"aw":"D","mv":false,"top":["ESindi (2591)","SAlbloshi (7083)","MHawban (6270)"],"bd":0.0863,"bdd":10},{"s":"JUBGLRYMAL","c":"KSA","city":"Jubail","a":0.5726,"d":0.0031,"p":1.044,"r":35,"rp":36,"aw":"D","mv":false,"top":["MAlshahrani (5993)","FAljaghdami (3161)","MAlshahrani (6877)"],"bd":0.0702,"bdd":2},{"s":"GRANADA","c":"KSA","city":"Riyadh","a":0.5719,"d":0.0,"p":1.043,"r":36,"rp":35,"aw":"D","mv":false,"top":["AKalaed (3207)","MAlanazi (5735)","Malanzi (4667)"],"bd":0.0615,"bdd":9},{"s":"UWALKJED","c":"KSA","city":"Jeddah","a":0.5698,"d":0.0006,"p":1.039,"r":37,"rp":37,"aw":"D","mv":false,"top":["WAlawi (5475)","FAbduallah (2742)","TAlGhamdi (6712)"],"bd":0.0562,"bdd":2},{"s":"SALALAH","c":"Oman","city":"Salalah","a":0.5671,"d":0.0121,"p":1.034,"r":38,"rp":41,"aw":null,"mv":false,"top":["AalSaqratia (2557)","Msami (2255)","Laila Majzah (6633)"],"bd":0.0894,"bdd":16},{"s":"NAKJPLAZA","c":"KSA","city":"Buraidah","a":0.5648,"d":0.0004,"p":1.03,"r":39,"rp":38,"aw":"D","mv":false,"top":["Kalduwayhis (2429)","SAlQuai (4758)","YAlharbi (4913)"],"bd":0.104,"bdd":13},{"s":"RYDAVENUE","c":"KSA","city":"Riyadh","a":0.5613,"d":0.0009,"p":1.024,"r":40,"rp":39,"aw":"D","mv":false,"top":["RAlanazi (6818)","Falmutairi (2376)","GAlharbi (5113)"],"bd":0.0691,"bdd":6},{"s":"HIRAAJED","c":"KSA","city":"Jeddah","a":0.5572,"d":0.0021,"p":1.016,"r":41,"rp":40,"aw":"E","mv":false,"top":["NAlzubaidi (7051)","AAlshafie (7118)","AAlzahrani (7187)"],"bd":0.0768,"bdd":2},{"s":"JEDCORNCH1","c":"KSA","city":"Jeddah","a":0.5564,"d":0.0036,"p":1.015,"r":42,"rp":42,"aw":"E","mv":false,"top":["AAlrefiee (7023)","HAttar (7186)","MMajrashi (7207)"],"bd":0.074,"bdd":14},{"s":"MAKMYANYRD","c":"KSA","city":"Makkah","a":0.5529,"d":0.0027,"p":1.008,"r":43,"rp":45,"aw":"E","mv":false,"top":["RSumnudi (5789)","AAlMikhlafi (2890)","NShafei (5971)"],"bd":0.0562,"bdd":2},{"s":"RYDMARINA","c":"KSA","city":"Riyadh","a":0.5524,"d":0.0,"p":1.007,"r":44,"rp":43,"aw":"E","mv":false,"top":["NOubaid (7123)","AAlhajaji (5897)","HAaliany (5820)"],"bd":0.0781,"bdd":14},{"s":"MAKHIJZMLL","c":"KSA","city":"Makkah","a":0.5507,"d":0.0,"p":1.004,"r":45,"rp":44,"aw":"E","mv":false,"top":["MAlsharif (2569)","NRadad (5855)","EBarnawi (5893)"],"bd":0.05,"bdd":15},{"s":"MANAR","c":"KSA","city":"Medina","a":0.5484,"d":0.0031,"p":1.0,"r":46,"rp":48,"aw":null,"mv":false,"top":["SAljohani (5821)","SAlharbi (6696)","OAljohani (2174)"],"bd":0.075,"bdd":15},{"s":"KHAMESBLD","c":"KSA","city":"Khamis Mushait","a":0.5483,"d":0.0,"p":1.0,"r":47,"rp":46,"aw":null,"mv":false,"top":["Rasiri (5112)","Moalqarni (2658)","AAlardani (5723)"],"bd":0.0579,"bdd":2},{"s":"RYDSAWARIP","c":"KSA","city":"Riyadh","a":0.5465,"d":0.0005,"p":0.996,"r":48,"rp":47,"aw":null,"mv":false,"top":["Asalem (3376)","ASumayli (5752)","AAlanazi (5737)"],"bd":0.0849,"bdd":14},{"s":"HILTONMAK2","c":"KSA","city":"Makkah","a":0.5444,"d":0.0069,"p":0.993,"r":49,"rp":54,"aw":null,"mv":false,"top":["Hqasem (2814)","ZAlthubynI (5679)","WAlqudsi (2851)"],"bd":0.0379,"bdd":10},{"s":"AZIZIARYD","c":"KSA","city":"Riyadh","a":0.5441,"d":0.0035,"p":0.992,"r":50,"rp":50,"aw":null,"mv":false,"top":["AAljayan (6583)","MAlmalki (5810)","BNaaje (6280)"],"bd":0.0594,"bdd":9},{"s":"TALAMALL","c":"KSA","city":"Riyadh","a":0.5418,"d":0.0009,"p":0.988,"r":51,"rp":49,"aw":null,"mv":false,"top":["MAlsubaie (6223)","AAljarba (7152)","RAlShahri (4272)"],"bd":0.051,"bdd":1},{"s":"MAKDARTWHD","c":"KSA","city":"Makkah","a":0.5415,"d":0.0127,"p":0.987,"r":52,"rp":60,"aw":null,"mv":false,"top":["MSani (5911)","MNahari (5910)","YAlAsiri (5894)"],"bd":0.0368,"bdd":14},{"s":"QATIFCC","c":"KSA","city":"Qatif","a":0.541,"d":0.0014,"p":0.987,"r":53,"rp":52,"aw":null,"mv":false,"top":["EAlSaif (5803)","ZAlkhabbaz (5444)","SAlnasri (6932)"],"bd":0.0539,"bdd":8},{"s":"KWTALDABOS","c":"Kuwait","city":"Kuwait","a":0.5398,"d":0.0,"p":0.984,"r":54,"rp":51,"aw":null,"mv":false,"top":["MArsheed (5967)","HAwadallah (2502)","AAlRefaie (3112)"],"bd":0.07,"bdd":15},{"s":"RYDROSHN","c":"KSA","city":"Riyadh","a":0.538,"d":0.0,"p":0.981,"r":55,"rp":53,"aw":null,"mv":false,"top":["AAlmutairi (6259)","FAlrashdi (2695)","RAlanizi (6446)"],"bd":0.1005,"bdd":15},{"s":"AJAWEED","c":"KSA","city":"Jeddah","a":0.5378,"d":0.0017,"p":0.981,"r":56,"rp":56,"aw":null,"mv":false,"top":["SNoman (1035)","AAlGhamdi (6264)","MAlqurashI (2479)"],"bd":0.0662,"bdd":13},{"s":"ARARMHMDIA","c":"KSA","city":"Arar","a":0.5366,"d":0.0,"p":0.979,"r":57,"rp":55,"aw":null,"mv":false,"top":["KAlenezi (7120)","AAlsaad (5451)","AAlanazi (5341)"],"bd":0.0656,"bdd":7},{"s":"FLAMINGO","c":"KSA","city":"Jeddah","a":0.533,"d":0.0017,"p":0.972,"r":58,"rp":57,"aw":null,"mv":false,"top":["WAlotibi (6253)","KAlGhamdi (6108)","GAlHarthi (6814)"],"bd":0.0535,"bdd":2},{"s":"MAKADANPLZ","c":"KSA","city":"Makkah","a":0.5317,"d":0.0014,"p":0.97,"r":59,"rp":58,"aw":null,"mv":false,"top":["FAlDahhasi (5887)","Aalzhrani (6563)","AAlmaliki (2855)"],"bd":0.0654,"bdd":11},{"s":"WADIDAWSER","c":"KSA","city":"Wadi Dawaser","a":0.5313,"d":0.0013,"p":0.969,"r":60,"rp":59,"aw":null,"mv":false,"top":["mAlhathab (5576)","RAldahlawi (6698)","mAldawsari (5574)"],"bd":0.0633,"bdd":4},{"s":"TAIBAMED","c":"KSA","city":"Medina","a":0.5297,"d":0.0084,"p":0.966,"r":61,"rp":63,"aw":null,"mv":false,"top":["ATaj (2651)","IAlHarbi (4237)","Mandijani (2664)"],"bd":0.0477,"bdd":10},{"s":"PRNCSLRD","c":"KSA","city":"Jeddah","a":0.5237,"d":0.0011,"p":0.955,"r":62,"rp":61,"aw":null,"mv":false,"top":["RAlnahari (1221)","FNaqro (4056)","Mfaisal (6400)"],"bd":0.0674,"bdd":7},{"s":"MAKSHOUQ","c":"KSA","city":"Makkah","a":0.5221,"d":0.0008,"p":0.952,"r":63,"rp":62,"aw":null,"mv":false,"top":["TAlkabkabi (2568)","AAlhuthali (2739)","AAlHarbi (3264)"],"bd":0.0717,"bdd":12},{"s":"MEDALMATAL","c":"KSA","city":"Medina","a":0.5219,"d":0.0021,"p":0.952,"r":64,"rp":65,"aw":null,"mv":false,"top":["MAbdulerab (2593)","FMobarak (5622)","AAlSaadi (4190)"],"bd":0.0733,"bdd":2},{"s":"MEDALIYAT","c":"KSA","city":"Medina","a":0.5219,"d":0.0013,"p":0.952,"r":65,"rp":64,"aw":null,"mv":false,"top":["MAlahmadi (6697)","TAlmlhas (6754)","MAljoahanl (2769)"],"bd":0.0582,"bdd":2},{"s":"RYDSHIFA","c":"KSA","city":"Riyadh","a":0.5207,"d":0.0085,"p":0.949,"r":66,"rp":70,"aw":null,"mv":false,"top":["Aaquhtani (4898)","MAlmuqayrishah (5896)","MAlthrwi (6168)"],"bd":0.0639,"bdd":1},{"s":"SALAMRYD","c":"KSA","city":"Riyadh","a":0.5197,"d":0.0061,"p":0.948,"r":67,"rp":69,"aw":null,"mv":false,"top":["SAlshehri (5344)","TAlshehri (7088)","RAlBuri (3508)"],"bd":0.0829,"bdd":1},{"s":"ZAHRAN","c":"KSA","city":"Khobar","a":0.5178,"d":0.0029,"p":0.944,"r":68,"rp":67,"aw":null,"mv":false,"top":["OAlsubai (6216)","YAlMubarak (6228)","EAlTwailai (6278)"],"bd":0.0523,"bdd":2},{"s":"MAKAHMALL2","c":"KSA","city":"Makkah","a":0.5173,"d":0.002,"p":0.943,"r":69,"rp":66,"aw":null,"mv":false,"top":["MAhmed (6230)","DMujallid (7173)","HLmufawwan (2863)"],"bd":0.0449,"bdd":7},{"s":"BUROTHAIM","c":"KSA","city":"Buraidah","a":0.5146,"d":0.0034,"p":0.938,"r":70,"rp":72,"aw":null,"mv":false,"top":["EAlmutairi (5905)","Lalduraibi (5456)","AAlotaibi (5931)"],"bd":0.0679,"bdd":9},{"s":"RYDAVNUMAL","c":"KSA","city":"Riyadh","a":0.5143,"d":0.0,"p":0.938,"r":71,"rp":68,"aw":null,"mv":false,"top":["NMohammed (5134)","RAldosari (6872)","Shazazi (5208)"],"bd":0.0587,"bdd":8},{"s":"KHURAISSQ2","c":"KSA","city":"Riyadh","a":0.5126,"d":0.0009,"p":0.935,"r":72,"rp":71,"aw":null,"mv":false,"top":["MAlharbi (7109)","SAlqahtani (2464)","Aalzaidi (5255)"],"bd":0.0531,"bdd":1},{"s":"KHAFOTHAIM","c":"KSA","city":"Khafji","a":0.512,"d":0.0024,"p":0.934,"r":73,"rp":73,"aw":null,"mv":false,"top":["Salhaete (2582)","AAl Rashdi (6845)","Ralotaibi (2572)"],"bd":0.0679,"bdd":9},{"s":"QATIFCFRNT","c":"KSA","city":"Qatif","a":0.5093,"d":0.0023,"p":0.929,"r":74,"rp":75,"aw":null,"mv":false,"top":["KSafwan (6771)","GAldarwish (6846)","FAlhaiki (6954)"],"bd":0.0638,"bdd":2},{"s":"JEDMRWACTR","c":"KSA","city":"Jeddah","a":0.509,"d":0.0041,"p":0.928,"r":75,"rp":79,"aw":null,"mv":false,"top":["MAlAbdali (6710)","S Alharbi (7239)","MAlsubaie (3261)"],"bd":0.0528,"bdd":9},{"s":"SAMTAHMALL","c":"KSA","city":"Samtah","a":0.508,"d":0.0,"p":0.926,"r":76,"rp":74,"aw":null,"mv":false,"top":["Mhamdi (4285)","YJarah (3279)","Malharthi (5132)"],"bd":0.0668,"bdd":1},{"s":"ALARIDAH","c":"KSA","city":"Al Ardha","a":0.5074,"d":0.002,"p":0.925,"r":77,"rp":78,"aw":null,"mv":false,"top":["JAlabdali (2525)","AHamzi (5131)","Msahhari (2578)"],"bd":0.1153,"bdd":1},{"s":"TABOUK","c":"KSA","city":"Tabuk","a":0.5073,"d":0.0006,"p":0.925,"r":78,"rp":76,"aw":null,"mv":false,"top":["MAlamri (7029)","AAljuhni (5508)","MAlmotiri (5813)"],"bd":0.0817,"bdd":9},{"s":"RASSBULVRD","c":"KSA","city":"Rass","a":0.506,"d":0.0,"p":0.923,"r":79,"rp":77,"aw":null,"mv":false,"top":["MAlharbi (5290)","SAlharbi (5110)","NAlharbi (6091)"],"bd":0.0607,"bdd":2},{"s":"PANORAMA2","c":"KSA","city":"Riyadh","a":0.506,"d":0.0012,"p":0.923,"r":80,"rp":80,"aw":null,"mv":false,"top":["WJamaan (5833)","WHamdan (6700)","NAldosari (6701)"],"bd":0.0466,"bdd":1},{"s":"OMNJALNALI","c":"Oman","city":"Muscat","a":0.5049,"d":0.0157,"p":0.921,"r":81,"rp":88,"aw":null,"mv":false,"top":["ABatini (6635)","JMusharafi (6638)","AMashaykhi (6636)"],"bd":0.0647,"bdd":17},{"s":"MAKDYAFAML","c":"KSA","city":"Makkah","a":0.5045,"d":0.0009,"p":0.92,"r":82,"rp":81,"aw":null,"mv":false,"top":["YAlhakami (5093)","AAllahyani (6080)","WAlQurashi (5487)"],"bd":0.0534,"bdd":1},{"s":"VILLAGEHMT","c":"KSA","city":"Jeddah","a":0.4993,"d":0.0016,"p":0.91,"r":83,"rp":83,"aw":null,"mv":false,"top":["MHassan (6806)","TSonbul (7199)","NAhmed (4658)"],"bd":0.0499,"bdd":6},{"s":"SALAMRYD2","c":"KSA","city":"Riyadh","a":0.4988,"d":0.0,"p":0.91,"r":84,"rp":82,"aw":null,"mv":false,"top":["AHashmi (6598)","NBinJabil (5462)","AAldawsari (5728)"],"bd":0.0526,"bdd":7},{"s":"MAKDNACNTR","c":"KSA","city":"Makkah","a":0.4978,"d":0.0052,"p":0.908,"r":85,"rp":85,"aw":null,"mv":false,"top":["YAlmekhlafi (2696)","MAlharthi (2735)","YAlHarbi (5889)"],"bd":0.0765,"bdd":12},{"s":"RIYADHDST","c":"KSA","city":"Riyadh","a":0.4948,"d":0.0006,"p":0.902,"r":86,"rp":84,"aw":null,"mv":false,"top":["TAlmalki (5921)","BAlosaimi (7135)","MAlOtaibi (5818)"],"bd":0.0619,"bdd":12},{"s":"PANORAMA","c":"KSA","city":"Riyadh","a":0.4947,"d":0.0039,"p":0.902,"r":87,"rp":86,"aw":null,"mv":false,"top":["ROmer (7092)","Athari Rafea Ateeq (5849)","MAlotabi (2743)"],"bd":0.0715,"bdd":2},{"s":"YANBUMALL","c":"KSA","city":"Yanbu","a":0.4942,"d":0.005,"p":0.901,"r":88,"rp":89,"aw":null,"mv":false,"top":["MAljohani (6880)","AAlgoraishi (6871)","IAlalawi (4287)"],"bd":0.0393,"bdd":2},{"s":"MAKKAH","c":"KSA","city":"Makkah","a":0.4915,"d":0.0034,"p":0.896,"r":89,"rp":90,"aw":null,"mv":false,"top":["AOsaimi (1962)","AAlMalki (5837)","EAlDbaian (6252)"],"bd":0.0546,"bdd":11},{"s":"HAYAT","c":"KSA","city":"Riyadh","a":0.4911,"d":0.0009,"p":0.896,"r":90,"rp":87,"aw":null,"mv":false,"top":["ADuwayrim (5898)","Mhakami (4797)","MAlqarni (7119)"],"bd":0.0547,"bdd":1},{"s":"EHSAA","c":"KSA","city":"Hafouf","a":0.4892,"d":0.005,"p":0.892,"r":91,"rp":93,"aw":null,"mv":false,"top":["ABuHalim (3165)","Ralsubaie (5686)","AAlghadeer (5351)"],"bd":0.0519,"bdd":1},{"s":"RYDALYAPLZ","c":"KSA","city":"Riyadh","a":0.4879,"d":0.0007,"p":0.89,"r":92,"rp":91,"aw":null,"mv":false,"top":["RAlanazi (6088)","SAlharthi (2526)","AAlshehri (7170)"],"bd":0.0531,"bdd":1},{"s":"MEDDARIMAN","c":"KSA","city":"Medina","a":0.4863,"d":0.0118,"p":0.887,"r":93,"rp":104,"aw":null,"mv":false,"top":["ZAlsamiri (6592)","AAlharbi (6547)","OAlrefaei (6597)"],"bd":0.0362,"bdd":11},{"s":"THEGATERYD","c":"KSA","city":"Riyadh","a":0.4854,"d":0.0025,"p":0.885,"r":94,"rp":94,"aw":null,"mv":false,"top":["Ealharbi (4770)","Ralenezi (2356)","FAlmutairi (2947)"],"bd":0.0586,"bdd":2},{"s":"ABHATIMSQR","c":"KSA","city":"Abha","a":0.4847,"d":0.0,"p":0.884,"r":95,"rp":92,"aw":null,"mv":false,"top":["SAssiri (5722)","SAlShahrani (3135)","WAlhubany (5929)"],"bd":0.0887,"bdd":1},{"s":"WADILABAN","c":"KSA","city":"Riyadh","a":0.4847,"d":0.0031,"p":0.884,"r":96,"rp":96,"aw":null,"mv":false,"top":["Balmutairi (2615)","AQahtani (1230)","TAlMutairi (5850)"],"bd":0.0543,"bdd":10},{"s":"ALAQEQRYD","c":"KSA","city":"Riyadh","a":0.4844,"d":0.0019,"p":0.883,"r":97,"rp":95,"aw":null,"mv":false,"top":["Halqahtani (5343)","FAlmeneea (7171)","AAlshaibani (6695)"],"bd":0.0664,"bdd":16},{"s":"HIJABMALL","c":"KSA","city":"Riyadh","a":0.4825,"d":0.0014,"p":0.88,"r":98,"rp":99,"aw":null,"mv":false,"top":["SAlZaferi (5835)","MSama (2157)","FAlSalmi (3033)"],"bd":0.0516,"bdd":2},{"s":"MEDIMAMBUK","c":"KSA","city":"Medina","a":0.4824,"d":0.0044,"p":0.88,"r":99,"rp":102,"aw":null,"mv":false,"top":["SAljohani (7034)","TAlharbi (7032)","YAlJohani (5513)"],"bd":0.0531,"bdd":2},{"s":"KHMISMUJAN","c":"KSA","city":"Khamis Mushait","a":0.4815,"d":0.0,"p":0.878,"r":100,"rp":97,"aw":null,"mv":false,"top":["AAlqahtani (5713)","MAlqahtani (7021)","KAlfahri (7134)"],"bd":0.0675,"bdd":1},{"s":"NAJMELAGRO","c":"KSA","city":"Najran","a":0.4815,"d":0.0,"p":0.878,"r":101,"rp":98,"aw":null,"mv":false,"top":["AAlMuhayya (2766)","MMakrami (5527)","Ibrahim Saleh Al Naji (5854)"],"bd":0.0689,"bdd":1},{"s":"RYDQURTBAH","c":"KSA","city":"Riyadh","a":0.4805,"d":0.0014,"p":0.876,"r":102,"rp":100,"aw":null,"mv":false,"top":["AAlotaibi (5923)","RAlotaibi (6821)","FAlShehri (4831)"],"bd":0.0619,"bdd":2},{"s":"MAKTOWER","c":"KSA","city":"Makkah","a":0.4791,"d":0.0068,"p":0.874,"r":103,"rp":106,"aw":null,"mv":false,"top":["MAldabi (7145)","AQayyum (2699)","AKhayat (5996)"],"bd":0.0439,"bdd":12},{"s":"JEDMNDARIN","c":"KSA","city":"Jeddah","a":0.4788,"d":0.0026,"p":0.873,"r":104,"rp":103,"aw":null,"mv":false,"top":["ABasinsbol (2353)","SAlqurashi (7068)","MZahrani (5674)"],"bd":0.0544,"bdd":2},{"s":"ABHLVNDAPK","c":"KSA","city":"Abha","a":0.4784,"d":0.0,"p":0.872,"r":105,"rp":101,"aw":null,"mv":false,"top":["MAlyahya (6886)","BMahanshi (3092)","SAsiri (2673)"],"bd":0.0728,"bdd":1},{"s":"JEDPALMWAK","c":"KSA","city":"Jeddah","a":0.477,"d":0.0048,"p":0.87,"r":106,"rp":107,"aw":null,"mv":false,"top":["NAlKhallaf (6293)","AAlayani (6300)","TAlMuteri (6399)"],"bd":0.1057,"bdd":13},{"s":"DMMMARINA","c":"KSA","city":"Dammam","a":0.4736,"d":0.0022,"p":0.864,"r":107,"rp":108,"aw":null,"mv":false,"top":["HHayan (5829)","MHakeem (5618)","HHazazi (5447)"],"bd":0.0541,"bdd":2},{"s":"RASHIDMAD2","c":"KSA","city":"Medina","a":0.4735,"d":0.0115,"p":0.863,"r":108,"rp":114,"aw":null,"mv":false,"top":["AAlharbi (6593)","RAljohani (5660)","Eman (2519)"],"bd":0.0472,"bdd":15},{"s":"KHAMSBLVRD","c":"KSA","city":"Khamis Mushait","a":0.4734,"d":0.0,"p":0.863,"r":109,"rp":105,"aw":null,"mv":false,"top":["NAlshahrany (6815)","AAlZahrani (5010)","Halshahrani (2638)"],"bd":0.0665,"bdd":1},{"s":"HILTONMAK","c":"KSA","city":"Makkah","a":0.4729,"d":0.0046,"p":0.862,"r":110,"rp":110,"aw":null,"mv":false,"top":["AAhmed (6051)","NAltumani (5791)","Mohammed (2507)"],"bd":0.0375,"bdd":11},{"s":"KHOBRRASHD","c":"KSA","city":"Khobar","a":0.4715,"d":0.001,"p":0.86,"r":111,"rp":109,"aw":null,"mv":false,"top":["FAlbuhari (6772)","GAlalwi (6215)","HAlHarbi (6804)"],"bd":0.0507,"bdd":2},{"s":"MEDANDLUSH","c":"KSA","city":"Medina","a":0.4703,"d":0.0119,"p":0.858,"r":112,"rp":119,"aw":null,"mv":false,"top":["AAlMali (2707)","EAmir (2754)","TAlful (5107)"],"bd":0.0367,"bdd":10},{"s":"JARIRRD","c":"KSA","city":"Riyadh","a":0.4695,"d":0.0032,"p":0.856,"r":113,"rp":111,"aw":null,"mv":false,"top":["HAlHarthi (4811)","ADeaij (6703)","IAljabri (6875)"],"bd":0.0432,"bdd":2},{"s":"KHMSBNDWOD","c":"KSA","city":"Khamis Mushait","a":0.4691,"d":0.0035,"p":0.855,"r":114,"rp":112,"aw":null,"mv":false,"top":["AAlfaifi (6816)","AAlQahtani (4265)","TAsiri (6584)"],"bd":0.0592,"bdd":2},{"s":"SOHARCITY","c":"Oman","city":"Sohar","a":0.4669,"d":0.0066,"p":0.851,"r":115,"rp":115,"aw":null,"mv":false,"top":["Hghefeili (6043)","Malmaqbali (2833)","Laila (2488)"],"bd":0.1027,"bdd":14},{"s":"KADI","c":"KSA","city":"Jazan","a":0.4635,"d":0.0015,"p":0.845,"r":116,"rp":113,"aw":null,"mv":false,"top":["NAljabri (2170)","SHussain (6889)","FShagari (3136)"],"bd":0.127,"bdd":4},{"s":"MEDMVNPICK","c":"KSA","city":"Medina","a":0.4627,"d":0.0076,"p":0.844,"r":117,"rp":126,"aw":null,"mv":false,"top":["IKhaled (2592)","IAlalawi (7036)","ZAlmasabi (6267)"],"bd":0.0352,"bdd":11},{"s":"JEDNUJOD","c":"KSA","city":"Jeddah","a":0.4621,"d":0.0036,"p":0.843,"r":118,"rp":118,"aw":null,"mv":false,"top":["RAlRayiqi (5530)","SGRAMISH (6852)","AAljohani (6251)"],"bd":0.0684,"bdd":10},{"s":"JUBHUWYLYT","c":"KSA","city":"Jubail","a":0.4603,"d":0.0012,"p":0.839,"r":119,"rp":117,"aw":null,"mv":false,"top":["LAlMuwallad (6562)","SSubaie (6201)","MAlshahrani (6877)"],"bd":0.0744,"bdd":1},{"s":"SHQRBSATEN","c":"KSA","city":"shagra","a":0.4596,"d":0.0,"p":0.838,"r":120,"rp":116,"aw":null,"mv":false,"top":["WAlhafi (7192)","AAlotaibi (6393)","HAlmutiri (6684)"],"bd":0.0559,"bdd":6},{"s":"MAKAHMEJAZ","c":"KSA","city":"Makkah","a":0.4593,"d":0.0015,"p":0.837,"r":121,"rp":121,"aw":null,"mv":false,"top":["YAlthobaiti (5096)","KBafil (5853)","AAlThobaiti (6851)"],"bd":0.0757,"bdd":7},{"s":"ABHHIZAMST","c":"KSA","city":"Abha","a":0.4589,"d":0.0036,"p":0.837,"r":122,"rp":125,"aw":null,"mv":false,"top":["AAlhasani (5116)","Aasairy (4716)","TKhubrani (5736)"],"bd":0.0567,"bdd":1},{"s":"NAKHDMM","c":"KSA","city":"Dammam","a":0.4588,"d":0.0018,"p":0.837,"r":123,"rp":122,"aw":null,"mv":false,"top":["HAlaliany (5802)","ZJamal (6765)","AAlsafwani (5678)"],"bd":0.0637,"bdd":2},{"s":"RABIGSTRET","c":"KSA","city":"Rabigh","a":0.4588,"d":0.0025,"p":0.837,"r":124,"rp":123,"aw":null,"mv":false,"top":["RAlghanmi (6878)","FAlfarsi (6861)","SAlbeladi (6834)"],"bd":0.0464,"bdd":1},{"s":"ALQASRMALL","c":"KSA","city":"Riyadh","a":0.4588,"d":0.0033,"p":0.837,"r":125,"rp":124,"aw":null,"mv":false,"top":["AAlhuraymis (7203)","MAlshayiqi (6826)","RAlBoasi (5822)"],"bd":0.0486,"bdd":9},{"s":"MURJANJED","c":"KSA","city":"Jeddah","a":0.4586,"d":0.0006,"p":0.836,"r":126,"rp":120,"aw":null,"mv":false,"top":["NAlamri (7062)","TAlziadi (7228)","HAlslamua (7136)"],"bd":0.059,"bdd":8},{"s":"MEDSULTANA","c":"KSA","city":"Medina","a":0.4582,"d":0.0053,"p":0.836,"r":127,"rp":128,"aw":null,"mv":false,"top":["RAlMohammadi (4098)","Aalharbi (4773)","GAlSharif (4779)"],"bd":0.0469,"bdd":9},{"s":"RASHIDMAD","c":"KSA","city":"Medina","a":0.4575,"d":0.0049,"p":0.834,"r":128,"rp":129,"aw":null,"mv":false,"top":["Skateb (5043)","LAljaber (3288)","GRaheem (6006)"],"bd":0.0673,"bdd":9},{"s":"DAMRIVEIRA","c":"KSA","city":"Dammam","a":0.4571,"d":0.0032,"p":0.834,"r":129,"rp":127,"aw":null,"mv":false,"top":["shaheen (2579)","BAlmalki (7213)","AFaraj (6850)"],"bd":0.0408,"bdd":1},{"s":"KWT360MALL","c":"Kuwait","city":"Kuwait","a":0.4551,"d":0.0039,"p":0.83,"r":130,"rp":131,"aw":null,"mv":false,"top":["MElSayed (3318)","NOujdid (5588)"],"bd":0.0403,"bdd":3},{"s":"MEDJWALK","c":"KSA","city":"Medina","a":0.4544,"d":0.0036,"p":0.829,"r":131,"rp":132,"aw":null,"mv":false,"top":["HAlMuhammadi (3166)","Ealharbi (4780)","YAlrashidi (7028)"],"bd":0.0468,"bdd":13},{"s":"ARABMALL","c":"KSA","city":"Jeddah","a":0.4533,"d":0.0018,"p":0.827,"r":132,"rp":130,"aw":null,"mv":false,"top":["SAlZubaidi (5871)","MAlNajaa (5036)","RAlasiri (3174)"],"bd":0.0496,"bdd":13},{"s":"DAREEN","c":"KSA","city":"Dammam","a":0.4521,"d":0.0023,"p":0.824,"r":133,"rp":133,"aw":null,"mv":false,"top":["HBinsulan (6058)","FAlshuaylalhazza (6956)","SOjan (5661)"],"bd":0.0622,"bdd":9},{"s":"REDSEA","c":"KSA","city":"Jeddah","a":0.451,"d":0.004,"p":0.822,"r":134,"rp":135,"aw":null,"mv":false,"top":["BSaeed (6709)","WAlsulami (6883)","Mhuban (6940)"],"bd":0.0423,"bdd":1},{"s":"RABWA","c":"KSA","city":"Riyadh","a":0.4502,"d":0.0008,"p":0.821,"r":135,"rp":134,"aw":null,"mv":false,"top":["WAlmudhaibri (4637)","SFrhan (6822)","Wijdan (4438)"],"bd":0.0459,"bdd":2},{"s":"SABIAYASMN","c":"KSA","city":"Sabia","a":0.4492,"d":0.0022,"p":0.819,"r":136,"rp":136,"aw":null,"mv":false,"top":["Nshutayfi (3465)","Ymutribi (2364)","Bqarradi (3503)"],"bd":0.075,"bdd":2},{"s":"MEDALHIJRA","c":"KSA","city":"Medina","a":0.4477,"d":0.0036,"p":0.816,"r":137,"rp":139,"aw":null,"mv":false,"top":["MAlaoufi (5161)","FAlsehli (2646)","Raljouhni (4771)"],"bd":0.055,"bdd":2},{"s":"JEDANDLUS2","c":"KSA","city":"Jeddah","a":0.4469,"d":0.003,"p":0.815,"r":138,"rp":140,"aw":null,"mv":false,"top":["RAdawi (5332)","MBadkook (5819)","KAlshamrani (6947)"],"bd":0.0444,"bdd":8},{"s":"JURSHIKHIR","c":"KSA","city":"Baha","a":0.4458,"d":0.0019,"p":0.813,"r":139,"rp":141,"aw":null,"mv":false,"top":["FAlGhamdi (6408)","SAlGhamdi (6406)","FAlGhamdi (6398)"],"bd":0.0893,"bdd":7},{"s":"KHOQOSAIBI","c":"KSA","city":"Khobar","a":0.445,"d":0.0008,"p":0.812,"r":140,"rp":137,"aw":null,"mv":false,"top":["MAlKhaldi (5918)","AAlbishi (7211)","Aalsurayij (5445)"],"bd":0.0481,"bdd":8},{"s":"JEDNRTHWLK","c":"KSA","city":"Jeddah","a":0.445,"d":0.0008,"p":0.811,"r":141,"rp":138,"aw":null,"mv":false,"top":["AHadi (7071)","Aalyami (5165)","FalMalki (3543)"],"bd":0.0454,"bdd":1},{"s":"JEDSULTNST","c":"KSA","city":"Jeddah","a":0.4433,"d":0.0014,"p":0.808,"r":142,"rp":142,"aw":null,"mv":false,"top":["RAlSulaiman (5846)","WBasan (7128)","FAlShamrani (5015)"],"bd":0.0423,"bdd":2},{"s":"MATHNABMAL","c":"KSA","city":"Mathnab","a":0.4428,"d":0.0047,"p":0.808,"r":143,"rp":146,"aw":null,"mv":false,"top":["AAlmutairi (6840)","GAloqayli (5104)","AFAlrasheed (5904)"],"bd":0.0671,"bdd":1},{"s":"MAKABRAJ1","c":"KSA","city":"Makkah","a":0.4418,"d":0.0038,"p":0.806,"r":144,"rp":147,"aw":null,"mv":false,"top":["FAlAbdali (4691)","Abdullah (2134)","Hilal (2779)"],"bd":0.0308,"bdd":13},{"s":"MEDSOUQEBQ","c":"KSA","city":"Medina","a":0.4417,"d":0.0145,"p":0.805,"r":145,"rp":156,"aw":null,"mv":false,"top":["NAlmutairi (5738)","FAljohani (5114)","MBawajeh (6101)"],"bd":0.0375,"bdd":17},{"s":"QUNKYLPLZA","c":"KSA","city":"Qunfudhah","a":0.4405,"d":0.0,"p":0.803,"r":146,"rp":143,"aw":null,"mv":false,"top":["MAlZayla'i (2661)","Talzubaidi (2683)","Salzibidi (2659)"],"bd":0.0646,"bdd":1},{"s":"JEDQURAISH","c":"KSA","city":"Jeddah","a":0.4401,"d":0.0013,"p":0.803,"r":147,"rp":145,"aw":null,"mv":false,"top":["TAlshmrani (7244)","MAlmalki (7020)","AAlbariqi (7190)"],"bd":0.0417,"bdd":12},{"s":"AZIZMALL","c":"KSA","city":"Jeddah","a":0.44,"d":0.0002,"p":0.802,"r":148,"rp":144,"aw":null,"mv":false,"top":["NAlMalki (5501)","YAlrshidie (2629)","RAlharbi (7223)"],"bd":0.0905,"bdd":13},{"s":"TAIFSHARST","c":"KSA","city":"Taif","a":0.4393,"d":0.0021,"p":0.801,"r":149,"rp":149,"aw":null,"mv":false,"top":["AAlosaimi (2258)","AAlAhamari (5973)","Salsufyani (5205)"],"bd":0.0541,"bdd":1},{"s":"YASMEENPLZ","c":"KSA","city":"Muhayel Aseer","a":0.4389,"d":0.0017,"p":0.8,"r":150,"rp":150,"aw":null,"mv":false,"top":["Ahmed Mofareh Asiri (5861)","Turki Asiri (3448)","IBasiri (5681)"],"bd":0.0926,"bdd":1},{"s":"DANA","c":"KSA","city":"Yanbu","a":0.4379,"d":0.0,"p":0.798,"r":151,"rp":148,"aw":null,"mv":false,"top":["KAloqbi (6888)","Feisa (5288)","MAlonayni (5909)"],"bd":0.0567,"bdd":2},{"s":"OBHURMALL","c":"KSA","city":"Jeddah","a":0.4376,"d":0.0021,"p":0.798,"r":152,"rp":152,"aw":null,"mv":false,"top":["FAlrashidi (2936)","Yalghamdi (5057)","RIbrahim (6414)"],"bd":0.0418,"bdd":14},{"s":"JEDDAHPARK","c":"KSA","city":"Jeddah","a":0.4367,"d":0.0005,"p":0.796,"r":153,"rp":151,"aw":null,"mv":false,"top":["FAlmadani (5247)","Aalbariqi (5250)","ATarjah (7038)"],"bd":0.0554,"bdd":13},{"s":"KHAMISKKHD","c":"KSA","city":"Khamis Mushait","a":0.436,"d":0.0009,"p":0.795,"r":154,"rp":153,"aw":null,"mv":false,"top":["MAlasiry (4887)","IAlalki (5815)","WAlshrani (5928)"],"bd":0.0718,"bdd":9},{"s":"SKAKASHLHB","c":"KSA","city":"Skaka","a":0.4319,"d":0.0022,"p":0.788,"r":155,"rp":154,"aw":null,"mv":false,"top":["NAlshammari (6835)","AAlRuwaile (5611)","RAlRifai (5610)"],"bd":0.0543,"bdd":13},{"s":"EHSALBUSTA","c":"KSA","city":"Hafouf","a":0.4288,"d":0.0056,"p":0.782,"r":156,"rp":159,"aw":null,"mv":false,"top":["AAlMaliki (3191)","AAlLatif (4019)","ZAlabbad (7289)"],"bd":0.0378,"bdd":1},{"s":"HAMDANYA2","c":"KSA","city":"Jeddah","a":0.428,"d":0.0008,"p":0.781,"r":157,"rp":155,"aw":null,"mv":false,"top":["NAlShaikh (4775)","AAlnefayee (6401)"],"bd":0.0815,"bdd":8},{"s":"ARARWOMNMT","c":"KSA","city":"Arar","a":0.4269,"d":0.0,"p":0.779,"r":158,"rp":157,"aw":null,"mv":false,"top":["GAlanazi (5906)","FAlhazmi (5669)","NAlanazi (5685)"],"bd":0.0555,"bdd":1},{"s":"SKAKAPLAZA","c":"KSA","city":"Skaka","a":0.4253,"d":0.0037,"p":0.776,"r":159,"rp":160,"aw":null,"mv":false,"top":["SAldhuwayhi (5747)","RAlenezi (5607)","SAlshammari (6757)"],"bd":0.0623,"bdd":2},{"s":"HAIFAA","c":"KSA","city":"Jeddah","a":0.4238,"d":0.0,"p":0.773,"r":160,"rp":158,"aw":null,"mv":false,"top":["JAlHarthi (5509)","AAlAjmi (6296)","MAlshamrani (7064)"],"bd":0.0637,"bdd":14},{"s":"JEDWAHBLVD","c":"KSA","city":"Jeddah","a":0.422,"d":0.0014,"p":0.77,"r":161,"rp":161,"aw":null,"mv":false,"top":["HAlammar (5058)","AAlGhamdi (6609)","RAlmalki (5075)"],"bd":0.0424,"bdd":1},{"s":"ANDLUS","c":"KSA","city":"Jeddah","a":0.4211,"d":0.0007,"p":0.768,"r":162,"rp":163,"aw":null,"mv":false,"top":["IAlqarni (5631)","NAlJizani (4016)","YAlZahrani (5976)"],"bd":0.0568,"bdd":15},{"s":"EHSAOTHAIM","c":"KSA","city":"Hafouf","a":0.421,"d":0.0008,"p":0.768,"r":163,"rp":164,"aw":null,"mv":false,"top":["Aalawad (5684)","HAlShurit (5449)","AAlNasser (4018)"],"bd":0.0417,"bdd":10},{"s":"TOWNSQJED","c":"KSA","city":"Jeddah","a":0.421,"d":0.0005,"p":0.768,"r":164,"rp":162,"aw":null,"mv":false,"top":["AAlSilani (3051)","ENukhayfi (6969)","SAlSuhaimi (1610)"],"bd":0.0501,"bdd":8},{"s":"MEDMAYAS","c":"KSA","city":"Medina","a":0.4179,"d":0.0107,"p":0.762,"r":165,"rp":168,"aw":null,"mv":false,"top":["KAbdulwasi (2611)","AAhmed (4236)","AAlharbi (6152)"],"bd":0.0328,"bdd":6},{"s":"NOUR","c":"KSA","city":"Medina","a":0.4172,"d":0.0028,"p":0.761,"r":166,"rp":166,"aw":null,"mv":false,"top":["SALnakhli (7037)","BAljohani (2173)","SAlrehaili (7033)"],"bd":0.0411,"bdd":14},{"s":"KWTWHMALL","c":"Kuwait","city":"Kuwait","a":0.4158,"d":0.0031,"p":0.758,"r":167,"rp":167,"aw":null,"mv":false,"top":["AGhorab (4071)","MGalal (6552)"],"bd":0.0414,"bdd":9},{"s":"YASMEEN","c":"KSA","city":"Jeddah","a":0.4154,"d":0.0001,"p":0.757,"r":168,"rp":165,"aw":null,"mv":false,"top":["AAlassafi (7204)","BAlsulami (7222)","MAlMahwari (6605)"],"bd":0.0525,"bdd":12},{"s":"KHMSAVENUE","c":"KSA","city":"Khamis Mushait","a":0.4097,"d":0.003,"p":0.747,"r":169,"rp":170,"aw":null,"mv":false,"top":["HAlmaliki (3140)","AAlMudawi (3502)","HAlBakhat (5450)"],"bd":0.0793,"bdd":2},{"s":"JEDKHUMRAH","c":"KSA","city":"Jeddah","a":0.4088,"d":0.0021,"p":0.745,"r":170,"rp":171,"aw":null,"mv":false,"top":["Aalzahrani (1987)","KAlghamdi (5593)","BHafiz (7116)"],"bd":0.0544,"bdd":13},{"s":"MAHMAL","c":"KSA","city":"Jeddah","a":0.4081,"d":0.0038,"p":0.744,"r":171,"rp":172,"aw":null,"mv":false,"top":["HAlShahri (4239)","AAlsulami (2440)","OBabedaan (6107)"],"bd":0.0542,"bdd":6},{"s":"ALBAHAMAL","c":"KSA","city":"Baha","a":0.4071,"d":0.0,"p":0.742,"r":172,"rp":169,"aw":null,"mv":false,"top":["AAlZahrani (5032)","NAlGhamdi (3278)","FShehri (6440)"],"bd":0.0682,"bdd":2},{"s":"ALAIN","c":"UAE","city":"Alain","a":0.4028,"d":0.0049,"p":0.735,"r":173,"rp":177,"aw":null,"mv":false,"top":["Mohammad (2076)","MMaskoun (2209)","SSouissy (6040)"],"bd":0.0462,"bdd":2},{"s":"PARKHMT","c":"KSA","city":"Taif","a":0.401,"d":0.0022,"p":0.731,"r":174,"rp":174,"aw":null,"mv":false,"top":["SAljumayi (2259)","OAlharthi (2272)","Falshehri (2302)"],"bd":0.051,"bdd":2},{"s":"MEDAD","c":"KSA","city":"Riyadh","a":0.4006,"d":0.0023,"p":0.73,"r":175,"rp":176,"aw":null,"mv":false,"top":["OYafii (1020)","MAlanazi (6599)","MalMutairi (3384)"],"bd":0.0499,"bdd":2},{"s":"JEDMUSADIA","c":"KSA","city":"Jeddah","a":0.4004,"d":0.0014,"p":0.73,"r":176,"rp":173,"aw":null,"mv":false,"top":["MAlghamdi (5636)","MShaily (6405)","FAlMalki (4359)"],"bd":0.0664,"bdd":13},{"s":"GALRYRYD2","c":"KSA","city":"Riyadh","a":0.3988,"d":0.0005,"p":0.727,"r":177,"rp":175,"aw":null,"mv":false,"top":["Rarawsaa (5346)","SAlbishi (5720)","SAlotaibi (4890)"],"bd":0.0518,"bdd":1},{"s":"HAMRAA","c":"KSA","city":"Riyadh","a":0.3974,"d":0.0044,"p":0.725,"r":178,"rp":179,"aw":null,"mv":false,"top":["Balghamdi (2831)","OAlshibani (2619)","MAlanzi (2590)"],"bd":0.0716,"bdd":8},{"s":"RASHIDABHA","c":"KSA","city":"Abha","a":0.3947,"d":0.0,"p":0.72,"r":179,"rp":178,"aw":null,"mv":false,"top":["WAlzidani (7131)","GAlharthi (5352)","RAlSurayie (3470)"],"bd":0.0595,"bdd":2},{"s":"ONAIZAH","c":"KSA","city":"Onaizah","a":0.3916,"d":0.0,"p":0.714,"r":180,"rp":180,"aw":null,"mv":false,"top":["OBinoffie (5012)","AHarbi (2064)","MAlharbi (6118)"],"bd":0.0504,"bdd":2},{"s":"SALAMJED","c":"KSA","city":"Jeddah","a":0.3912,"d":0.0004,"p":0.713,"r":181,"rp":181,"aw":null,"mv":false,"top":["AAlSheki (6560)","RAlZahrani (6805)","AAlSamli (5864)"],"bd":0.0437,"bdd":7},{"s":"LELEMALL","c":"KSA","city":"Samtah","a":0.3893,"d":0.0019,"p":0.71,"r":182,"rp":182,"aw":null,"mv":false,"top":["AHamdi (4661)","NSumayli (5717)","SHujuri (2454)"],"bd":0.0532,"bdd":1},{"s":"NAJRANPLZA","c":"KSA","city":"Najran","a":0.388,"d":0.0037,"p":0.708,"r":183,"rp":183,"aw":null,"mv":false,"top":["IAlyala (3153)","MAlsehaq (3295)","MSallah (5816)"],"bd":0.0543,"bdd":2},{"s":"RYDYARMOOK","c":"KSA","city":"Riyadh","a":0.3853,"d":0.0085,"p":0.703,"r":184,"rp":188,"aw":null,"mv":false,"top":["AAlDahlawi (3526)","Aaljarba (5287)","MAlanazi (5725)"],"bd":0.0387,"bdd":1},{"s":"HAMDANIIYA","c":"KSA","city":"Jeddah","a":0.3838,"d":0.0016,"p":0.7,"r":185,"rp":185,"aw":null,"mv":false,"top":["AYassin (1278)","AAlZahrani (6553)","SAlmalki (2628)"],"bd":0.0374,"bdd":3},{"s":"YASKIOSK","c":"UAE","city":"Abu Dhabi","a":0.3829,"d":0.0,"p":0.698,"r":186,"rp":184,"aw":null,"mv":false,"top":["Nalekab (5220)","Aelkhoutri (6031)","IJamal (7311)"],"bd":0.0381,"bdd":4},{"s":"NAJPARK","c":"KSA","city":"Najran","a":0.3822,"d":0.0,"p":0.697,"r":187,"rp":186,"aw":null,"mv":false,"top":["RAbbas (4268)","AAlBisher (4269)","RAsiri (5828)"],"bd":0.0501,"bdd":1},{"s":"ALMALGARYD","c":"KSA","city":"Riyadh","a":0.3806,"d":0.0097,"p":0.694,"r":188,"rp":192,"aw":null,"mv":false,"top":["MHudaysh (7229)","AAlqahtani (6263)","AAlanzi (3703)"],"bd":0.0354,"bdd":4},{"s":"TAIFTERAML","c":"KSA","city":"Taif","a":0.379,"d":0.0,"p":0.691,"r":189,"rp":187,"aw":null,"mv":false,"top":["SAlessa (5337)","SAlthobaiti (5626)","YAlOsaimi (5827)"],"bd":0.0381,"bdd":4},{"s":"AMWAJ","c":"KSA","city":"Khobar","a":0.3788,"d":0.0023,"p":0.691,"r":190,"rp":189,"aw":null,"mv":false,"top":["SAlkaldi (2349)","FSharan (6768)","HAlHarbi (6804)"],"bd":0.0297,"bdd":1},{"s":"RASHIDJZN","c":"KSA","city":"Jazan","a":0.375,"d":0.0051,"p":0.684,"r":191,"rp":195,"aw":null,"mv":false,"top":["AYatimi (3381)","SDerbi (2013)","MAli (5748)"],"bd":0.0473,"bdd":1},{"s":"HAILZONE","c":"KSA","city":"Hail","a":0.3742,"d":0.0,"p":0.682,"r":192,"rp":190,"aw":null,"mv":false,"top":["aAlshomer (5505)","TAlShammari (5860)","ZNazzal (1565)"],"bd":0.0388,"bdd":2},{"s":"DAMMOTHAIM","c":"KSA","city":"Dammam","a":0.3719,"d":-0.0001,"p":0.678,"r":193,"rp":191,"aw":null,"mv":false,"top":["MJaffari (5441)","MAlKhathami (4388)","SMuhanna (1803)"],"bd":0.0364,"bdd":7},{"s":"JUBAILMAL2","c":"KSA","city":"Jubail","a":0.3714,"d":0.0008,"p":0.677,"r":194,"rp":193,"aw":null,"mv":false,"top":["HAlsafwani (5597)","ZAlkhuwaildIi (5682)","SAlkhaldi (7271)"],"bd":0.0355,"bdd":7},{"s":"TIFZHRNCTR","c":"KSA","city":"Taif","a":0.3702,"d":0.0,"p":0.675,"r":195,"rp":194,"aw":null,"mv":false,"top":["ASAlshehri (2604)","BAlmekhlafi (2690)","WAlShehri (5843)"],"bd":0.0495,"bdd":2},{"s":"SAHARH","c":"UAE","city":"Sharjah","a":0.3694,"d":0.0026,"p":0.674,"r":196,"rp":198,"aw":null,"mv":false,"top":["AHusam (2087)","EALI (6038)","MAlaliallolah (6190)"],"bd":0.0408,"bdd":16},{"s":"JURIMALL","c":"KSA","city":"Taif","a":0.3689,"d":0.0,"p":0.673,"r":197,"rp":196,"aw":null,"mv":false,"top":["FAlrawqi (2257)","NAlBaqami (5859)","Ralrabie (2492)"],"bd":0.0367,"bdd":3},{"s":"BAHAAVENUS","c":"KSA","city":"Baha","a":0.3682,"d":0.0007,"p":0.671,"r":198,"rp":197,"aw":null,"mv":false,"top":["AAl-Ghamdi (4226)","AAlzahrani (5541)","AAlGhamdi (6277)"],"bd":0.0502,"bdd":1},{"s":"TAWAREN","c":"KSA","city":"Riyadh","a":0.3679,"d":0.0021,"p":0.671,"r":199,"rp":200,"aw":null,"mv":false,"top":["HBahari (6445)","AAlhejji (7137)","TMohd (1071)"],"bd":0.0479,"bdd":17},{"s":"RYDPARK","c":"KSA","city":"Riyadh","a":0.3669,"d":0.0004,"p":0.669,"r":200,"rp":199,"aw":null,"mv":false,"top":["WYasin (4273)","MAlmousa (6596)","RAlkahtani (3616)"],"bd":0.0465,"bdd":9},{"s":"CCNTRBHR","c":"Bahrain","city":"Manama","a":0.3664,"d":0.001,"p":0.668,"r":201,"rp":201,"aw":null,"mv":false,"top":["MAlrafaei (4150)","AAlmutawa (5695)","ZSalman (2260)"],"bd":0.0534,"bdd":2},{"s":"NAKHELMALL","c":"KSA","city":"Riyadh","a":0.3644,"d":0.0005,"p":0.665,"r":202,"rp":202,"aw":null,"mv":false,"top":["SAlsubaie (5715)","NAlmutairi (6869)","Balsaffar (5167)"],"bd":0.0412,"bdd":2},{"s":"SMARTSHRYD","c":"KSA","city":"Riyadh","a":0.3627,"d":0.001,"p":0.661,"r":203,"rp":203,"aw":null,"mv":false,"top":["NAlmutairi (5470)","HAlmutairi (7241)","TAlHarbi (3325)"],"bd":0.061,"bdd":2},{"s":"MILAQROTAB","c":"KSA","city":"Tabuk","a":0.3534,"d":0.0029,"p":0.644,"r":204,"rp":205,"aw":null,"mv":false,"top":["BEid (6229)","MAlQahtani (3714)","AIssa (1784)"],"bd":0.0649,"bdd":10},{"s":"SBTALYABVD","c":"KSA","city":"Sabt Al Alaya","a":0.3511,"d":0.0,"p":0.64,"r":205,"rp":204,"aw":null,"mv":false,"top":["MAlQarni (6231)","KAlamri (6603)","AAlharthi (6570)"],"bd":0.0503,"bdd":2},{"s":"WESTAVENUE","c":"KSA","city":"Dammam","a":0.3488,"d":0.0007,"p":0.636,"r":206,"rp":206,"aw":null,"mv":false,"top":["AAsays (6276)","AAlJiaan (6708)","BAlObaidi (6550)"],"bd":0.0368,"bdd":9},{"s":"HAFRBATIN","c":"KSA","city":"Hafer Albatin","a":0.3466,"d":0.0,"p":0.632,"r":207,"rp":207,"aw":null,"mv":false,"top":["SAlotaibi (2870)","MAlDhafeeri (6557)","Aalanzi (2580)"],"bd":0.0561,"bdd":1},{"s":"WEHDA","c":"UAE","city":"Abu Dhabi","a":0.3333,"d":0.0008,"p":0.608,"r":208,"rp":208,"aw":null,"mv":false,"top":["AMoustafa (6032)","IHazmi (6917)","Mduri (6034)"],"bd":0.0441,"bdd":3},{"s":"RYDGALLER","c":"KSA","city":"Riyadh","a":0.3315,"d":0.0011,"p":0.605,"r":209,"rp":209,"aw":null,"mv":false,"top":["Lalshammari (5169)","TAlRuqi (2942)","AAlhazmi (6887)"],"bd":0.0353,"bdd":2},{"s":"ALKOUTMALL","c":"Kuwait","city":"Kuwait","a":0.3307,"d":0.0013,"p":0.603,"r":210,"rp":210,"aw":null,"mv":false,"top":["AAhmed (3327)","Mdosoqi (2950)","AAbbas (5580)"],"bd":0.0435,"bdd":13},{"s":"DEERFIELDS","c":"UAE","city":"Abu Dhabi","a":0.3289,"d":0.0,"p":0.6,"r":211,"rp":211,"aw":null,"mv":false,"top":["Mohamed (2056)","Sara (2780)","Mhassan (5558)"],"bd":0.0844,"bdd":16},{"s":"AVENUES","c":"Kuwait","city":"Kuwait","a":0.3275,"d":0.0,"p":0.597,"r":212,"rp":212,"aw":null,"mv":false,"top":["AAhmed (3267)","Ralbawab (6232)","KKhairalla (5313)"],"bd":0.0399,"bdd":4},{"s":"DUBAIDALMA","c":"UAE","city":"Abu Dhabi","a":0.3137,"d":0.0013,"p":0.572,"r":213,"rp":213,"aw":null,"mv":false,"top":["MReddad (6033)","Ayman (4013)","ASoliman (3059)"],"bd":0.0411,"bdd":2},{"s":"KWTMGHATER","c":"Kuwait","city":"Kuwait","a":0.3065,"d":0.0003,"p":0.559,"r":214,"rp":214,"aw":null,"mv":false,"top":["MKhaled (2499)","KAlBalili (6554)"],"bd":0.0316,"bdd":3},{"s":"KUWTMARINA","c":"Kuwait","city":"Kuwait","a":0.3023,"d":0.0009,"p":0.551,"r":215,"rp":215,"aw":null,"mv":false,"top":["AJANAJREH (6210)","AMohammed (2624)","NALSALMAN (4072)"],"bd":0.0279,"bdd":1},{"s":"GRMALLHAIL","c":"KSA","city":"Hail","a":0.2998,"d":0.0013,"p":0.547,"r":216,"rp":216,"aw":null,"mv":false,"top":["AAlanazi (6115)","TAlazmi (6268)","AAlHarbi (4778)"],"bd":0.0322,"bdd":1},{"s":"UAEBWBTMAL","c":"UAE","city":"Dubai","a":0.2877,"d":0.0074,"p":0.525,"r":217,"rp":217,"aw":null,"mv":false,"top":["IAlKhedr (5040)","HIdreis (6802)","OCharki (6632)"],"bd":0.0399,"bdd":2},{"s":"MUBARKIA","c":"Kuwait","city":"Kuwait","a":0.2758,"d":0.0013,"p":0.503,"r":218,"rp":218,"aw":null,"mv":false,"top":["MShabana (2758)","NALOUCHI (6604)","AAbbas (5580)"],"bd":0.03,"bdd":6},{"s":"AVENUKIOSK","c":"Kuwait","city":"Kuwait","a":0.2748,"d":0.0034,"p":0.501,"r":219,"rp":219,"aw":null,"mv":false,"top":["NALSALMAN (4072)","Ghada (6142)","LAlmowla (6544)"],"bd":0.038,"bdd":2},{"s":"GATEMALL","c":"Kuwait","city":"Kuwait","a":0.2728,"d":0.0039,"p":0.497,"r":220,"rp":220,"aw":null,"mv":false,"top":["Asaad (2287)","RAbdelwahab (2757)","YAljabr (6143)"],"bd":0.033,"bdd":2},{"s":"MANARRAK","c":"UAE","city":"Ras Alkhima","a":0.2631,"d":0.0043,"p":0.48,"r":221,"rp":221,"aw":null,"mv":false,"top":["Mbilal (2351)","Souhaila (2100)","ASaleh (1715)"],"bd":0.0325,"bdd":2},{"s":"FUJAIRAHCC","c":"UAE","city":"Fujairah","a":0.2532,"d":0.0011,"p":0.462,"r":222,"rp":222,"aw":null,"mv":false,"top":["FAssaf (1994)","Tkiwan (2399)","MAlshbli (6191)"],"bd":0.0482,"bdd":3},{"s":"MIRDIFFCC","c":"UAE","city":"Dubai","a":0.2473,"d":0.0022,"p":0.451,"r":223,"rp":223,"aw":null,"mv":false,"top":["HAlheloo (5358)","WKhallouf (6971)","HAlshoufi (5219)"],"bd":0.0377,"bdd":14},{"s":"JAHARKWT","c":"Kuwait","city":"Kuwait","a":0.1989,"d":0.0009,"p":0.363,"r":224,"rp":224,"aw":null,"mv":false,"top":["MAbdalla (2623)","RAbdulkader (3610)"],"bd":0.021,"bdd":3},{"s":"DUBSILCNML","c":"UAE","city":"Dubai","a":0.1898,"d":0.0033,"p":0.346,"r":225,"rp":225,"aw":null,"mv":false,"top":["ARamadan (5359)","AMohamad (2181)","Yayari (6036)"],"bd":0.0175,"bdd":1},{"s":"DEERFIELD2","c":"UAE","city":"Abu Dhabi","a":0.1593,"d":0.0012,"p":0.291,"r":226,"rp":226,"aw":null,"mv":false,"top":["Eslam (2781)","AALI (6039)","Mohamed (2056)"],"bd":0.0293,"bdd":4}],"trend":[{"d":1,"a":0.036,"c":{"KSA":0.0363,"UAE":0.0278,"Oman":0.0486,"Kuwait":0.0232,"Bahrain":0.0393}},{"d":2,"a":0.0738,"c":{"KSA":0.0733,"UAE":0.0757,"Oman":0.0892,"Kuwait":0.0511,"Bahrain":0.0927}},{"d":3,"a":0.1033,"c":{"KSA":0.1024,"UAE":0.1107,"Oman":0.1209,"Kuwait":0.0755,"Bahrain":0.1268}},{"d":4,"a":0.1296,"c":{"KSA":0.1289,"UAE":0.1391,"Oman":0.1365,"Kuwait":0.1022,"Bahrain":0.1555}},{"d":5,"a":0.1532,"c":{"KSA":0.1533,"UAE":0.1545,"Oman":0.1612,"Kuwait":0.1204,"Bahrain":0.1713}},{"d":6,"a":0.1797,"c":{"KSA":0.1805,"UAE":0.1782,"Oman":0.1827,"Kuwait":0.137,"Bahrain":0.1886}},{"d":7,"a":0.2061,"c":{"KSA":0.2082,"UAE":0.1944,"Oman":0.2043,"Kuwait":0.1532,"Bahrain":0.2063}},{"d":8,"a":0.2357,"c":{"KSA":0.2387,"UAE":0.2161,"Oman":0.2335,"Kuwait":0.1737,"Bahrain":0.2262}},{"d":9,"a":0.2662,"c":{"KSA":0.2696,"UAE":0.2383,"Oman":0.2748,"Kuwait":0.1913,"Bahrain":0.2565}},{"d":10,"a":0.293,"c":{"KSA":0.2973,"UAE":0.2559,"Oman":0.3043,"Kuwait":0.211,"Bahrain":0.2719}},{"d":11,"a":0.3166,"c":{"KSA":0.3217,"UAE":0.2722,"Oman":0.3281,"Kuwait":0.2241,"Bahrain":0.2842}},{"d":12,"a":0.3413,"c":{"KSA":0.3465,"UAE":0.2829,"Oman":0.3845,"Kuwait":0.2371,"Bahrain":0.2974}},{"d":13,"a":0.3703,"c":{"KSA":0.3756,"UAE":0.3026,"Oman":0.4331,"Kuwait":0.2569,"Bahrain":0.3129}},{"d":14,"a":0.3965,"c":{"KSA":0.4019,"UAE":0.3178,"Oman":0.4891,"Kuwait":0.2716,"Bahrain":0.32}},{"d":15,"a":0.4228,"c":{"KSA":0.428,"UAE":0.3308,"Oman":0.5494,"Kuwait":0.2884,"Bahrain":0.336}},{"d":16,"a":0.4474,"c":{"KSA":0.4515,"UAE":0.3568,"Oman":0.603,"Kuwait":0.3038,"Bahrain":0.3539}},{"d":17,"a":0.4683,"c":{"KSA":0.4717,"UAE":0.3735,"Oman":0.6527,"Kuwait":0.3198,"Bahrain":0.3655}},{"d":18,"a":0.4722,"c":{"KSA":0.4754,"UAE":0.3767,"Oman":0.6625,"Kuwait":0.3216,"Bahrain":0.3664}}],"car":[{"s":"ZAHIA","c":"UAE","a":1.277,"p":2.329,"top":["SHussein (1900)","Nabil (1453)","BMadani (1944)"]},{"s":"BARKAOMN","c":"Oman","a":0.8346,"p":1.522,"top":["MSaid (4515)","YMohamed (4516)","AAlsubhi (5559)"]},{"s":"WATANIYAHB","c":"KSA","a":0.738,"p":1.346,"top":["BAlanzi (2242)","SAlshamri (3707)","KAlKhaldi (5848)"]},{"s":"MUSCATCC","c":"Oman","a":0.7335,"p":1.338,"top":["AAlbalushi (2718)","HALZADJALI (5239)","Said (1777)"]},{"s":"OMMAL","c":"Oman","a":0.7148,"p":1.303,"top":["EAlhadhrami (4123)","JAlsariri (6041)","KAOUTAR (2078)"]}]}</script>
+<script>
+(function(){
+'use strict';
+const D = JSON.parse(document.getElementById('embed').textContent);
+const AR = {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'};
+const PRIZE = {A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'};
+const ICO = {A:'🚗', B:'📱', C:'💻', D:'⌚', E:'🥇'};
+const $ = id=>document.getElementById(id);
+const pct = (x,d=1)=>(x*100).toFixed(d)+'%';
+const pts = x=>{const v=x*100; return (v>0?'▲ ':v<0?'▼ ':'') + Math.abs(v).toFixed(1);};
+const cls = x=> x>0.0005?'up':x<-0.0005?'down':'flat';
+const bdi = s=>`<bdi dir="ltr">${s}</bdi>`;
+const left = D.dim - D.de;
+const monthAr = new Date(D.asof+'T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+
+$('sub').textContent = `برنامج حوافز المبيعات · ${monthAr}`;
+$('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.dim}`; $('pLeft').textContent = left;
+
+/* ticker */
+function loop(t, items, speed){
+  // حلقة بلا فراغ (نسختان متطابقتان) وسرعة ثابتة بالبكسل/ثانية
+  t.innerHTML=`<div class="copy">${items}</div><div class="copy" aria-hidden="true">${items}</div>`;
+  requestAnimationFrame(()=>{ const w=t.firstElementChild.getBoundingClientRect().width; t.style.setProperty('--dur', Math.max(20, Math.round(w/speed))+'s'); });
+}
+(function(){
+  // كل خبر إيجابي: الخروج يتحول إلى «قريب من العودة»، والنزول لا يُعلن
+  const N=(D.news||[]).filter(n=>n.k!=='down');
+  const prz=c=>c?`${ICO[c]} ${PRIZE[c]}`:'';
+  const ev=[];
+  // 🏁 تخطّى خط الـ100% اليوم
+  D.branches.filter(b=>b.a>=1&&b.a-b.d<1).forEach(b=>ev.push({g:'🏁 تخطّوا 100% اليوم',cls:'in',tag:'🏁 تخطّى 100%',u:b.top[0],b:b,p:'الفرع تأهّل رسمياً للسباق'}));
+  N.filter(n=>n.k==='in').forEach(n=>ev.push({g:'🟢 دخلوا التأهيل',cls:'in',tag:'🟢 دخل التأهيل',u:n.u,s:n.s,c:n.c,p:'← '+prz(n.aw)}));
+  N.filter(n=>n.k==='up').forEach(n=>ev.push({g:'🔼 ترقّوا لجائزة أعلى',cls:'up',tag:'🔼 ترقّى',u:n.u,s:n.s,c:n.c,p:prz(n.was)+' ← '+prz(n.aw)}));
+  // 🚀 أكبر قفزات اليوم في نسبة التحقيق، و🔥 أكبر صعود في الترتيب
+  [...D.branches].sort((a,b)=>b.d-a.d).slice(0,3).forEach(b=>ev.push({g:'🚀 أكبر قفزات اليوم',cls:'up',tag:'🚀 قفزة اليوم',u:b.top[0],b:b,p:'+'+(b.d*100).toFixed(1)+' نقطة'}));
+  [...D.branches].map(b=>({b,rc:b.rp-b.r})).filter(x=>x.rc>=10).sort((a,b)=>b.rc-a.rc).slice(0,3).forEach(x=>ev.push({g:'🔥 صعود قوي في الترتيب',cls:'up',tag:'🔥 صعد '+x.rc+' مركز',u:x.b.top[0],b:x.b,p:'الآن المركز '+x.b.r}));
+  N.filter(n=>n.k==='out').forEach(n=>ev.push({g:'🎯 قريبين من العودة',cls:'near',tag:'🎯 قريب من العودة',u:n.u,s:n.s,c:n.c,p:'دفعة بسيطة ويرجع للسباق'}));
+  if(!ev.length) return;
+  const items=ev.map(e=>{const s=e.b?e.b.s:e.s, c=e.b?e.b.c:e.c; return `<span class="nw ${e.cls}"><span class="tag">${e.tag}</span><span class="u">${e.u?bdi(e.u):''}</span><span class="b">${s} · ${AR[c]}</span><span class="p">${e.p}</span></span>`;}).join('');
+  loop($('news'), items, 55);
+  const nin=N.filter(n=>n.k==='in').length, nup=N.filter(n=>n.k==='up').length, n100=D.branches.filter(b=>b.a>=1&&b.a-b.d<1).length;
+  $('newsDate').textContent=`يوم ${+D.asof.slice(8)} · دخل ${nin} · ترقّى ${nup}${n100?' · تخطّى 100%: '+n100:''}`;
+  $('newsBar').hidden=false;
+  // القائمة الكاملة: نفس الأخبار مجمّعة حسب النوع
+  const groups=[]; ev.forEach(e=>{ let g=groups.find(x=>x.g===e.g); if(!g){ g={g:e.g,it:[]}; groups.push(g);} g.it.push(e); });
+  const list=$('newsList'), btn=$('newsAll'), more=$('newsMore');
+  list.innerHTML=groups.map(g=>`<div class="g"><h3>${g.g}<small>${g.it.length}</small></h3>${g.it.map(e=>{const s=e.b?e.b.s:e.s, c=e.b?e.b.c:e.c;
+    return `<div class="row"><span class="u">${e.u?bdi(e.u):'—'}</span><span class="b">${s} · ${AR[c]}</span><span class="p">${e.p.replace(/^← /,'متوقع: ')}</span></div>`;}).join('')}</div>`).join('')
+    +'<button type="button" class="close" id="newsClose">إغلاق القائمة ▴</button>';
+  const set=open=>{ list.hidden=!open; btn.setAttribute('aria-expanded',open); more.textContent=open?'▴ إخفاء القائمة':`📋 عرض كل الأخبار (${ev.length})`; };
+  btn.addEventListener('click',()=>set(list.hidden));
+  $('newsClose').addEventListener('click',()=>{ set(false); btn.focus(); });
+  set(false);
+})();
+
+/* hero */
+(function(){
+  const c=D.car[0]; const h=$('hero');
+  if(!c){ h.innerHTML='<div class="lead"><div class="eyebrow">سباق السيارة</div><div class="who">لا يوجد فرع مؤهل بعد — السباق مفتوح</div></div>'; return; }
+  h.innerHTML=`<div class="lead">
+    <div class="eyebrow">🚗 سباق السيارة — المتصدر الآن</div>
+    <div class="big num">${pct(c.a)}</div>
+    <div class="who">${c.s} <span class="small">${AR[c.c]}</span><small>الموظف المتصدر: ${c.top[0]?bdi(c.top[0]):'—'}${c.top[1]?' · الثاني: '+bdi(c.top[1]):''}${c.top[2]?' · الثالث: '+bdi(c.top[2]):''}</small></div>
+    <div class="small" style="margin-top:14px">${c.a>=1?'تجاوز خط الـ100% — الفرع مؤهل، والمنافسة الآن على الأعلى نسبة':'يحتاج '+((1-c.a)*100).toFixed(1)+' نقطة للوصول إلى 100%'}</div>
+  </div>
+  <div class="track4"><div class="th"><b>🏁 حلبة السيارة</b><span>أول من يعدّي خط النهاية بأعلى نسبة ياخذ السيارة</span></div>
+    ${D.car.slice(0,4).map((x,i)=>{const sc=Math.max(1.25,c.a*1.05), pos=Math.min(100,x.a/sc*100), fin=100/sc;
+      return `<div class="lane ${i===0?'lead1':''}"><div class="ln"><span class="r">${i+1}</span><b>${x.s}</b><small>${AR[x.c]}${x.top[0]?' · '+bdi(x.top[0]):''}</small><span class="a num">${pct(x.a)}</span></div>
+        <div class="road"><i style="width:${pos}%"></i><span class="car" style="right:${pos}%">🚗</span><span class="fin" style="right:${fin}%"></span></div>
+        <div class="gap">${x.a>=1?'✅ عدّى خط النهاية':'باقي '+((1-x.a)*100).toFixed(1)+' نقطة على خط النهاية'}</div></div>`;}).join('')}
+    <div class="note">السباق للفروع الكبيرة فقط (حجم مبيعاتها يكفي لجائزة السيارة)</div>
+  </div>`;
+})();
+
+/* stats */
+(function(){
+  const c=D.company, gap=(c.a-D.frac)*100;
+  const nearQ=D.branches.filter(b=>b.a<1&&b.p>=0.9&&b.p<1).length;
+  const inRace=D.branches.filter(b=>b.aw).length;
+  // مؤشرات محفّزة فقط — بدون أرقام الشركة السلبية
+  $('stats').innerHTML=[
+    {v:'🏁 '+c.at100, l:'فرع عدّى خط الـ100%', d:'تأهّل رسمياً للسباق', cls:'up'},
+    {v:inRace, l:'فرع في مراكز الجوائز الآن', d:'من أصل 41 جائزة'},
+    {v:nearQ, l:'فرع على بُعد خطوة', d:'قريب من مراكز الجوائز — ممكن تكون التالي'},
+    {v:left, l:'يوم باقي', d:'كل يوم يفرق في الترتيب'},
+  ].map(t=>`<div class="stat"><div class="v num ${t.cls||''}">${t.v}</div><div class="l">${t.l}</div><div class="d">${t.d}</div></div>`).join('');
+})();
+
+
+/* movers */
+(function(){
+  const up=[...D.branches].sort((a,b)=>b.d-a.d).slice(0,10);
+  $('movers').innerHTML=up.map(b=>`<div class="mv"><span class="n"><b>${b.s}</b><small>${AR[b.c]} · ${b.city}</small></span><span class="a num">${pct(b.a)}</span><span class="d num ${cls(b.d)}">${pts(b.d)}</span></div>`).join('');
+})();
+
+/* next in line: أقرب الفروع غير المرشّحة لمقعد جائزة */
+(function(){
+  const MK={KSA:'KSA',UAE:'UAE',Oman:'Oman',Kuwait:'KW-BH',Bahrain:'KW-BH'}, Q={KSA:34,UAE:2,Oman:2,'KW-BH':2};
+  const winners=D.branches.filter(b=>b.aw&&b.aw!=='A');
+  const lastSeat=winners.length?Math.min(...winners.map(b=>b.a)):D.frac;
+  // الدولة اللي حصتها ناقصة: يكفي فرعها يوصل وتيرة 100% (نسبة = المفترض اليوم)
+  // السعودية: يتجاوز آخر مقعد سعودي. الدولة الصغيرة: لو حصتها ناقصة يكفي وتيرة 100%، وإلا يتجاوز ثاني فائز في دولته
+  const ksaSeat=Math.min(...winners.filter(b=>MK[b.c]==='KSA').map(b=>b.a), 9);
+  const need=b=>{ const m=MK[b.c]; let t;
+    if(m==='KSA') t=ksaSeat;
+    else { const w=winners.filter(x=>MK[x.c]===m).map(x=>x.a); t = w.length<Q[m] ? D.frac : Math.min(...w); }
+    return Math.max(0.001,t-b.a); };
+  const list=D.branches.filter(b=>!b.aw).map(b=>({b,g:need(b)})).sort((x,y)=>x.g-y.g).slice(0,12);
+  const shown=new Set(list.map(x=>x.b.s));
+  const perC=['UAE','Oman','Kuwait','Bahrain'].map(c=>D.branches.filter(b=>b.c===c&&!b.aw&&!shown.has(b.s)).map(b=>({b,g:need(b)})).sort((x,y)=>x.g-y.g)[0]).filter(Boolean).filter(x=>!list.some(l=>l.b.c===x.b.c));
+  $('nextCountry').innerHTML=perC.length?'<span class="small">الأقرب في كل دولة:</span>'+perC.map(x=>`<span class="pc"><b>${x.b.s}</b> ${AR[x.b.c]}${x.b.top[0]?' · '+bdi(x.b.top[0]):''} · <bdi dir="ltr" class="num">${pct(x.b.a)}</bdi> · <em>ينقصه <bdi dir="ltr">${(x.g*100).toFixed(1)}</bdi> نقطة</em></span>`).join(''):'';
+  // كم فرع في الطابور ينقصه أقل من مبيعات يوم واحد عادي له (نسبته ÷ الأيام المنقضية)
+  const oneDay=list.filter(x=>x.g < x.b.a/D.de).length;
+  $('pushBanner').innerHTML=`<span class="bolt">⚡</span><span class="t"><b>بينك وبين الجوائز يوم واحد قوي!</b><span>${oneDay===list.length?'كل الفروع اللي تحت':oneDay+' من الفروع اللي تحت'} ينقصها أقل من مبيعات يوم واحد عادي. اقفل اليوم بقوة، وبكرة يطلع اسمك في «أخبار التأهيل» 🚀</span></span>`;
+  $('nextList').innerHTML=list.map((x,i)=>`<div class="nx"><span class="r">${i+1}</span><span class="n"><b>${x.b.s} <span class="small">${AR[x.b.c]}</span></b><small>${x.b.top[0]?bdi(x.b.top[0]):x.b.city}</small></span><span class="g"><span class="a num">${pct(x.b.a)}</span><small>+${(x.g*100).toFixed(1)} نقطة وتدخل</small></span></div>`).join('');
+})();
+
+/* my branch: أين فرعي وكم باقي لي — بلا مبالغ */
+(function(){
+  const MK={KSA:'KSA',UAE:'UAE',Oman:'Oman',Kuwait:'KW-BH',Bahrain:'KW-BH'}, Q={KSA:38,UAE:2,Oman:2,'KW-BH':2};
+  const R=D.dim-D.de;
+  const ws=D.branches.filter(b=>b.aw&&b.aw!=='A');
+  // النسبة المتوقعة اللي لازم يتجاوزها الفرع عشان يدخل الجوائز
+  function needP(b){ const m=MK[b.c]; const w=ws.filter(x=>MK[x.c]===m);
+    if(m==='KSA') return Math.max(1, w.length?Math.min(...w.map(x=>x.p))+0.001:1);
+    return (D.fill&&D.fill[m]<2) ? 1 : Math.max(1, Math.min(...w.map(x=>x.p))+0.001); }
+  const fmt=x=>Math.round(x*100);
+  const times=n=>n===1?'مرة وحدة':n===2?'مرتين':n<=10?n+' مرات':n+' مرة';
+  const places=n=>n===1?'مركز واحد':n===2?'مركزين':n<=10?n+' مراكز':n+' مركز';
+  // بدون أي أرقام مبيعات: وصف بالكلام + شريطين للمقارنة
+  const lvl=inc=> inc<0.10?'<b>شوي بس</b> فوق بيعكم المعتاد'
+                : inc<0.25?'<b>زيادة بسيطة</b> على بيعكم المعتاد'
+                : inc<0.50?'<b>زيادة واضحة</b> — الأيام الجاية لازم تكون أيام قوية'
+                : inc<0.90?'<b>زيادة كبيرة</b> — الأيام الجاية لازم تكون من أقوى أيامكم'
+                : inc<1.20?'<b>ضعف</b> بيعكم المعتاد تقريباً'
+                : '<b>أكثر من ضعف</b> بيعكم المعتاد';
+  const bars=inc=>`<div class="cmp"><div><span>بيعكم المعتاد</span><i style="width:${Math.min(100,100/(1+inc))}%"></i></div><div><span>المطلوب</span><i class="need" style="width:100%"></i></div></div>`;
+  function plain(inc, goal){ return `<div class="tip">${goal}<br>تحتاجون كل يوم ${lvl(inc)}.${bars(inc)}</div>`; }
+  function card(b){
+    const r=b.a/D.de;                     // معدل الفرع اليومي بالنقاط
+    const rc=b.rp-b.r;
+    const team=b.top.length?`<div class="team">⭐ المتصدر في فرعكم: ${bdi(b.top[0])}${b.top[1]?' · الثاني: '+bdi(b.top[1]):''}${b.top[2]?' · الثالث: '+bdi(b.top[2]):''}</div>`:'';
+    let status, tips=[];
+    if(b.aw==='A'){ status='<span class="status car">🚗 متصدرين سباق السيارة!</span>'; }
+    else if(b.aw){ status=`<span class="status in">✅ داخلين: ${ICO[b.aw]} ${PRIZE[b.aw]}</span>`; }
+    else { status='<span class="status out">🎯 لسا ما دخلتوا الجوائز</span>'; }
+    if(b.aw){
+      // هامش الأمان لبلوغ 100%
+      const slow=1-((1-b.a)/R)/r;
+      if(b.a>=1) tips.push(`<div class="tip good">🏁 <b>عدّيتوا 100%!</b> الحين كل يوم يرفع نسبتكم ويثبّت مركزكم.</div>`);
+      else if(slow>0){ const h=slow<0.10?'<b>هامشكم صغير</b> — أي نزول في البيع يطلعكم من 100%، حافظوا على نفس المستوى كل يوم.'
+                          : slow<0.30?'عندكم <b>هامش بسيط</b>: لو نزل بيعكم شوي بتظلون فوق 100%، بس لا تتراخون.'
+                          : 'عندكم <b>هامش مريح</b>: حتى لو نزل بيعكم بتظلون فوق 100%. بس الفروع اللي تحتكم قريبة، كمّلوا!';
+        tips.push(`<div class="tip good">🛡️ ${h}</div>`); }
+    } else {
+      const F=needP(b), gap=F-b.a, need=gap/R, inc=need/r-1;
+      if(inc<=0) tips.push(`<div class="tip good">على سرعتكم الحالية أنتم قريبين جداً — <b>زيادة بسيطة</b> وتدخلون.</div>`);
+      else tips.push(plain(inc, `📈 <b>عشان تدخلون الجوائز</b> خلال الـ${R} يوم الباقية:`));
+      // كرروا أحسن يوم
+      const short=gap-r*R;
+      if(b.bd>r && short>0){ const n=Math.ceil(short/(b.bd-r));
+        if(n<=R) tips.push(`<div class="tip">🔥 أحسن يوم لكم هالشهر كان <b>يوم ${b.bdd}</b>. لو كررتوه <b>${times(n)}</b> من الأيام الباقية، تدخلون الجوائز.</div>`); }
+      const inc100=((1-b.a)/R)/r-1;
+      if(F>1.001 && inc100>0) tips.push(`<div class="tip">🏁 وعشان توصلون 100% بس: تحتاجون ${lvl(inc100)}.</div>`);
+    }
+    if(rc>0) tips.push(`<div class="tip good">🔼 تقدمتوا <b>${places(rc)}</b> من أمس — كمّلوا!</div>`);
+    return `<div class="mygrid"><div class="mybig"><span class="n">${b.s} <small>${AR[b.c]} · ${b.city}</small></span><span class="v num ${b.a>=1?'up':''}">${pct(b.a)}</span><span class="pj">تحقيقكم اليوم · المتوقع بنهاية الشهر <b class="num">${pct(b.p,0)}</b></span></div>
+      <div class="mymsg">${status}${tips.join('')}${team}</div></div>`;
+  }
+  const idx={}; D.branches.forEach(b=>{ idx[b.s.toUpperCase()]=b; b.top.forEach(u=>{ const m=u.match(/\((\d+)\)/); if(m) idx[m[1]]=b; idx[u.split(' (')[0].toUpperCase()]=b; }); });
+  function find(q){ q=(q||'').trim().toUpperCase(); if(!q) return null; if(idx[q]) return idx[q];
+    const byCode=D.branches.find(b=>b.s.toUpperCase().startsWith(q))||D.branches.find(b=>b.s.toUpperCase().includes(q)); if(byCode) return byCode;
+    const k=Object.keys(idx).find(k=>k.includes(q)); return k?idx[k]:null; }
+  function show(q, save){
+    const b=find(q);
+    if(!b){ $('myCard').innerHTML = q? '<div class="empty-mine">ما لقيت فرع بهالاسم. جرّب كود الفرع مثل <b>ZAHRAN</b> أو رقم اليوزر.</div>' : '<div class="empty-mine">اكتب فرعك فوق، وبتشوف وين أنتم، وكم باقي لكم على الجوائز، ومين المتصدر عندكم.</div>'; $('myClear').hidden=true; return; }
+    $('myCard').innerHTML=card(b); $('myIn').value=b.s; $('myClear').hidden=false;
+    if(save){ try{ localStorage.setItem('athar_my', b.s); }catch(e){} }
+  }
+  let saved=null; try{ saved=localStorage.getItem('athar_my'); }catch(e){}
+  show(saved,false);
+  // قائمة اقتراحات خاصة: أبجدية حسب الدولة (ما تكشف الترتيب)، وتنزل للآخر بالتمرير
+  const ORDER=['KSA','UAE','Oman','Kuwait','Bahrain','Qatar'];
+  const all=[...D.branches].sort((x,y)=>ORDER.indexOf(x.c)-ORDER.indexOf(y.c)||x.s.localeCompare(y.s));
+  const sug=$('mySug'), inp=$('myIn'); let act=-1, cur=[];
+  function render(q){
+    q=(q||'').trim().toUpperCase();
+    // الأولوية: كود الفرع المطابق تماماً، ثم كود يبدأ بالنص، ثم كود يحتويه، ثم المدينة/الدولة/اليوزر
+    const score=b=>{ const S=b.s.toUpperCase(); if(!q) return 9; if(S===q) return 0; if(S.startsWith(q)) return 1; if(S.includes(q)) return 2;
+      if(b.city.toUpperCase().includes(q)||AR[b.c].includes(q)) return 3; if(b.top.some(u=>u.toUpperCase().includes(q))) return 4; return -1; };
+    cur=all.map(b=>[score(b),b]).filter(x=>x[0]>=0);
+    if(q) cur.sort((x,y)=>x[0]-y[0]||x[1].s.localeCompare(y[1].s));
+    cur=cur.map(x=>x[1]);
+    let html='', last=null;
+    cur.forEach((b,i)=>{ if(!q && b.c!==last){ html+=`<div class="g">${AR[b.c]} · ${all.filter(x=>x.c===b.c).length} فرع</div>`; last=b.c; }
+      const hit = q && !b.s.toUpperCase().includes(q) ? (b.top.find(u=>u.toUpperCase().includes(q))||'') : '';
+      html+=`<div class="o${i===act?' act':''}" role="option" data-s="${b.s}"><b>${b.s}</b><small>${hit?bdi(hit)+' · ':''}${AR[b.c]} · ${b.city}</small></div>`; });
+    sug.innerHTML = html || '<div class="none">ما لقيت فرع بهالاسم — جرّب كود الفرع أو المدينة أو رقم اليوزر</div>';
+    sug.hidden=false; inp.setAttribute('aria-expanded','true');
+  }
+  function close(){ sug.hidden=true; act=-1; inp.setAttribute('aria-expanded','false'); }
+  inp.addEventListener('focus',()=>{ act=-1; render(''); });
+  inp.addEventListener('input',()=>{ act=-1; render(inp.value); });
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); if(sug.hidden) render(inp.value); act=Math.max(0,Math.min(cur.length-1,act+(e.key==='ArrowDown'?1:-1))); render(inp.value); const el=sug.querySelector('.o.act'); if(el) el.scrollIntoView({block:'nearest'}); }
+    else if(e.key==='Enter'){ e.preventDefault(); const q=inp.value.trim().toUpperCase(); const exact=idx[q]; const b=act>=0?cur[act]:(exact||cur[0]); close(); show(b?b.s:inp.value,true); inp.blur(); }
+    else if(e.key==='Escape'){ close(); }
+  });
+  sug.addEventListener('mousedown',e=>{ const o=e.target.closest('.o'); if(!o) return; e.preventDefault(); close(); show(o.dataset.s,true); inp.blur(); });
+  document.addEventListener('mousedown',e=>{ if(!e.target.closest('.combo')) close(); });
+  $('myClear').addEventListener('click',()=>{ try{ localStorage.removeItem('athar_my'); }catch(e){} $('myIn').value=''; show(null,false); $('myIn').focus(); });
+})();
+
+/* prizes */
+(function(){
+  const cats=['A','B','C','D','E'];
+  $('prizes').innerHTML=cats.map(c=>{
+    const list=D.branches.filter(b=>b.aw===c).sort((a,b)=>b.p-a.p);
+    const cap=c==='A'?1:10, vac=cap-list.length;
+    // المقاعد الشاغرة تظهر كفرصة مفتوحة، مو كفراغ
+    const open = vac>0 ? `<li class="vac"><span class="r">🔓</span><span class="s"><b>${vac===1?'مقعد شاغر':vac+' مقاعد شاغرة'}</b><small>${c==='A'?'أول فرع كبير يعدّي 100% ياخذ السيارة':'أول فرع يوصل 100% ياخذه — ممكن يكون فرعك'}</small></span><span class="p">؟</span></li>` : '';
+    const items=list.map((b,i)=>`<li class="${i>=3?'more':''}"><span class="r num">${i+1}</span><span class="s"><b>${b.s} <span class="small">${AR[b.c]}</span>${b.mv?' <span class="chip mv">منقولة</span>':''}</b><small>${b.top[0]?bdi(b.top[0]):'—'}</small></span><span class="p num">${pct(b.a)}<small>متوقع ${pct(b.p,0)}</small></span></li>`).join('')+open;
+    const btn = list.length>3 ? `<button class="morebtn" data-n="${list.length}">عرض الكل (${list.length})</button>` : '';
+    return `<div class="cat"><div class="ch"><b><span class="ico">${ICO[c]}</span> ${PRIZE[c]}</b><span class="small">${c==='A'?'1':list.length+' / 10'}</span></div><ol>${items}</ol>${btn}</div>`;
+  }).join('');
+  $('prizes').querySelectorAll('.morebtn').forEach(bt=>bt.addEventListener('click',()=>{const c=bt.closest('.cat'); const o=c.classList.toggle('open'); bt.textContent=o?'أقل':`عرض الكل (${bt.dataset.n})`;}));
+  $('prizeSub').textContent=`لو استمرت الوتيرة الحالية إلى نهاية الشهر · ${D.branches.filter(b=>b.aw).length} جائزة مرشّحة من 41`;
+})();
+
+
+})();
+</script>
+<script>
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function label(){ var light=root.getAttribute('data-theme')==='light';
+    btn.innerHTML = light ? '🌙 <span class="tl">الوضع الداكن</span><span class="ts">داكن</span>' : '☀️ <span class="tl">الوضع الفاتح</span><span class="ts">فاتح</span>';
+    btn.setAttribute('aria-pressed', light ? 'true' : 'false'); }
+  btn.addEventListener('click', function(){
+    var light = root.getAttribute('data-theme')!=='light';
+    if(light) root.setAttribute('data-theme','light'); else root.removeAttribute('data-theme');
+    try{ localStorage.setItem('athar_theme', light?'light':'dark'); }catch(e){}
+    label();
+  });
+  label();
+})();
+</script>
+
+<script>setInterval(function(){var p=document.getElementById('updatePanel');if(!window.atharNoReload&&!(p&&!p.hidden))location.reload();},300000);</script></body></html>
