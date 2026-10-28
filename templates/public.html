@@ -60,6 +60,17 @@ h1{font-size:30px} h2{font-size:20px} h3{font-size:16px}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:13px;border:1px solid var(--line);background:var(--surface)}
 .pill b{font-family:var(--display)}
 .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px var(--up-soft)}
+/* month-end countdown */
+.cd{display:flex;flex-direction:column;gap:6px}
+.cd .lbl{font-size:12.5px;color:var(--fg-3);font-weight:600}
+.cd .tiles{display:flex;align-items:flex-start;gap:6px;direction:rtl}
+.cd .u{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cd .n{position:relative;min-width:54px;padding:7px 8px 6px;border-radius:10px;background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line-strong);font-family:var(--display);font-weight:800;font-size:26px;line-height:1;text-align:center;color:var(--fg);font-variant-numeric:tabular-nums}
+.cd .n::after{content:"";position:absolute;inset-inline:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--gold)}
+.cd .u small{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.02em}
+.cd .sep{font-family:var(--display);font-size:22px;color:var(--fg-3);padding-top:5px}
+.cd .done{font-family:var(--display);font-weight:700;color:var(--gold);font-size:18px}
+@media (max-width:640px){ .cd{width:100%} .cd .n{min-width:0;flex:1;font-size:22px} .cd .u{flex:1} }
 
 /* ticker */
 .tape{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);padding:8px 0}
@@ -301,6 +312,16 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
         <div class="muted" id="sub">—</div>
       </div>
     </div>
+    <div class="cd" id="cd" hidden role="timer" aria-label="الوقت المتبقي على نهاية السباق">
+      <span class="lbl">⏳ ينتهي السباق بعد</span>
+      <div class="tiles" id="cdTiles">
+        <div class="u"><span class="n" id="cdD">--</span><small>يوم</small></div><span class="sep">:</span>
+        <div class="u"><span class="n" id="cdH">--</span><small>ساعة</small></div><span class="sep">:</span>
+        <div class="u"><span class="n" id="cdM">--</span><small>دقيقة</small></div><span class="sep">:</span>
+        <div class="u"><span class="n" id="cdS">--</span><small>ثانية</small></div>
+      </div>
+      <span class="done" id="cdDone" hidden>🏁 انتهى السباق — النتائج النهائية قريباً</span>
+    </div>
     <div class="meta">
       <button type="button" class="pill theme-btn" id="themeBtn" aria-label="تبديل بين الوضع الداكن والفاتح"></button>
       <span class="pill"><span class="dot"></span>البيانات حتى <b id="pAsof">—</b></span>
@@ -375,6 +396,20 @@ const monthAr = new Date(D.asof+'T00:00:00').toLocaleDateString('ar-SA-u-ca-greg
 $('sub').textContent = `برنامج حوافز المبيعات · ${monthAr}`;
 $('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.dim}`; $('pLeft').textContent = left;
 // وقت آخر سحب للبيانات بتوقيت الخليج (يظهر فقط إذا كان مسجّلاً في البيانات)
+// العدّ التنازلي لنهاية الشهر: منتصف ليل أول الشهر القادم بتوقيت الخليج
+(function(){
+  const off=/Dubai|Muscat/.test(D.tz||'')?4:3, y=+D.asof.slice(0,4), m=+D.asof.slice(5,7);
+  const end=Date.UTC(y,m,1)-off*3600e3;          // m is already next month's 0-based index
+  const p2=n=>String(n).padStart(2,'0');
+  function tick(){
+    const s=Math.max(0,Math.floor((end-Date.now())/1000));
+    if(!s){ $('cdTiles').hidden=true; $('cdDone').hidden=false; return false; }
+    $('cdD').textContent=p2(Math.floor(s/86400)); $('cdH').textContent=p2(Math.floor(s/3600)%24);
+    $('cdM').textContent=p2(Math.floor(s/60)%60); $('cdS').textContent=p2(s%60); return true;
+  }
+  $('cd').hidden=false;
+  if(tick()){ const t=setInterval(()=>{ if(!tick()) clearInterval(t); },1000); }
+})();
 if(D.built){ try{ $('pUpd').textContent = new Date(D.built).toLocaleString('ar-SA-u-ca-gregory-nu-latn',{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).replace('،',' ·'); $('pUpdWrap').hidden=false; }catch(e){} }
 
 /* ticker */
