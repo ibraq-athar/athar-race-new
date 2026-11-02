@@ -1,0 +1,147 @@
+<title>الفائزون — مسابقة أثر</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Changa:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Winners page for a finished month (podium design): same palette as the board (public.html), final results only. No amounts: percentages and names. */
+:root{
+  --bg:#0f1218; --surface:#171c25; --surface-2:#1f2633; --line:#2a3344; --line-strong:#3a4659;
+  --fg:#f2f0ea; --fg-2:#b8bcc6; --fg-3:#7d8494;
+  --gold:#e6b64a; --gold-soft:#3a2d10; --gold-ink:#1a1304; --up:#3fcf7a; --bar:#4f8cff;
+  --display:"Changa","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --hero-0:#1c1a12; --hero-1:#171c25; color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f5f3ee; --surface:#ffffff; --surface-2:#f0ede6; --line:#e3ded3; --line-strong:#cdc5b6;
+  --fg:#1c1f26; --fg-2:#454b57; --fg-3:#6b7180;
+  --gold:#a8760a; --gold-soft:#f7ecd0; --gold-ink:#ffffff; --up:#1d8a4b; --bar:#2d6be0;
+  --hero-0:#fbf2dc; --hero-1:#ffffff; color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
+.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;font-family:var(--display);font-weight:700;line-height:1.2}
+h1{font-size:30px} h2{font-size:20px}
+.muted{color:var(--fg-2)} .small{font-size:12.5px;color:var(--fg-3)}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
+.head .t{display:flex;align-items:center;gap:12px}
+.mark{width:48px;height:48px;border-radius:12px;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-size:26px;flex:none}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:13px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.pill b{font-family:var(--display)}
+.msel select{font:inherit;font-family:var(--display);font-weight:700;color:var(--fg);background:transparent;border:0;cursor:pointer;padding:0 2px}
+.msel select option{background:var(--surface);color:var(--fg)}
+.msel:focus-within{outline:2px solid var(--bar);outline-offset:2px}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:18px}
+/* car winner hero */
+.hero{text-align:center;padding:30px 16px 26px;border-radius:20px;background:radial-gradient(ellipse at top,var(--hero-0) 0%,var(--hero-1) 72%);border:1px solid var(--gold)}
+.hero .t{font-family:var(--display);color:var(--gold);font-weight:700;letter-spacing:.04em}
+.hero .ico{font-size:64px;line-height:1.1}
+.hero .n{font-family:var(--display);font-weight:800;font-size:44px;line-height:1.15}
+.hero .pct{font-family:var(--display);font-weight:800;font-size:56px;color:var(--gold);line-height:1;margin-top:4px}
+.hero .team{color:var(--fg-2);font-size:13.5px;margin-top:6px}
+/* one podium per prize: 2nd · 1st · 3rd, then 4th+ as chips */
+#cats{display:flex;flex-direction:column;gap:22px}
+.sec h2{display:flex;gap:8px;align-items:baseline;margin-bottom:14px}
+.sec h2 small{font-family:var(--font);font-weight:500;color:var(--fg-3);font-size:13px}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:10px;max-width:760px;margin:0 auto}
+.pd{text-align:center;min-width:0}
+.pd .who{font-family:var(--display);font-weight:700;font-size:17px;overflow-wrap:anywhere}
+.pd .where,.pd .emp{font-size:12.5px;color:var(--fg-2)}
+.pd .blk{margin-top:8px;border-radius:12px 12px 0 0;display:grid;place-items:center;font-family:var(--display);font-weight:800;color:#1a1304}
+.pd.p1 .blk{height:120px;background:linear-gradient(#f3cf6d,#c99a2e);font-size:40px}
+.pd.p2 .blk{height:90px;background:linear-gradient(#e2e6ee,#a9b0bd);font-size:32px}
+.pd.p3 .blk{height:70px;background:linear-gradient(#e7a774,#b0703f);font-size:28px}
+.pd .pct{font-family:var(--display);font-weight:700;color:var(--up);margin-top:6px}
+.rest{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
+.chip b{font-family:var(--display)} .chip .pct{font-family:var(--display);font-weight:700;color:var(--up)}
+.empty{color:var(--fg-3);font-size:13px;text-align:center;padding:6px 2px}
+.thanks{text-align:center;padding:22px}
+.thanks h2{color:var(--gold);margin-bottom:6px}
+@media (max-width:640px){
+  .hero .ico{font-size:48px} .hero .n{font-size:32px} .hero .pct{font-size:42px}
+  .pd .who{font-size:14px} .pd.p1 .blk{height:96px} .pd.p2 .blk{height:72px} .pd.p3 .blk{height:56px}
+  .meta{width:100%}
+}
+</style>
+
+<div class="wrap">
+  <script>(function(){var t=null;try{t=localStorage.getItem('athar_theme');}catch(e){} if(t==='light') document.documentElement.setAttribute('data-theme','light');})();</script>
+  <header class="head">
+    <div class="t">
+      <div class="mark">🏆</div>
+      <div>
+        <h1>الفائزون</h1>
+        <div class="muted" id="sub">—</div>
+      </div>
+    </div>
+    <div class="meta">
+      <label class="pill msel" id="mselWrap" hidden>📅 الشهر <select id="msel" aria-label="اختر الشهر"></select></label>
+      <span class="pill">✅ النتائج النهائية</span>
+      <span class="pill">الفروع الفائزة <b id="nWin">—</b></span>
+    </div>
+  </header>
+
+  <section class="hero" id="car" aria-label="الفائز بالسيارة"></section>
+  <div id="cats"></div>
+
+  <section class="card thanks">
+    <h2>🎉 مبروك لكل الفروع الفائزة</h2>
+    <div class="muted">الترتيب حسب نسبة تحقيق المستهدف الفعلية لكامل الشهر. شكراً لكل الفرق على جهودهم.</div>
+  </section>
+</div>
+
+<script id="embed" type="application/json">{}</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+// احتفال: مدافع قصاصات من اليسار واليمين عند فتح الصفحة (يتوقف لمن يفضّل تقليل الحركة)
+(function(){
+  if(!window.confetti || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors=['#e6b64a','#f3cf6d','#ffffff','#3fcf7a','#4f8cff','#f0655c'];
+  const cannon=(x,angle,n,v)=>confetti({particleCount:n,angle,spread:55,startVelocity:v,origin:{x,y:0.75},colors,zIndex:9999});
+  const end=Date.now()+3000;
+  (function stream(){ cannon(0,60,4,55); cannon(1,120,4,55); if(Date.now()<end) requestAnimationFrame(stream); })();
+  [300,1200,2200].forEach(t=>setTimeout(()=>{ cannon(0,55,90,75); cannon(1,125,90,75); },t));
+})();
+</script>
+<script>
+(function(){
+const D = JSON.parse(document.getElementById('embed').textContent);
+const AR = {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'};
+const PRIZE = {A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'};
+const ICO = {A:'🚗', B:'📱', C:'💻', D:'⌚', E:'🥇'};
+const $ = id=>document.getElementById(id);
+const esc = s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct = x=>(x*100).toFixed(1)+'%';
+const monthName = m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+
+$('sub').textContent = `مسابقة أثر · ${monthName(D.month||D.asof.slice(0,7))}`;
+const won = D.branches.filter(b=>b.aw);
+$('nWin').textContent = won.length;
+
+const car = won.find(b=>b.aw==='A');
+const where = b=>`${esc(AR[b.c]||b.c)} · ${esc(b.city)}`;
+$('car').innerHTML = `<div class="t">🏆 أبطال مسابقة أثر · ${monthName(D.month||D.asof.slice(0,7))}</div><div class="ico">🚗</div>`+
+  (car ? `<div class="n">${esc(car.s)}</div><div class="muted">${where(car)}</div><div class="pct">${pct(car.a)}</div>
+          ${car.top.length?`<div class="team">⭐ ${car.top.map(esc).join(' · ')}</div>`:''}`
+       : `<div class="n">لم تُمنح هذا الشهر</div><div class="muted">لم يحقق أي فرع شروط السيارة</div>`);
+
+$('cats').innerHTML = ['B','C','D','E'].map(c=>{
+  const L = won.filter(b=>b.aw===c).sort((x,y)=>y.a-x.a);
+  const pd = (b,place)=> b ? `<div class="pd p${place}"><div class="who">${esc(b.s)}</div><div class="where">${where(b)}</div>
+      ${b.top[0]?`<div class="emp">⭐ ${esc(b.top[0])}</div>`:''}<div class="blk">${place}</div><div class="pct">${pct(b.a)}</div></div>` : '<div></div>';
+  return `<section class="sec card"><h2>${ICO[c]} ${PRIZE[c]} <small>${L.length} فائز</small></h2>`+
+    (L.length ? `<div class="podium">${pd(L[1],2)}${pd(L[0],1)}${pd(L[2],3)}</div>
+       ${L.length>3?`<div class="rest">${L.slice(3).map((b,i)=>`<span class="chip">${i+4}. <b>${esc(b.s)}</b> · ${esc(b.top[0]||'')} <span class="pct">${pct(b.a)}</span></span>`).join('')}</div>`:''}`
+      : `<div class="empty">لا يوجد فائزون في هذه الفئة</div>`)+`</section>`;
+}).join('');
+
+if(D.months&&D.months.length){
+  const s=$('msel');
+  s.innerHTML=D.months.map(m=>`<option value="${m}">${monthName(m)}</option>`).join('')
+    +(D.pending||[]).map(m=>`<option value="${m}" disabled>${monthName(m)} — بانتظار ملف المستهدف</option>`).join('');
+  s.value=D.month; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
+}
+})();
+</script>

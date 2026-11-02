@@ -70,6 +70,10 @@ h1{font-size:30px} h2{font-size:20px} h3{font-size:16px}
 .cd .u small{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.02em}
 .cd .sep{font-family:var(--display);font-size:22px;color:var(--fg-3);padding-top:5px}
 .cd .done{font-family:var(--display);font-weight:700;color:var(--gold);font-size:18px}
+/* month picker */
+.msel select{font:inherit;font-family:var(--display);font-weight:700;color:var(--fg);background:transparent;border:0;cursor:pointer;padding:0 2px}
+.msel select option{background:var(--surface);color:var(--fg)}
+.msel:focus-within{outline:2px solid var(--bar);outline-offset:2px}
 @media (max-width:640px){ .cd{width:100%} .cd .n{min-width:0;flex:1;font-size:22px} .cd .u{flex:1} }
 
 /* ticker */
@@ -313,7 +317,7 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
       </div>
     </div>
     <div class="cd" id="cd" hidden role="timer" aria-label="الوقت المتبقي على نهاية السباق">
-      <span class="lbl">⏳ ينتهي السباق بعد</span>
+      <span class="lbl" id="cdLbl">⏳ ينتهي السباق بعد</span>
       <div class="tiles" id="cdTiles">
         <div class="u"><span class="n" id="cdD">--</span><small>يوم</small></div><span class="sep">:</span>
         <div class="u"><span class="n" id="cdH">--</span><small>ساعة</small></div><span class="sep">:</span>
@@ -323,6 +327,7 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
       <span class="done" id="cdDone" hidden>🏁 انتهى السباق — النتائج النهائية قريباً</span>
     </div>
     <div class="meta">
+      <label class="pill msel" id="mselWrap" hidden>📅 الشهر <select id="msel" aria-label="اختر الشهر"></select></label>
       <button type="button" class="pill theme-btn" id="themeBtn" aria-label="تبديل بين الوضع الداكن والفاتح"></button>
       <span class="pill"><span class="dot"></span>البيانات حتى <b id="pAsof">—</b></span>
       <span class="pill">اليوم <b id="pDay">—</b></span>
@@ -403,13 +408,22 @@ $('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.d
   const p2=n=>String(n).padStart(2,'0');
   function tick(){
     const s=Math.max(0,Math.floor((end-Date.now())/1000));
-    if(!s){ $('cdTiles').hidden=true; $('cdDone').hidden=false; return false; }
+    if(!s){ $('cdTiles').hidden=true; $('cdLbl').hidden=true; $('cdDone').hidden=false; return false; }
     $('cdD').textContent=p2(Math.floor(s/86400)); $('cdH').textContent=p2(Math.floor(s/3600)%24);
     $('cdM').textContent=p2(Math.floor(s/60)%60); $('cdS').textContent=p2(s%60); return true;
   }
+  if(D.results) $('cdDone').textContent='🏁 انتهى السباق — تُعلن النتائج '+new Date(D.results+'T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{day:'numeric',month:'long'});
   $('cd').hidden=false;
   if(tick()){ const t=setInterval(()=>{ if(!tick()) clearInterval(t); },1000); }
 })();
+// اختيار الشهر: كل شهر صفحة مستقلة YYYY-MM.html
+if(D.months&&D.months.length){
+  const s=$('msel');
+  const mn=m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+  s.innerHTML=D.months.map(m=>`<option value="${m}">${mn(m)}</option>`).join('')
+    +(D.pending||[]).map(m=>`<option value="${m}" disabled>${mn(m)} — بانتظار ملف المستهدف</option>`).join('');
+  s.value=D.month; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
+}
 if(D.built){ try{ $('pUpd').textContent = new Date(D.built).toLocaleString('ar-SA-u-ca-gregory-nu-latn',{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).replace('،',' ·'); $('pUpdWrap').hidden=false; }catch(e){} }
 
 /* ticker */

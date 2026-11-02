@@ -7,6 +7,7 @@
     python run.py --api --target data/target.xlsx --asof 2026-10-13   # API, month-to-date up to that day
     python run.py --api --target data/target.xlsx --every     # keep running: rebuild from Odoo every 5 minutes
     python run.py --api --target data/target.xlsx --serve     # open http://localhost:8000 — "Refresh now" button
+    python run.py --api --targets data/targets                # one page per month: data/targets/2026-10.xlsx …
 
 Outputs (folder --out, default site/):
     index.html      public board «سباق أثر»  — percentages and names only, safe to share with branches
@@ -15,7 +16,11 @@ Outputs (folder --out, default site/):
 Add --csv to also write CSV tables for importing into a database (e.g. Supabase).
 """
 import os
+import re
 import sys
+import shutil
+import calendar
+import datetime
 import json
 import argparse
 import time
@@ -31,6 +36,7 @@ from athar.render import render                          # noqa: E402
 
 REFRESH_MINUTES = 5          # --every with no number: rebuild from Odoo every 5 minutes
 SERVE_PORT = 8000            # --serve with no number
+WINNERS_DAY = 10             # a month's winners page replaces its board on this day of the next month
 
 
 def main():
@@ -38,7 +44,11 @@ def main():
     src = ap.add_mutually_exclusive_group(required=True)
     src.add_argument("--pos", help="Odoo POS pivot export (.xlsx)")
     src.add_argument("--api", action="store_true", help="read sales from the Odoo BI API (URL and token in .env) instead")
-    ap.add_argument("--target", required=True, help="monthly target file (.xlsx)")
+    tg = ap.add_mutually_exclusive_group(required=True)
+    tg.add_argument("--target", help="monthly target file (.xlsx)")
+    tg.add_argument("--targets", metavar="DIR",
+                    help="with --api: folder of monthly target files named YYYY-MM.xlsx; builds one page per month "
+                         "(YYYY-MM.html, index.html = current month) with a month dropdown and the winners pages")
     ap.add_argument("--asof", help="last day in the data (YYYY-MM-DD); needed for the single-total export, "
                                    "optional with --api (default: today)")
     ap.add_argument("--out", default=os.path.join(ROOT, "site"))
@@ -55,6 +65,8 @@ def main():
     ap.add_argument("--host", default="127.0.0.1",
                     help="with --serve: 0.0.0.0 lets other PCs on the network open it (internal.html has amounts!)")
     a = ap.parse_args()
+    if a.targets and not a.api:
+        sys.exit("--targets only works with --api")
 
     if a.serve is not None:
         if not a.api:
@@ -151,7 +163,7 @@ def serve(a):
             path = self.path.split("?")[0]
             if path == "/api/status":
                 return self._json(200, {"ok": True, "busy": r.lock.locked(), "last": r.last, "error": r.error})
-            page = {"/": "index.html", "/index.html": "index.html", "/internal.html": "internal.html"}.get(path)
+            page = "index.html" if path == "/" else path[1:] if re.fullmatch(r"/[\w.-]+\.html", path) else None
             if page and os.path.exists(os.path.join(a.out, page)):
                 html = open(os.path.join(a.out, page), encoding="utf-8").read()
                 b = html.replace("</body>", REFRESH_BUTTON + "</body>", 1).encode()   # button only when served here
@@ -194,14 +206,46 @@ def serve(a):
 
 
 def build(a, refresh=None):
+    if a.targets:
+        return build_months(a, refresh)
+    build_one(a, refresh, a.target, a.asof, "index.html", None, not a.public_only)
+
+
+def build_months(a, refresh):
+    """One page per month that has a target file (up to the current month). A finished month whose results
+    date has come (WINNERS_DAY of the next month, GCC) gets the winners page instead of its board."""
+    today = gcc_today()
+    cur = today.strftime("%Y-%m")
+    months = sorted(f[:7] for f in os.listdir(a.targets) if re.fullmatch(r"\d{4}-\d{2}\.xlsx", f) and f[:7] <= cur)
+    if not months:
+        sys.exit(f"No target files named YYYY-MM.xlsx (up to {cur}) in {a.targets}")
+    built = []
+    for m in months:
+        y, mo = int(m[:4]), int(m[5:])
+        asof = None if m == cur else f"{m}-{calendar.monthrange(y, mo)[1]:02d}"   # past month: all of it
+        results = datetime.date(y + mo // 12, mo % 12 + 1, WINNERS_DAY)
+        extra = {"month": m, "months": months, "pending": [] if cur in months else [cur], "results": results.isoformat(),
+                 "winners": m != cur and today >= results}
+        try:
+            build_one(a, refresh, os.path.join(a.targets, m + ".xlsx"), asof, m + ".html", extra,
+                      not a.public_only and m == months[-1])
+            built.append(m)
+        except (Exception, SystemExit) as e:   # e.g. a new month before its first sale: keep the others
+            print(f"{m}: not built — {e}", flush=True)
+    if not built:
+        sys.exit("No month could be built")
+    shutil.copyfile(os.path.join(a.out, built[-1] + ".html"), os.path.join(a.out, "index.html"))
+
+
+def build_one(a, refresh, target, asof_in, page, extra, internal):
     if a.api:
         try:
-            stores, daily = read_pos_api(a.asof)
+            stores, daily = read_pos_api(asof_in)
         except Exception as e:
             sys.exit(f"Sales API failed: {e}")
     else:
         stores, daily = read_pos(a.pos)
-    targets = read_targets(a.target)
+    targets = read_targets(target)
     elapsed = None
     if a.api:
         asof = max(daily)                               # last day that actually has sales
@@ -211,11 +255,11 @@ def build(a, refresh=None):
                   flush=True)
     elif daily:
         last = max(daily)
-        if a.asof and a.asof != last:
-            sys.exit(f"--asof {a.asof} does not match the last day column in the file ({last})")
+        if asof_in and asof_in != last:
+            sys.exit(f"--asof {asof_in} does not match the last day column in the file ({last})")
         asof = last
-    elif a.asof:
-        asof = a.asof
+    elif asof_in:
+        asof = asof_in
     else:
         sys.exit("This export has no day columns. Pass --asof YYYY-MM-DD (the last day it covers), "
                  "or export from Odoo with days as columns.")
@@ -224,9 +268,11 @@ def build(a, refresh=None):
     pub = public_data(stores, daily, targets, asof, elapsed)
     pub["built"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())   # shown as "last updated" (GCC time)
     pub["tz"] = os.environ.get("ODOO_TZ") or "Asia/Riyadh"
-    render(os.path.join(ROOT, "templates", "public.html"), pub, os.path.join(a.out, "index.html"), refresh)
+    pub.update(extra or {})
+    tpl = "winners.html" if pub.get("winners") else "public.html"
+    render(os.path.join(ROOT, "templates", tpl), pub, os.path.join(a.out, page), refresh)
     json.dump(pub, open(os.path.join(a.out, "data", "public.json"), "w", encoding="utf-8"), ensure_ascii=False)
-    if not a.public_only:
+    if internal:
         inn = internal_data(stores, daily, targets, asof, elapsed)
         render(os.path.join(ROOT, "templates", "internal.html"), inn, os.path.join(a.out, "internal.html"), refresh)
         json.dump(inn, open(os.path.join(a.out, "data", "internal.json"), "w", encoding="utf-8"), ensure_ascii=False)
@@ -242,7 +288,7 @@ def build(a, refresh=None):
     print(f"Car leader (projected): {s['car']} | seats filled {s['fill']} | moved to KSA {s['moved']}")
     if s["unmatched"]:
         print("WARNING branches with sales but no target:", s["unmatched"])
-    print("Written to", a.out)
+    print(f"Written {page} to", a.out)
 
 
 if __name__ == "__main__":
