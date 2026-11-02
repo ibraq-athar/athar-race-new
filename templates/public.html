@@ -417,12 +417,13 @@ $('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.d
   if(tick()){ const t=setInterval(()=>{ if(!tick()) clearInterval(t); },1000); }
 })();
 // اختيار الشهر: كل شهر صفحة مستقلة YYYY-MM.html
-if(D.months&&D.months.length){
-  const s=$('msel');
+// always shown: an older build without a month list still gets its own month
+{
+  const s=$('msel'), months=(D.months&&D.months.length)?D.months:[D.month||D.asof.slice(0,7)];
   const mn=m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
-  s.innerHTML=D.months.map(m=>`<option value="${m}">${mn(m)}</option>`).join('')
+  s.innerHTML=months.map(m=>`<option value="${m}">${mn(m)}</option>`).join('')
     +(D.pending||[]).map(m=>`<option value="${m}" disabled>${mn(m)} — بانتظار ملف المستهدف</option>`).join('');
-  s.value=D.month; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
+  s.value=D.month||months[0]; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
 }
 if(D.built){ try{ $('pUpd').textContent = new Date(D.built).toLocaleString('ar-SA-u-ca-gregory-nu-latn',{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).replace('،',' ·'); $('pUpdWrap').hidden=false; }catch(e){} }
 

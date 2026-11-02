@@ -137,11 +137,11 @@ $('cats').innerHTML = ['B','C','D','E'].map(c=>{
       : `<div class="empty">لا يوجد فائزون في هذه الفئة</div>`)+`</section>`;
 }).join('');
 
-if(D.months&&D.months.length){
-  const s=$('msel');
-  s.innerHTML=D.months.map(m=>`<option value="${m}">${monthName(m)}</option>`).join('')
+{
+  const s=$('msel'), months=(D.months&&D.months.length)?D.months:[D.month||D.asof.slice(0,7)];
+  s.innerHTML=months.map(m=>`<option value="${m}">${monthName(m)}</option>`).join('')
     +(D.pending||[]).map(m=>`<option value="${m}" disabled>${monthName(m)} — بانتظار ملف المستهدف</option>`).join('');
-  s.value=D.month; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
+  s.value=D.month||months[0]; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
 }
 })();
 </script>
