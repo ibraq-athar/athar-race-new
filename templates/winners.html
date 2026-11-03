@@ -35,6 +35,7 @@ h1{font-size:30px} h2{font-size:20px}
 .pill b{font-family:var(--display)}
 .msel select{font:inherit;font-family:var(--display);font-weight:700;color:var(--fg);background:transparent;border:0;cursor:pointer;padding:0 2px}
 .msel select option{background:var(--surface);color:var(--fg)}
+.pvw{border-color:var(--gold);color:var(--gold)}
 .msel:focus-within{outline:2px solid var(--bar);outline-offset:2px}
 .card{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:18px}
 /* car winner hero */
@@ -123,6 +124,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
     <div class="meta">
       <label class="pill msel" id="mselWrap" hidden>📅 الشهر <select id="msel" aria-label="اختر الشهر"></select></label>
       <span class="pill">✅ النتائج النهائية</span>
+      <span class="pill pvw" id="pvw" hidden>👁️ معاينة للمراجعة — الإعلان الرسمي <b id="pvwD"></b></span>
       <span class="pill">الفروع الفائزة <b id="nWin">—</b></span>
     </div>
   </header>
@@ -170,6 +172,8 @@ const monthName = m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-g
 $('sub').textContent = `مسابقة أثر · ${monthName(D.month||D.asof.slice(0,7))}`;
 const won = D.branches.filter(b=>b.aw);
 $('nWin').textContent = won.length;
+// before results day this page is only a preview for management to check (YYYY-MM-winners.html)
+if(!D.winners && D.results){ $('pvwD').textContent=new Date(D.results+'T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{day:'numeric',month:'long'}); $('pvw').hidden=false; }
 
 const car = won.find(b=>b.aw==='A');
 const where = b=>`${esc(AR[b.c]||b.c)} · ${esc(b.city)}`;

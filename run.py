@@ -276,6 +276,8 @@ def build_one(a, refresh, target, asof_in, page, extra, internal):
     pub.update(extra or {})
     tpl = "winners.html" if pub.get("winners") else "public.html"
     render(os.path.join(ROOT, "templates", tpl), pub, os.path.join(a.out, page), refresh)
+    if extra and extra["month"] < gcc_today().strftime("%Y-%m"):   # finished month: winners at YYYY-MM-winners.html too (check before results day)
+        render(os.path.join(ROOT, "templates", "winners.html"), pub, os.path.join(a.out, extra["month"] + "-winners.html"), refresh)
     json.dump(pub, open(os.path.join(a.out, "data", "public.json"), "w", encoding="utf-8"), ensure_ascii=False)
     if internal:
         inn = internal_data(stores, daily, targets, asof, elapsed)
