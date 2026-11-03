@@ -235,6 +235,11 @@ def build_months(a, refresh):
     if not built:
         sys.exit("No month could be built")
     shutil.copyfile(os.path.join(a.out, built[-1] + ".html"), os.path.join(a.out, "index.html"))
+    if cur not in months:   # current month has no target file yet: a "waiting" page only, nothing is calculated
+        render(os.path.join(ROOT, "templates", "pending.html"), {"month": cur, "months": built, "pending": [cur]},
+               os.path.join(a.out, cur + ".html"), refresh)
+    if os.path.isdir(os.path.join(ROOT, "media")):   # e.g. the CEO voice note on the winners page
+        shutil.copytree(os.path.join(ROOT, "media"), os.path.join(a.out, "media"), dirs_exist_ok=True)
 
 
 def build_one(a, refresh, target, asof_in, page, extra, internal):

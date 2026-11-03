@@ -1,0 +1,58 @@
+<title>مسابقة أثر — بانتظار المستهدف</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Changa:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* A month whose target file is not added yet: no figures, just the month switcher and a note. */
+:root{
+  --bg:#0f1218; --surface:#171c25; --line:#2a3344; --fg:#f2f0ea; --fg-2:#b8bcc6; --gold:#e6b64a; --gold-ink:#1a1304; --bar:#4f8cff;
+  --display:"Changa","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif; color-scheme:dark;
+}
+:root[data-theme="light"]{ --bg:#f5f3ee; --surface:#ffffff; --line:#e3ded3; --fg:#1c1f26; --fg-2:#454b57; --gold:#a8760a; --gold-ink:#ffffff; --bar:#2d6be0; color-scheme:light; }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
+.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
+h1,h2{margin:0;font-family:var(--display);font-weight:700;line-height:1.2} h1{font-size:30px}
+.muted{color:var(--fg-2)}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
+.head .t{display:flex;align-items:center;gap:12px}
+.mark{width:48px;height:48px;border-radius:12px;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:26px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:13px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.msel select{font:inherit;font-family:var(--display);font-weight:700;color:var(--fg);background:transparent;border:0;cursor:pointer;padding:0 2px}
+.msel select option{background:var(--surface);color:var(--fg)}
+.msel:focus-within{outline:2px solid var(--bar);outline-offset:2px}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:40px 18px;text-align:center}
+.card .ico{font-size:56px;line-height:1.2}
+.card h2{font-size:24px;margin:8px 0 6px}
+</style>
+
+<div class="wrap">
+  <script>(function(){var t=null;try{t=localStorage.getItem('athar_theme');}catch(e){} if(t==='light') document.documentElement.setAttribute('data-theme','light');})();</script>
+  <header class="head">
+    <div class="t">
+      <div class="mark">أ</div>
+      <div><h1>مسابقة أثر</h1><div class="muted" id="sub">—</div></div>
+    </div>
+    <label class="pill msel">📅 الشهر <select id="msel" aria-label="اختر الشهر"></select></label>
+  </header>
+  <section class="card">
+    <div class="ico">⏳</div>
+    <h2 id="ttl">—</h2>
+    <div class="muted">لم يُضَف ملف المستهدف لهذا الشهر بعد. ستظهر النتائج هنا فور إضافته.</div>
+  </section>
+</div>
+
+<script id="embed" type="application/json">{}</script>
+<script>
+(function(){
+const D = JSON.parse(document.getElementById('embed').textContent);
+const $ = id=>document.getElementById(id);
+const mn = m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+$('sub').textContent = 'برنامج حوافز المبيعات · '+mn(D.month);
+$('ttl').textContent = mn(D.month)+' — بانتظار ملف المستهدف';
+const s=$('msel');
+s.innerHTML=D.months.map(m=>`<option value="${m}">${mn(m)}</option>`).join('')
+  +D.pending.map(m=>`<option value="${m}">${mn(m)} — بانتظار ملف المستهدف</option>`).join('');
+s.value=D.month; s.addEventListener('change',()=>{ location.href=s.value+'.html'; });
+})();
+</script>
