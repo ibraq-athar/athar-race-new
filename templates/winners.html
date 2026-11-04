@@ -9,7 +9,8 @@
   --display:"Changa","IBM Plex Sans Arabic",system-ui,sans-serif;
   --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
   --hero-0:#3a2a08; --hero-1:#171c25; color-scheme:dark;
-  --glow-gold:rgba(230,182,74,.28); --glow-a:rgba(168,85,247,.22); --glow-b:rgba(236,72,153,.18); --glow-c:rgba(79,140,255,.18);
+  --glow-gold:rgba(230,182,74,.28); --glow-a:rgba(168,85,247,.22); --glow-b:rgba(133,18,44,.35); --glow-c:rgba(79,140,255,.18);
+  --brand:#c23a5c; --navy:#373851;
   --spark-o:.35; --ray:rgba(243,207,109,.10); --sec-top:rgba(230,182,74,.10);
 }
 :root[data-theme="light"]{
@@ -17,13 +18,14 @@
   --fg:#1c1f26; --fg-2:#454b57; --fg-3:#6b7180;
   --gold:#a8760a; --gold-soft:#f7ecd0; --gold-ink:#ffffff; --up:#1d8a4b; --bar:#2d6be0;
   --hero-0:#fbe7b0; --hero-1:#ffffff; color-scheme:light;
-  --glow-gold:rgba(230,182,74,.35); --glow-a:rgba(168,85,247,.14); --glow-b:rgba(236,72,153,.12); --glow-c:rgba(79,140,255,.12);
+  --glow-gold:rgba(230,182,74,.35); --glow-a:rgba(168,85,247,.14); --glow-b:rgba(133,18,44,.14); --glow-c:rgba(79,140,255,.12);
+  --brand:#85122c; --navy:#373851;
   --spark-o:.45; --ray:rgba(201,154,46,.12); --sec-top:rgba(230,182,74,.16);
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
-.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
 h1,h2,h3{margin:0;font-family:var(--display);font-weight:700;line-height:1.2}
 h1{font-size:30px} h2{font-size:20px}
 .muted{color:var(--fg-2)} .small{font-size:12.5px;color:var(--fg-3)}
@@ -35,6 +37,26 @@ h1{font-size:30px} h2{font-size:20px}
 .pill b{font-family:var(--display)}
 .msel select{font:inherit;font-family:var(--display);font-weight:700;color:var(--fg);background:transparent;border:0;cursor:pointer;padding:0 2px}
 .msel select option{background:var(--surface);color:var(--fg)}
+/* IBRAQ branding */
+.brandbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.blogo{height:34px;width:auto} .hlogo{height:30px;width:auto;margin:2px auto 6px;display:block;opacity:.9} .slogo{height:28px;width:auto;opacity:.85}
+.blogo,.hlogo,.slogo{filter:brightness(0) invert(1)}
+:root[data-theme="light"] .blogo,:root[data-theme="light"] .hlogo,:root[data-theme="light"] .slogo{filter:brightness(0) opacity(.8)}
+/* the emblem alone, cut from the middle of the logo file (logo is 1440x348; emblem sits at 41-58% of its width, top 78%) */
+.emb{--s:40px;width:var(--s);height:calc(var(--s) * 1.12);position:relative;overflow:hidden;flex:none;display:block}
+.emb img{position:absolute;width:calc(var(--s) * 5.88);max-width:none;left:calc(var(--s) * -2.41);top:0}
+.wm{font-family:var(--display);font-weight:700;letter-spacing:.2em;color:var(--fg)}
+.brandbar .tag{font-family:var(--display);color:var(--brand);font-weight:700;font-size:15px}
+.sec{border-top-width:1px}
+.sec::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--gold),var(--brand))}
+.sec h2{color:var(--fg)} .chip{border-color:color-mix(in srgb,var(--brand) 45%,var(--line))}
+.ceo .mic{background:var(--brand);color:#fff}
+.sign{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+/* language option: Arabic is always the starting view */
+.seg{padding:3px;gap:2px}
+.seg button{cursor:pointer;font:inherit;font-size:13px;font-family:var(--display);font-weight:700;color:var(--fg-2);background:transparent;border:0;border-radius:999px;padding:3px 12px}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink)}
+.seg button:focus-visible{outline:2px solid var(--bar);outline-offset:1px}
 .pvw{border-color:var(--gold);color:var(--gold)}
 .msel:focus-within{outline:2px solid var(--bar);outline-offset:2px}
 .card{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:18px}
@@ -49,15 +71,65 @@ h1{font-size:30px} h2{font-size:20px}
 #cats{display:flex;flex-direction:column;gap:22px}
 .sec h2{display:flex;gap:8px;align-items:baseline;margin-bottom:14px}
 .sec h2 small{font-family:var(--font);font-weight:500;color:var(--fg-3);font-size:13px}
-.podium{display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:10px;max-width:760px;margin:0 auto}
-.pd{text-align:center;min-width:0}
-.pd .who{font-family:var(--display);font-weight:700;font-size:17px;overflow-wrap:anywhere}
-.pd .where,.pd .emp{font-size:12.5px;color:var(--fg-2)}
-.pd .blk{margin-top:8px;border-radius:12px 12px 0 0;display:grid;place-items:center;font-family:var(--display);font-weight:800;color:#1a1304}
-.pd.p1 .blk{height:120px;background:linear-gradient(#f3cf6d,#c99a2e);font-size:40px}
-.pd.p2 .blk{height:90px;background:linear-gradient(#e2e6ee,#a9b0bd);font-size:32px}
-.pd.p3 .blk{height:70px;background:linear-gradient(#e7a774,#b0703f);font-size:28px}
-.pd .pct{font-family:var(--display);font-weight:700;color:var(--up);margin-top:6px}
+/* realistic 3-step podium: front face, lit top face, side shading, floor shadow, engraved emblem */
+.podium{display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:0;max-width:720px;margin:0 auto;position:relative;padding-bottom:14px}
+.podium::after{content:"";position:absolute;left:4%;right:4%;bottom:0;height:22px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),transparent);z-index:0}
+.pd{text-align:center;min-width:0;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+.pd .who{font-family:var(--display);font-weight:700;font-size:17px;overflow-wrap:anywhere;padding-inline:4px}
+.pd .where,.pd .emp{font-size:12.5px;color:var(--fg-2);padding-inline:4px}
+.pd .pct{font-family:var(--display);font-weight:800;color:var(--up);margin:4px 0 26px;font-size:18px}
+.pd .blk{--top:#fff;--a:#ccc;--b:#999;width:100%;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding-bottom:10px;
+  font-family:var(--display);font-weight:800;color:rgba(26,19,4,.78);text-shadow:0 1px 0 rgba(255,255,255,.45);
+  background:linear-gradient(90deg,rgba(0,0,0,.18),transparent 14%,transparent 86%,rgba(0,0,0,.24)),linear-gradient(180deg,var(--a),var(--b));
+  box-shadow:inset 0 -10px 0 var(--brand),inset 0 1px 0 rgba(255,255,255,.6)}
+.pd .blk::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:20px;background:linear-gradient(180deg,var(--top),var(--a));
+  clip-path:polygon(7% 0,93% 0,100% 100%,0 100%)}
+.pd.p1 .blk{--top:#fff1bf;--a:#f3cf6d;--b:#b8871f;height:150px;font-size:56px}
+.pd.p2 .blk{--top:#ffffff;--a:#e4e8ef;--b:#9aa2b1;height:115px;font-size:46px}
+.pd.p3 .blk{--top:#ffd9b8;--a:#e2a06c;--b:#a2622f;height:92px;font-size:40px}
+.pd.p2 .blk{border-start-end-radius:0} .pd.p1{z-index:2}
+.pd.p1 .blk{box-shadow:inset 0 -10px 0 var(--brand),inset 0 1px 0 rgba(255,255,255,.6),0 0 40px -8px #f3cf6d}
+/* car branch team: every employee ranked, with the prize for their place */
+.staff{list-style:none;margin:18px auto 0;padding:0;max-width:640px;display:flex;flex-direction:column;gap:6px;text-align:start}
+.staff li{display:grid;grid-template-columns:34px 1fr auto auto;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+:root[data-theme="light"] .staff li{background:rgba(255,255,255,.7)}
+.staff .no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;background:var(--surface-2);font-size:13px}
+.staff .nm{font-weight:600;overflow-wrap:anywhere} .staff .sh{font-family:var(--display);color:var(--fg-2);font-size:13px}
+.staff .pz{font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;border:1px solid var(--line)}
+.staff li.r1{border-color:var(--gold);background:linear-gradient(90deg,rgba(230,182,74,.22),transparent)} .staff li.r1 .no{background:linear-gradient(#f3cf6d,#c99a2e);color:#1a1304}
+.staff li.r2 .no{background:linear-gradient(#e2e6ee,#a9b0bd);color:#1a1304} .staff li.r3 .no{background:linear-gradient(#e7a774,#b0703f);color:#1a1304}
+.staff li.r1 .pz{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.staff li.r2 .pz,.staff li.r3 .pz{border-color:var(--gold);color:var(--gold)}
+.staffH{font-family:var(--display);font-weight:700;margin-top:20px;color:var(--gold)}
+/* intro: closed stage curtains, the IBRAQ emblem, a 3-2-1-GO countdown, then the curtains draw open on the winners */
+#intro{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:#0b0508}
+#intro .cur{position:absolute;top:0;bottom:0;width:50.5%;transition:transform 1.3s cubic-bezier(.65,0,.25,1);
+  background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 22%,transparent 72%,rgba(0,0,0,.6)),
+    repeating-linear-gradient(90deg,#3d0512 0,#7d1229 18px,#b3223f 30px,#d0405c 34px,#9b1a35 42px,#5a0a1c 58px,#3d0512 66px)}
+#intro .cl{left:0;transform-origin:left center;box-shadow:inset -18px 0 30px rgba(0,0,0,.55)}
+#intro .cr{right:0;transform-origin:right center;box-shadow:inset 18px 0 30px rgba(0,0,0,.55)}
+#intro .val{position:absolute;top:0;left:0;right:0;height:74px;z-index:2;transition:transform .8s .5s ease-in;
+  background:linear-gradient(180deg,#2a030c,#7d1229 60%,#5a0a1c),repeating-linear-gradient(90deg,transparent 0 40px,rgba(0,0,0,.25) 40px 44px);
+  box-shadow:0 8px 18px rgba(0,0,0,.6)}
+#intro .val::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:14px;
+  background:repeating-linear-gradient(90deg,#f3cf6d 0 3px,#b8871f 3px 6px);-webkit-mask:linear-gradient(#000,transparent);mask:linear-gradient(#000,transparent)}
+#intro .spot{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 34% 46% at 50% 55%,rgba(255,236,190,.22),transparent 70%);transition:opacity .6s}
+#intro .mid{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;gap:10px;transition:opacity .4s,transform .5s}
+#intro .emb{--s:96px;filter:brightness(0) invert(1) drop-shadow(0 0 16px rgba(243,207,109,.65));animation:fadeUp .7s ease-out both}
+#intro .wt{font-family:var(--display);color:#f3cf6d;letter-spacing:.06em;font-size:15px;animation:fadeUp .7s .2s ease-out both}
+#intro .rv{font-family:var(--display);font-weight:800;color:#fff;font-size:30px;text-align:center;text-shadow:0 2px 12px rgba(0,0,0,.6);animation:fadeUp .7s .4s ease-out both;padding-inline:16px}
+#intro .cd{:var(--display);font-weight:800;font-size:150px;line-height:1;height:160px;min-width:200px;text-align:center;color:#f3cf6d;
+  text-shadow:0 0 30px rgba(243,207,109,.7),0 6px 0 #7a5410}
+#intro .cd.pop{animation:pop .78s cubic-bezier(.2,.9,.3,1.2) both}
+#intro .cd.go{color:#fff;text-shadow:0 0 34px #f3cf6d,0 6px 0 #85122c}
+#intro .skip{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:3;color:rgba(255,255,255,.55);font-size:12px}
+#intro.open .cl{transform:scaleX(.1)} #intro.open .cr{transform:scaleX(.1)}
+#intro.open .val{transform:translateY(-110%)}
+#intro.open .mid,#intro.open .spot,#intro.open .skip{opacity:0} #intro.open .mid{transform:scale(1.2)}
+#intro.open{background:transparent;transition:background .3s}
+@keyframes pop{0%{opacity:0;transform:scale(2.4)}35%{opacity:1;transform:scale(1)}80%{opacity:1;transform:scale(.96)}100%{opacity:0;transform:scale(.7)}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .rest{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
 .chip b{font-family:var(--display)} .chip .pct{font-family:var(--display);font-weight:700;color:var(--up)}
@@ -88,7 +160,6 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 .hero .n{background:linear-gradient(90deg,var(--fg),var(--gold),var(--fg));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
 @keyframes shine{to{background-position:200% center}}
 .sec{position:relative;background:linear-gradient(180deg,var(--sec-top),var(--surface) 140px);border-top:3px solid var(--gold)}
-.pd.p1 .blk{box-shadow:0 0 28px -4px #f3cf6d}
 /* CEO voice note */
 .ceo{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;border:1px solid var(--gold);background:linear-gradient(90deg,var(--sec-top),var(--surface))}
 .ceo .mic{width:52px;height:52px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-size:26px;flex:none}
@@ -98,14 +169,16 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 .ceo audio{flex:1 1 260px;max-width:100%}
 .ceo .tap{color:var(--gold);font-weight:600}
 @media (prefers-reduced-motion: reduce){ .ceo.playing .mic{animation:none} }
-@media (prefers-reduced-motion: reduce){ body::before,.deco span,.hero::before,.hero .n{animation:none} .deco{display:none} }
+@media (prefers-reduced-motion: reduce){ #intro{display:none} body::before,.deco span,.hero::before,.hero .n{animation:none} .deco{display:none} }
 @media (max-width:640px){
   .hero .ico{font-size:48px} .hero .n{font-size:32px} .hero .pct{font-size:42px}
-  .pd .who{font-size:14px} .pd.p1 .blk{height:96px} .pd.p2 .blk{height:72px} .pd.p3 .blk{height:56px}
-  .meta{width:100%}
+  .pd .who{font-size:13px} .pd .pct{font-size:15px} .pd.p1 .blk{height:112px;font-size:42px} .pd.p2 .blk{height:88px;font-size:34px} .pd.p3 .blk{height:70px;font-size:30px}
+  .staff li{grid-template-columns:30px 1fr auto;} .staff .sh{display:none} #intro .emb{--s:72px} #intro .cd{font-size:110px;height:120px} #intro .rv{font-size:21px} #intro .val{height:54px}
+  .meta{width:100%} .pill{white-space:normal;max-width:100%} .msel select{max-width:62vw}
 }
 </style>
 
+<div id="intro" aria-hidden="true"><div class="cur cl"></div><div class="cur cr"></div><div class="val"></div><div class="spot"></div><div class="mid"><span class="emb"><img src="https://cdn.files.salla.network/other/2084701115/ab139722-93e7-4ea0-b942-68759ef2e55b-original.webp" alt=""></span><div class="wt" id="introT">إبراق بالطيب سباق</div><div class="rv" id="introR"></div><div class="cd" id="cdNum"></div></div><div class="skip" id="introSkip"></div></div>
 <div class="deco" aria-hidden="true">
   <span style="left:3%;animation-duration:19s">🎈</span><span style="left:12%;animation-duration:25s;animation-delay:-8s">✨</span>
   <span style="left:24%;animation-duration:22s;animation-delay:-14s">🎉</span><span style="left:76%;animation-duration:21s;animation-delay:-4s">🎈</span>
@@ -113,35 +186,38 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 </div>
 <div class="wrap">
   <script>(function(){var t=null;try{t=localStorage.getItem('athar_theme');}catch(e){} if(t==='light') document.documentElement.setAttribute('data-theme','light');})();</script>
+  <div class="brandbar"><img class="blogo" src="https://cdn.files.salla.network/other/2084701115/ab139722-93e7-4ea0-b942-68759ef2e55b-original.webp" alt="إبراق | IBRAQ" onerror="this.outerHTML='<span class=&quot;blogo wm&quot;>IBRAQ · إبراق</span>'"><span class="tag" data-i="tag">إبراق بالطيب سباق</span></div>
   <header class="head">
     <div class="t">
       <div class="mark">🏆</div>
       <div>
-        <h1>الفائزون</h1>
+        <h1 data-i="title">الفائزون</h1>
         <div class="muted" id="sub">—</div>
       </div>
     </div>
     <div class="meta">
-      <label class="pill msel" id="mselWrap" hidden>📅 الشهر <select id="msel" aria-label="اختر الشهر"></select></label>
-      <span class="pill">✅ النتائج النهائية</span>
-      <span class="pill pvw" id="pvw" hidden>👁️ معاينة للمراجعة — الإعلان الرسمي <b id="pvwD"></b></span>
-      <span class="pill">الفروع الفائزة <b id="nWin">—</b></span>
+      <span class="pill seg" id="langSeg" role="group"><button type="button" data-l="ar" lang="ar">العربية</button><button type="button" data-l="en" lang="en">English</button></span>
+      <label class="pill msel" id="mselWrap" hidden>📅 <span data-i="month">الشهر</span> <select id="msel"></select></label>
+      <span class="pill">✅ <span data-i="final">النتائج النهائية</span></span>
+      <span class="pill pvw" id="pvw" hidden>👁️ <span data-i="preview">معاينة للمراجعة — الإعلان الرسمي</span> <b id="pvwD"></b></span>
+      <span class="pill"><span data-i="nwin">الفروع الفائزة</span> <b id="nWin">—</b></span>
     </div>
   </header>
 
-  <section class="hero" id="car" aria-label="الفائز بالسيارة"></section>
+  <section class="hero" id="car"></section>
 
-  <section class="card ceo" id="ceoCard" hidden aria-label="كلمة الرئيس التنفيذي">
+  <section class="card ceo" id="ceoCard" hidden>
     <div class="mic" aria-hidden="true">🎙️</div>
-    <div class="txt"><h2>كلمة الرئيس التنفيذي</h2><div class="small" id="ceoHint">رسالة تهنئة للفائزين</div></div>
+    <div class="txt"><h2 data-i="ceo">كلمة الرئيس التنفيذي</h2><div class="small" id="ceoHint">رسالة تهنئة للفائزين</div></div>
     <!-- the real recording (mp3) wins; ceo-voice.wav is a placeholder until it is added -->
     <audio id="ceoAudio" preload="auto" controls><source src="media/ceo-voice.mp3" type="audio/mpeg"><source src="media/ceo-voice.wav" type="audio/wav"></audio>
   </section>
   <div id="cats"></div>
 
   <section class="card thanks">
-    <h2>🎉 مبروك لكل الفروع الفائزة</h2>
-    <div class="muted">الترتيب حسب نسبة تحقيق المستهدف الفعلية لكامل الشهر. شكراً لكل الفرق على جهودهم.</div>
+    <h2>🎉 <span data-i="congrats">مبروك لكل الفروع الفائزة</span></h2>
+    <div class="muted" data-i="rank">الترتيب حسب نسبة تحقيق المستهدف الفعلية لكامل الشهر. شكراً لكل الفرق على جهودهم.</div>
+    <div class="sign"><img class="slogo" src="https://cdn.files.salla.network/other/2084701115/ab139722-93e7-4ea0-b942-68759ef2e55b-original.webp" alt="إبراق | IBRAQ" onerror="this.outerHTML='<span class=&quot;slogo wm&quot;>IBRAQ · إبراق</span>'"><div class="small"><span data-i="sign">مع تحيات إدارة إبراق</span> · ibraqperfumes.com</div></div>
   </section>
 </div>
 
@@ -149,51 +225,92 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>
 // احتفال: مدافع قصاصات من اليسار واليمين عند فتح الصفحة (يتوقف لمن يفضّل تقليل الحركة)
-(function(){
+window.atharReveal = cb => window.atharRevealed ? cb() : addEventListener('athar:revealed', cb, {once:true});
+atharReveal(function(){
   if(!window.confetti || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const colors=['#e6b64a','#f3cf6d','#ffffff','#3fcf7a','#4f8cff','#f0655c'];
   const cannon=(x,angle,n,v)=>confetti({particleCount:n,angle,spread:55,startVelocity:v,origin:{x,y:0.75},colors,zIndex:9999});
   const end=Date.now()+3000;
   (function stream(){ cannon(0,60,4,55); cannon(1,120,4,55); if(Date.now()<end) requestAnimationFrame(stream); })();
-  [300,1200,2200].forEach(t=>setTimeout(()=>{ cannon(0,55,90,75); cannon(1,125,90,75); },t));
-})();
+  [100,1000,2000].forEach(t=>setTimeout(()=>{ cannon(0,55,90,75); cannon(1,125,90,75); },t));
+});
 </script>
 <script>
 (function(){
 const D = JSON.parse(document.getElementById('embed').textContent);
-const AR = {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'};
-const PRIZE = {A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'};
+// Arabic / English: the choice is remembered per viewer; Arabic is the default
+const T = {
+  ar:{tag:'إبراق بالطيب سباق', title:'الفائزون', month:'الشهر', final:'النتائج النهائية', preview:'معاينة للمراجعة — الإعلان الرسمي',
+      nwin:'الفروع الفائزة', ceo:'كلمة الرئيس التنفيذي', ceoSub:'رسالة تهنئة للفائزين', tap:'🔊 اضغط في أي مكان لسماع الكلمة',
+      congrats:'مبروك لكل الفروع الفائزة', rank:'الترتيب حسب نسبة تحقيق المستهدف الفعلية لكامل الشهر. شكراً لكل الفرق على جهودهم.',
+      sign:'مع تحيات إدارة إبراق', race:'مسابقة أثر', champs:'أبطال مسابقة أثر', noCar:'لم تُمنح هذا الشهر', noCarSub:'لم يحقق أي فرع شروط السيارة',
+      winners:n=>`${n} فائز`, none:'لا يوجد فائزون في هذه الفئة', waiting:'بانتظار ملف المستهدف', pickMonth:'اختر الشهر', langLabel:'اللغة',
+      staffH:'🏅 فريق الفرع الفائز — ترتيب المساهمة', share:'من مبيعات الفرع', voucher:'🎟️ قسيمة 250 ر.س', ePrize:['🚗 سيارة','📱 آيفون','💻 آيباد'], intro:'إبراق بالطيب سباق', go:'انطلق!', reveal:m=>`الكشف عن فائزي مسابقة أثر لشهر ${m}`, skip:'اضغط للتخطي',
+      prize:{A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'},
+      country:{KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'}, loc:'ar-SA-u-ca-gregory-nu-latn'},
+  en:{tag:'IBRAQ — leading in fragrance', title:'Winners', month:'Month', final:'Final results', preview:'Preview for review — official announcement',
+      nwin:'Winning branches', ceo:'A word from the CEO', ceoSub:'A congratulations message to the winners', tap:'🔊 Tap anywhere to play the message',
+      congrats:'Congratulations to all winning branches', rank:'Ranked by actual target achievement for the whole month. Thank you to every team for their effort.',
+      sign:'With regards, IBRAQ management', race:'Athar Race', champs:'Athar Race champions', noCar:'Not awarded this month', noCarSub:'No branch met the car conditions',
+      winners:n=>`${n} ${n===1?'winner':'winners'}`, none:'No winners in this category', waiting:'waiting for the target file', pickMonth:'Choose month', langLabel:'Language',
+      staffH:'🏅 Winning branch team — ranked by contribution', share:'of branch sales', voucher:'🎟️ SAR 250 voucher', ePrize:['🚗 Car','📱 iPhone','💻 iPad'], intro:'IBRAQ — leading in fragrance', go:'GO!', reveal:m=>`Revealing the winners of Athar Race for ${m}`, skip:'Tap to skip',
+      prize:{A:'Car', B:'Smartphone', C:'iPad', D:'Smartwatch', E:'Gold bar'},
+      country:{KSA:'Saudi Arabia', UAE:'UAE', Oman:'Oman', Kuwait:'Kuwait', Bahrain:'Bahrain', Qatar:'Qatar'}, loc:'en-GB'}
+};
+let lang = new URLSearchParams(location.search).get('lang')==='en' ? 'en' : 'ar';   // Arabic unless ?lang=en
 const ICO = {A:'🚗', B:'📱', C:'💻', D:'⌚', E:'🥇'};
+const LOGO = 'https://cdn.files.salla.network/other/2084701115/ab139722-93e7-4ea0-b942-68759ef2e55b-original.webp';
 const $ = id=>document.getElementById(id);
 const esc = s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct = x=>(x*100).toFixed(1)+'%';
-const monthName = m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
-
-$('sub').textContent = `مسابقة أثر · ${monthName(D.month||D.asof.slice(0,7))}`;
+const M = D.month||D.asof.slice(0,7);
 const won = D.branches.filter(b=>b.aw);
-$('nWin').textContent = won.length;
-// before results day this page is only a preview for management to check (YYYY-MM-winners.html)
-if(!D.winners && D.results){ $('pvwD').textContent=new Date(D.results+'T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{day:'numeric',month:'long'}); $('pvw').hidden=false; }
-
 const car = won.find(b=>b.aw==='A');
-const where = b=>`${esc(AR[b.c]||b.c)} · ${esc(b.city)}`;
-$('car').innerHTML = `<div class="banner" aria-hidden="true">🎉 ✨ 🎊</div><div class="t">🏆 أبطال مسابقة أثر · ${monthName(D.month||D.asof.slice(0,7))}</div><div class="ico">🚗</div>`+
-  (car ? `<div class="n">${esc(car.s)}</div><div class="muted">${where(car)}</div><div class="pct">${pct(car.a)}</div>
-          ${car.top.length?`<div class="team">⭐ ${car.top.map(esc).join(' · ')}</div>`:''}`
-       : `<div class="n">لم تُمنح هذا الشهر</div><div class="muted">لم يحقق أي فرع شروط السيارة</div>`);
 
-$('cats').innerHTML = ['B','C','D','E'].map(c=>{
-  const L = won.filter(b=>b.aw===c).sort((x,y)=>y.a-x.a);
-  const pd = (b,place)=> b ? `<div class="pd p${place}"><div class="who">${esc(b.s)}</div><div class="where">${where(b)}</div>
-      ${b.top[0]?`<div class="emp">⭐ ${esc(b.top[0])}</div>`:''}<div class="blk">${place}</div><div class="pct">${pct(b.a)}</div></div>` : '<div></div>';
-  return `<section class="sec card"><h2>${ICO[c]} ${PRIZE[c]} <small>${L.length} فائز</small></h2>`+
-    (L.length ? `<div class="podium">${pd(L[1],2)}${pd(L[0],1)}${pd(L[2],3)}</div>
-       ${L.length>3?`<div class="rest">${L.slice(3).map((b,i)=>`<span class="chip">${i+4}. <b>${esc(b.s)}</b> · ${esc(b.top[0]||'')} <span class="pct">${pct(b.a)}</span></span>`).join('')}</div>`:''}`
-      : `<div class="empty">لا يوجد فائزون في هذه الفئة</div>`)+`</section>`;
-}).join('');
+function paint(){
+  const L = T[lang];
+  const monthName = m=>new Date(m+'-01T00:00:00').toLocaleDateString(L.loc,{month:'long',year:'numeric'});
+  const where = b=>`${esc(L.country[b.c]||b.c)} · ${esc(b.city)}`;
+  document.documentElement.lang = lang; document.documentElement.dir = lang==='ar' ? 'rtl' : 'ltr';
+  document.title = `${L.title} — ${L.race}`;
+  document.querySelectorAll('[data-i]').forEach(e=>{ e.textContent = L[e.dataset.i]; });
+  $('langSeg').setAttribute('aria-label', L.langLabel);
+  $('langSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.l===lang)));
+  $('msel').setAttribute('aria-label', L.pickMonth);
+  if($('ceoCard').classList.contains('tapping')) $('ceoHint').innerHTML = `<span class="tap">${L.tap}</span>`; else $('ceoHint').textContent = L.ceoSub;
+  $('sub').textContent = `${L.race} · ${monthName(M)}`;
+  if($('introT')){ $('introT').textContent = L.intro; $('introSkip').textContent = L.skip; $('introR').textContent = L.reveal(monthName(M)); }   // gone once the intro has played
+  $('nWin').textContent = won.length;
+  // before results day this page is only a preview for management to check (YYYY-MM-winners.html)
+  if(!D.winners && D.results){ $('pvwD').textContent=new Date(D.results+'T00:00:00').toLocaleDateString(L.loc,{day:'numeric',month:'long'}); $('pvw').hidden=false; }
 
-// كلمة الرئيس التنفيذي: تظهر فقط إذا وُجد الملف، وتبدأ تلقائياً مرة واحدة لكل زيارة.
-// المتصفحات تمنع تشغيل الصوت قبل أي لمسة من الزائر، فعندها تبدأ مع أول نقرة/لمسة في الصفحة.
+  $('car').innerHTML = `<div class="banner" aria-hidden="true">🎉 ✨ 🎊</div><img class="hlogo" src="${LOGO}" alt="IBRAQ | إبراق" onerror="this.outerHTML='<span class=&quot;hlogo wm&quot;>IBRAQ · إبراق</span>'"><div class="t">🏆 ${L.champs} · ${monthName(M)}</div><div class="ico">🚗</div>`+
+    (car ? `<div class="n">${esc(car.s)}</div><div class="muted">${where(car)}</div><div class="pct">${pct(car.a)}</div>
+            ${(D.staff||[]).length?`<div class="staffH">${L.staffH}</div><ol class="staff">${D.staff.map((u,i)=>`<li class="r${i+1}"><span class="no">${i+1}</span><span class="nm">${esc(u.n)}</span><span class="sh">${pct(u.sh)} ${L.share}</span><span class="pz">${L.ePrize[i]||L.voucher}</span></li>`).join('')}</ol>`:(car.top.length?`<div class="team">⭐ ${car.top.map(esc).join(' · ')}</div>`:'')}`
+         : `<div class="n">${L.noCar}</div><div class="muted">${L.noCarSub}</div>`);
+
+  $('cats').innerHTML = ['B','C','D','E'].map(c=>{
+    const W = won.filter(b=>b.aw===c).sort((x,y)=>y.a-x.a);
+    const pd = (b,place)=> b ? `<div class="pd p${place}"><div class="who">${esc(b.s)}</div><div class="where">${where(b)}</div>
+        ${b.top[0]?`<div class="emp">⭐ ${esc(b.top[0])}</div>`:''}<div class="pct">${pct(b.a)}</div><div class="blk"><span>${place}</span></div></div>` : '<div></div>';
+    return `<section class="sec card"><h2>${ICO[c]} ${L.prize[c]} <small>${L.winners(W.length)}</small></h2>`+
+      (W.length ? `<div class="podium">${pd(W[1],2)}${pd(W[0],1)}${pd(W[2],3)}</div>
+         ${W.length>3?`<div class="rest">${W.slice(3).map((b,i)=>`<span class="chip">${i+4}. <b>${esc(b.s)}</b> · ${esc(b.top[0]||'')} <span class="pct">${pct(b.a)}</span></span>`).join('')}</div>`:''}`
+        : `<div class="empty">${L.none}</div>`)+`</section>`;
+  }).join('');
+
+  const s=$('msel'), months=(D.months&&D.months.length)?D.months:[M];
+  s.innerHTML=months.map(m=>`<option value="${m}">${monthName(m)}</option>`).join('')
+    +(D.pending||[]).map(m=>`<option value="${m}">${monthName(m)} — ${L.waiting}</option>`).join('');
+  s.value=D.month||months[0]; $('mselWrap').hidden=false;
+}
+paint();
+$('msel').addEventListener('change',e=>{ location.href=e.target.value+'.html'+location.search; });
+$('langSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b && b.dataset.l!==lang){ lang=b.dataset.l; paint();
+  const u=new URL(location.href); if(lang==='en') u.searchParams.set('lang','en'); else u.searchParams.delete('lang'); history.replaceState(null,'',u); } });
+
+// CEO voice note: shown only when the file exists, starts by itself once per visit.
+// Browsers block sound until the visitor touches the page; then it starts on the first click/tap.
 (function(){
   const au=$('ceoAudio'), card=$('ceoCard');
   au.addEventListener('canplay',()=>{ card.hidden=false; },{once:true});
@@ -201,19 +318,27 @@ $('cats').innerHTML = ['B','C','D','E'].map(c=>{
   ['pause','ended'].forEach(e=>au.addEventListener(e,()=>{ card.classList.remove('playing'); window.atharNoReload=false; }));
   let seen=false; try{ seen=sessionStorage.getItem('athar_ceo')==='1'; }catch(e){}
   if(seen) return;   // the page reloads itself every few minutes: don't replay each time
-  au.play().catch(err=>{
+  atharReveal(()=>au.play().catch(err=>{
     if(err.name!=='NotAllowedError') return;   // e.g. no file yet
-    $('ceoHint').innerHTML='<span class="tap">🔊 اضغط في أي مكان لسماع الكلمة</span>';
-    const go=()=>{ au.play().catch(()=>{}); $('ceoHint').textContent='رسالة تهنئة للفائزين'; };
-    ['pointerdown','keydown'].forEach(e=>document.addEventListener(e,go,{once:true}));
-  });
+    card.classList.add('tapping'); paint();
+    const stop=()=>['pointerdown','keydown'].forEach(n=>document.removeEventListener(n,go));
+    const go=e=>{ if(e.target.closest&&e.target.closest('#langSeg')) return; au.play().catch(()=>{}); card.classList.remove('tapping'); paint(); stop(); };
+    ['pointerdown','keydown'].forEach(n=>document.addEventListener(n,go));
+  }));
 })();
 
-{
-  const s=$('msel'), months=(D.months&&D.months.length)?D.months:[D.month||D.asof.slice(0,7)];
-  s.innerHTML=months.map(m=>`<option value="${m}">${monthName(m)}</option>`).join('')
-    +(D.pending||[]).map(m=>`<option value="${m}">${monthName(m)} — بانتظار ملف المستهدف</option>`).join('');
-  s.value=D.month||months[0]; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
-}
+// intro: once per visit (the page reloads itself), tap to skip, none for reduced motion
+(function(){
+  const el=$('intro'); let shown=false; try{ shown=sessionStorage.getItem('athar_intro')==='1'; sessionStorage.setItem('athar_intro','1'); }catch(e){}
+  const done=()=>{ if(window.atharRevealed) return; window.atharRevealed=true; dispatchEvent(new Event('athar:revealed')); };
+  if(shown || matchMedia('(prefers-reduced-motion: reduce)').matches){ el.remove(); done(); return; }
+  const open=()=>{ if(el.classList.contains('open')) return; clearTimeout(tick); el.classList.add('open'); setTimeout(done,700); setTimeout(()=>el.remove(),1500); };
+  history.scrollRestoration='manual'; scrollTo(0,0);   // the curtains open on the car winner
+  const cd=$('cdNum'), seq=['10','9','8','7','6','5','4','3','2','1',T[lang].go]; let n=0, tick;
+  const step=()=>{ if(n>=seq.length) return open();
+    cd.textContent=seq[n]; cd.className='cd'+(n===seq.length-1?' go':''); void cd.offsetWidth; cd.classList.add('pop');
+    n++; tick=setTimeout(step, n===seq.length ? 650 : 760); };
+  el.addEventListener('click',open); tick=setTimeout(step,700);
+})();
 })();
 </script>

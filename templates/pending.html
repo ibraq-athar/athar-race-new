@@ -11,7 +11,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
-.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
 h1,h2{margin:0;font-family:var(--display);font-weight:700;line-height:1.2} h1{font-size:30px}
 .muted{color:var(--fg-2)}
 .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
@@ -31,14 +31,14 @@ h1,h2{margin:0;font-family:var(--display);font-weight:700;line-height:1.2} h1{fo
   <header class="head">
     <div class="t">
       <div class="mark">أ</div>
-      <div><h1>مسابقة أثر</h1><div class="muted" id="sub">—</div></div>
+      <div><h1 id="h1">مسابقة أثر</h1><div class="muted" id="sub">—</div></div>
     </div>
-    <label class="pill msel">📅 الشهر <select id="msel" aria-label="اختر الشهر"></select></label>
+    <label class="pill msel">📅 <span id="mLbl">الشهر</span> <select id="msel" aria-label="اختر الشهر"></select></label>
   </header>
   <section class="card">
     <div class="ico">⏳</div>
     <h2 id="ttl">—</h2>
-    <div class="muted">لم يُضَف ملف المستهدف لهذا الشهر بعد. ستظهر النتائج هنا فور إضافته.</div>
+    <div class="muted" id="note">لم يُضَف ملف المستهدف لهذا الشهر بعد. ستظهر النتائج هنا فور إضافته.</div>
   </section>
 </div>
 
@@ -47,12 +47,18 @@ h1,h2{margin:0;font-family:var(--display);font-weight:700;line-height:1.2} h1{fo
 (function(){
 const D = JSON.parse(document.getElementById('embed').textContent);
 const $ = id=>document.getElementById(id);
-const mn = m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
-$('sub').textContent = 'برنامج حوافز المبيعات · '+mn(D.month);
-$('ttl').textContent = mn(D.month)+' — بانتظار ملف المستهدف';
+// Arabic unless the address says ?lang=en (same as the board)
+const EN = new URLSearchParams(location.search).get('lang')==='en', t=(ar,en)=>EN?en:ar;
+document.documentElement.lang = EN?'en':'ar'; document.documentElement.dir = EN?'ltr':'rtl';
+const mn = m=>new Date(m+'-01T00:00:00').toLocaleDateString(EN?'en-GB':'ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+const W = t('بانتظار ملف المستهدف','waiting for the target file');
+if(EN){ document.title='Athar Race — waiting for targets'; $('h1').textContent='Athar Race'; $('mLbl').textContent='Month';
+  $('note').textContent="This month's target file hasn't been added yet. Results will appear here as soon as it is."; }
+$('sub').textContent = t('برنامج حوافز المبيعات','Sales incentive programme')+' · '+mn(D.month);
+$('ttl').textContent = mn(D.month)+' — '+W;
 const s=$('msel');
 s.innerHTML=D.months.map(m=>`<option value="${m}">${mn(m)}</option>`).join('')
-  +D.pending.map(m=>`<option value="${m}">${mn(m)} — بانتظار ملف المستهدف</option>`).join('');
-s.value=D.month; s.addEventListener('change',()=>{ location.href=s.value+'.html'; });
+  +D.pending.map(m=>`<option value="${m}">${mn(m)} — ${W}</option>`).join('');
+s.value=D.month; s.addEventListener('change',()=>{ location.href=s.value+'.html'+location.search; });
 })();
 </script>

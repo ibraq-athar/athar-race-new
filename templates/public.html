@@ -36,7 +36,7 @@
   .theme-btn .tl{display:none} .theme-btn .ts{display:inline}
   .news{flex-direction:column}
   .nlabel{display:block;text-align:start;padding:7px 12px;font-size:14px;width:100%}
-  .nmore{float:left;margin-top:-1px}
+  .nmore{float:left;margin-top:-1px} html[dir=ltr] .nmore{float:right}
   .nlist{padding:12px}
   .nlabel small{display:block;font-size:11.5px;margin-top:1px}
   .ntape{padding:9px 0}
@@ -44,7 +44,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
-.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px;display:flex;flex-direction:column;gap:22px}
 h1,h2,h3{margin:0;text-wrap:balance;font-family:var(--display);font-weight:700;line-height:1.2}
 h1{font-size:30px} h2{font-size:20px} h3{font-size:16px}
 .num{font-variant-numeric:tabular-nums}
@@ -63,7 +63,7 @@ h1{font-size:30px} h2{font-size:20px} h3{font-size:16px}
 /* month-end countdown */
 .cd{display:flex;flex-direction:column;gap:6px}
 .cd .lbl{font-size:12.5px;color:var(--fg-3);font-weight:600}
-.cd .tiles{display:flex;align-items:flex-start;gap:6px;direction:rtl}
+.cd .tiles{display:flex;align-items:flex-start;gap:6px;direction:inherit}
 .cd .u{display:flex;flex-direction:column;align-items:center;gap:4px}
 .cd .n{position:relative;min-width:54px;padding:7px 8px 6px;border-radius:10px;background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line-strong);font-family:var(--display);font-weight:800;font-size:26px;line-height:1;text-align:center;color:var(--fg);font-variant-numeric:tabular-nums}
 .cd .n::after{content:"";position:absolute;inset-inline:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--gold)}
@@ -82,8 +82,10 @@ h1{font-size:30px} h2{font-size:20px} h3{font-size:16px}
 .tape .copy{display:flex;gap:28px;padding-inline-end:28px}
 .tape:hover .track{animation-play-state:paused}
 @keyframes tape{from{transform:translateX(0)}to{transform:translateX(50%)}}
+@keyframes tapeL{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+html[dir=ltr] .tape .track{animation-name:tapeL}
 @media (prefers-reduced-motion:reduce){.tape{overflow:auto}.tape .track{animation:none;width:auto}.tape .copy{flex-wrap:wrap;gap:8px 20px;padding:0 12px;white-space:normal}.tape .copy+.copy{display:none}}
-.tape .it{font-family:var(--display);font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:rtl}
+.tape .it{font-family:var(--display);font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:inherit}
 .tape .it .s{color:var(--fg-2);font-weight:500}
 .tape .it .a{font-weight:700}
 .tape .it .d{font-size:12px}
@@ -106,7 +108,7 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 .nlist .close{grid-column:1/-1;justify-self:start;cursor:pointer;font:inherit;font-size:13px;color:var(--fg);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:999px;padding:5px 14px}
 .ntape{flex:1;border:0;min-width:0;padding:10px 0}
 .ntape .copy{gap:34px;padding-inline-end:34px}
-.nw{font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:rtl}
+.nw{font-size:14px;display:inline-flex;gap:7px;align-items:baseline;direction:inherit}
 .nw .tag{font-family:var(--display);font-weight:700;font-size:12.5px;padding:1px 8px;border-radius:999px}
 .nw.in .tag{background:var(--up-soft);color:var(--up)} .nw.up .tag{background:var(--up-soft);color:var(--up)}
 .nw.near .tag{background:var(--gold-soft);color:var(--gold)}
@@ -157,7 +159,7 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 /* collapsed prize lists */
 .cat:not(.open) li.more{display:none}
 .cat .morebtn{align-self:flex-start;font-size:12.5px;padding:5px 12px;border-radius:999px;background:transparent;border:1px solid var(--line-strong);color:var(--fg-2)}
-.cat li .p small{display:block;font-family:var(--font);font-size:10.5px;font-weight:500;color:var(--fg-3);text-align:left}
+.cat li .p small{display:block;font-family:var(--font);font-size:10.5px;font-weight:500;color:var(--fg-3);text-align:end}
 .explain{font-size:13px;color:var(--fg-2);background:var(--surface-2);border-radius:9px;padding:9px 12px;line-height:1.6}
 .explain b{color:var(--fg)}
 
@@ -169,7 +171,7 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 .nx .n{min-width:0}
 .nx .n b{display:block;font-family:var(--display)}
 .nx .n small{display:block;color:var(--fg-3);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nx .g{text-align:left}
+.nx .g{text-align:end}
 .nx .g .a{font-family:var(--display);font-weight:700;font-size:16px}
 .push{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(90deg,var(--gold-soft),transparent);border:1px solid var(--gold);border-radius:10px;padding:12px 16px}
 .push .bolt{font-size:30px;line-height:1}
@@ -191,7 +193,7 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 .hero .who{font-size:18px;font-weight:600}
 .hero .who small{display:block;font-size:13px;color:var(--fg-2);font-weight:400}
 .race{height:14px;background:var(--bar-track);border-radius:7px;position:relative;margin-top:4px}
-.race>i{position:absolute;inset-block:0;right:0;border-radius:7px;background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
+.race>i{position:absolute;inset-block:0;inset-inline-start:0;border-radius:7px;background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
 .race>b{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--marker)}
 .race .lbl{position:absolute;top:18px;font-size:11px;color:var(--fg-3);transform:translateX(50%)}
 .track4{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -206,9 +208,15 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 .lane .ln .a{font-family:var(--display);font-weight:700;font-size:16px}
 .lane.lead1 .ln .a,.lane.lead1 .ln b{color:var(--gold)}
 .road{position:relative;height:12px;background:repeating-linear-gradient(90deg,var(--bar-track) 0 14px,var(--road-dash) 14px 18px);border-radius:6px;margin-inline:0 14px}
-.road>i{position:absolute;inset-block:0;right:0;border-radius:6px;background:var(--bar)}
+.road>i{position:absolute;inset-block:0;inset-inline-start:0;border-radius:6px;background:var(--bar)}
 .lane.lead1 .road>i{background:linear-gradient(90deg,var(--gold-deep),var(--gold))}
 .road .car{position:absolute;top:50%;transform:translate(50%,-55%);font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+html[dir=ltr] .road .car{transform:translate(-50%,-55%) scaleX(-1)} html[dir=ltr] .road .fin{transform:translateX(-50%)}
+/* language option: Arabic unless the address says ?lang=en */
+.seg{padding:3px;gap:2px}
+.seg button{cursor:pointer;font:inherit;font-size:13px;font-family:var(--display);font-weight:700;color:var(--fg-2);background:transparent;border:0;border-radius:999px;padding:3px 12px}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink)}
+.seg button:focus-visible{outline:2px solid var(--bar);outline-offset:1px}
 .road .fin{position:absolute;top:-6px;bottom:-6px;width:6px;transform:translateX(50%);background:repeating-linear-gradient(0deg,#f2f0ea 0 3px,#0f1218 3px 6px);border-radius:1px}
 .lane .gap{font-size:11.5px;color:var(--fg-3)}
 .track4 .note{font-size:11.5px;color:var(--fg-3);border-top:1px solid var(--line);padding-top:8px}
@@ -232,9 +240,9 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 .mrow .nm{font-weight:600}
 .mrow .nm small{display:block;font-weight:400;color:var(--fg-3);font-size:11.5px}
 .mrow .bar{height:14px;background:var(--bar-track);border-radius:4px;position:relative}
-.mrow .bar>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:4px 0 0 4px}
+.mrow .bar>i{position:absolute;inset-block:0;inset-inline-start:0;background:var(--bar);border-radius:4px 0 0 4px}
 .mrow .bar>b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--marker)}
-.mrow .val{font-family:var(--display);font-weight:700;font-size:17px;text-align:left}
+.mrow .val{font-family:var(--display);font-weight:700;font-size:17px;text-align:end}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--fg-3)}
 .legend i{display:inline-block;width:12px;height:8px;background:var(--bar);border-radius:2px;margin-inline-start:4px;vertical-align:middle}
 .legend b{display:inline-block;width:2px;height:12px;background:var(--marker);margin-inline-start:6px;vertical-align:middle}
@@ -245,7 +253,7 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 .mv{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
 .mv .n small{color:var(--fg-3);font-size:11.5px;margin-inline-start:6px}
 .mv .a{font-family:var(--display);font-weight:700}
-.mv .d{font-family:var(--display);font-weight:700;font-size:13px;min-width:54px;text-align:left}
+.mv .d{font-family:var(--display);font-weight:700;font-size:13px;min-width:54px;text-align:end}
 
 /* prize boards */
 .prizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
@@ -289,7 +297,7 @@ button.nlabel:hover .nmore{background:rgba(0,0,0,.24)}
 .row .ach{display:flex;align-items:center;gap:8px}
 .row .ach .v{font-family:var(--display);font-weight:700;min-width:52px}
 .mini{flex:1;height:7px;background:var(--bar-track);border-radius:4px;position:relative;min-width:40px}
-.mini>i{position:absolute;inset-block:0;right:0;background:var(--bar);border-radius:4px}
+.mini>i{position:absolute;inset-block:0;inset-inline-start:0;background:var(--bar);border-radius:4px}
 .mini>i.full{background:var(--up)}
 .mini>b{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:var(--marker)}
 .row .dl{font-family:var(--display);font-weight:700;font-size:13px}
@@ -310,43 +318,44 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
   <script>(function(){var t=null;try{t=localStorage.getItem('athar_theme');}catch(e){} if(t==='light') document.documentElement.setAttribute('data-theme','light');})();</script>
   <header class="head">
     <div class="t">
-      <div class="mark">أ</div>
+      <div class="mark" data-en="A">أ</div>
       <div>
-        <h1>مسابقة أثر</h1>
+        <h1 data-en="Athar Race">مسابقة أثر</h1>
         <div class="muted" id="sub">—</div>
       </div>
     </div>
-    <div class="cd" id="cd" hidden role="timer" aria-label="الوقت المتبقي على نهاية السباق">
-      <span class="lbl" id="cdLbl">⏳ ينتهي السباق بعد</span>
+    <div class="cd" id="cd" hidden role="timer" aria-label="الوقت المتبقي على نهاية السباق" data-en-al="Time left until the race ends">
+      <span class="lbl" id="cdLbl" data-en="⏳ The race ends in">⏳ ينتهي السباق بعد</span>
       <div class="tiles" id="cdTiles">
-        <div class="u"><span class="n" id="cdD">--</span><small>يوم</small></div><span class="sep">:</span>
-        <div class="u"><span class="n" id="cdH">--</span><small>ساعة</small></div><span class="sep">:</span>
-        <div class="u"><span class="n" id="cdM">--</span><small>دقيقة</small></div><span class="sep">:</span>
-        <div class="u"><span class="n" id="cdS">--</span><small>ثانية</small></div>
+        <div class="u"><span class="n" id="cdD">--</span><small data-en="days">يوم</small></div><span class="sep">:</span>
+        <div class="u"><span class="n" id="cdH">--</span><small data-en="hrs">ساعة</small></div><span class="sep">:</span>
+        <div class="u"><span class="n" id="cdM">--</span><small data-en="min">دقيقة</small></div><span class="sep">:</span>
+        <div class="u"><span class="n" id="cdS">--</span><small data-en="sec">ثانية</small></div>
       </div>
-      <span class="done" id="cdDone" hidden>🏁 انتهى السباق — النتائج النهائية قريباً</span>
+      <span class="done" id="cdDone" hidden data-en="🏁 The race is over — final results coming soon">🏁 انتهى السباق — النتائج النهائية قريباً</span>
     </div>
     <div class="meta">
-      <label class="pill msel" id="mselWrap" hidden>📅 الشهر <select id="msel" aria-label="اختر الشهر"></select></label>
-      <button type="button" class="pill theme-btn" id="themeBtn" aria-label="تبديل بين الوضع الداكن والفاتح"></button>
-      <span class="pill"><span class="dot"></span>البيانات حتى <b id="pAsof">—</b></span>
-      <span class="pill">اليوم <b id="pDay">—</b></span>
-      <span class="pill">باقي <b id="pLeft">—</b> يوم</span>
-      <span class="pill" id="pUpdWrap" hidden>آخر تحديث <b id="pUpd">—</b></span>
+      <span class="pill seg" id="langSeg" role="group" aria-label="اللغة" data-en-al="Language"><button type="button" data-l="ar" lang="ar">العربية</button><button type="button" data-l="en" lang="en">English</button></span>
+      <label class="pill msel" id="mselWrap" hidden>📅 <span data-en="Month">الشهر</span> <select id="msel" aria-label="اختر الشهر" data-en-al="Choose month"></select></label>
+      <button type="button" class="pill theme-btn" id="themeBtn" aria-label="تبديل بين الوضع الداكن والفاتح" data-en-al="Switch between dark and light mode"></button>
+      <span class="pill"><span class="dot"></span><span data-en="Data through">البيانات حتى</span> <b id="pAsof">—</b></span>
+      <span class="pill"><span data-en="Day">اليوم</span> <b id="pDay">—</b></span>
+      <span class="pill"><span data-en="Days left">باقي</span> <b id="pLeft">—</b> <span data-en="">يوم</span></span>
+      <span class="pill" id="pUpdWrap" hidden><span data-en="Last updated">آخر تحديث</span> <b id="pUpd">—</b></span>
     </div>
   </header>
 
   <div class="news" id="newsBar" hidden>
-    <button type="button" class="nlabel" id="newsAll" aria-expanded="false" aria-controls="newsList">أخبار التأهيل<small id="newsDate"></small><span class="nmore" id="newsMore">📋 عرض كل الأخبار</span></button>
-    <div class="tape ntape" aria-label="أخبار التأهيل اليوم"><div class="track" id="news"></div></div>
+    <button type="button" class="nlabel" id="newsAll" aria-expanded="false" aria-controls="newsList"><span data-en="Qualification news">أخبار التأهيل</span><small id="newsDate"></small><span class="nmore" id="newsMore">📋 عرض كل الأخبار</span></button>
+    <div class="tape ntape" aria-label="أخبار التأهيل اليوم" data-en-al="Today's qualification news"><div class="track" id="news"></div></div>
   </div>
   <div class="nlist" id="newsList" hidden>
   </div>
 
   <section class="mine" id="mine">
     <div class="mhead">
-      <label for="myIn"><b>📍 فرعي</b><span>اكتب اسم فرعك أو اليوزر حقك وتنحفظ عندك</span></label>
-      <div class="mform"><div class="combo"><input id="myIn" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mySug" placeholder="اكتب أو اختر: ZAHRAN، جدة، 6216…"><div class="sug" id="mySug" role="listbox" hidden></div></div><button id="myClear" hidden>تغيير</button></div>
+      <label for="myIn"><b data-en="📍 My branch">📍 فرعي</b><span data-en="Type your branch or your user code — it's remembered on this device">اكتب اسم فرعك أو اليوزر حقك وتنحفظ عندك</span></label>
+      <div class="mform"><div class="combo"><input id="myIn" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mySug" placeholder="اكتب أو اختر: ZAHRAN، جدة، 6216…" data-en-ph="Type or pick: ZAHRAN, Jeddah, 6216…"><div class="sug" id="mySug" role="listbox" hidden></div></div><button id="myClear" hidden data-en="Change">تغيير</button></div>
     </div>
     <div id="myCard"></div>
   </section>
@@ -356,18 +365,18 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
   <section class="stats" id="stats"></section>
 
   <section class="card">
-    <div class="hd"><h2>🚀 الأكثر صعوداً اليوم</h2><span class="small">أكبر زيادة في نسبة التحقيق خلال آخر يوم</span></div>
+    <div class="hd"><h2 data-en="🚀 Today's top climbers">🚀 الأكثر صعوداً اليوم</h2><span class="small" data-en="Biggest rise in achievement over the last day">أكبر زيادة في نسبة التحقيق خلال آخر يوم</span></div>
     <div class="movers" id="movers"></div>
   </section>
 
   <section class="card">
-    <div class="hd"><h2>لوحة الجوائز المتوقعة</h2><span class="small" id="prizeSub"></span></div>
-    <div class="explain">💡 <b>كيف ينحسب الترشيح؟</b> نفترض إن كل فرع بيكمّل بنفس سرعته الحالية لين آخر الشهر. اللي متوقع يتجاوز 100% يدخل السباق. الرقم الكبير جنب كل فرع = تحقيقه اليوم، والصغير تحته = المتوقع بنهاية الشهر.</div>
+    <div class="hd"><h2 data-en="Projected prize board">لوحة الجوائز المتوقعة</h2><span class="small" id="prizeSub"></span></div>
+    <div class="explain" data-en-html="💡 &lt;b&gt;How is it projected?&lt;/b&gt; We assume every branch keeps its current pace until month end. Branches projected above 100% are in the race. The big number next to each branch = its achievement today; the small one under it = projected at month end.">💡 <b>كيف ينحسب الترشيح؟</b> نفترض إن كل فرع بيكمّل بنفس سرعته الحالية لين آخر الشهر. اللي متوقع يتجاوز 100% يدخل السباق. الرقم الكبير جنب كل فرع = تحقيقه اليوم، والصغير تحته = المتوقع بنهاية الشهر.</div>
     <div class="prizes" id="prizes"></div>
   </section>
 
   <section class="card next">
-    <div class="hd"><h2>🎯 على بُعد خطوة من الجوائز</h2><span class="small">الفروع التالية في الطابور — دفعة بسيطة وتدخل مراكز الجوائز</span></div>
+    <div class="hd"><h2 data-en="🎯 One step away from a prize">🎯 على بُعد خطوة من الجوائز</h2><span class="small" data-en="Next in line — a small push and they're in the prize places">الفروع التالية في الطابور — دفعة بسيطة وتدخل مراكز الجوائز</span></div>
     <div class="push" id="pushBanner"></div>
     <div class="nextg" id="nextList"></div>
     <div class="pcs" id="nextCountry"></div>
@@ -376,9 +385,9 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
 
 
   <details>
-    <summary>كيف تفوز؟</summary>
-    <p>نسبة التحقيق = مبيعات فرعك ÷ مستهدف الشهر. ما يدخل أي فرع السباق إلا إذا بلغ 100% فأكثر. الفروع المؤهلة تُرتَّب بنسبة التحقيق: الأعلى على مستوى الشركة (بشرط حجم مبيعات أدنى) يفوز بالسيارة، وبعدها 40 جائزة: 10 جوالات، 10 آيباد، 10 ساعات ذكية، 10 سبائك ذهب. في الإمارات وعُمان والكويت والبحرين: الأول في الدولة يأخذ جوالاً والثاني سبيكة ذهب. في السعودية: 7 جوالات و10 آيباد و10 ساعات و7 سبائك حسب الترتيب. لو ما بلغ أحد 100% في دولة، ينتقل مقعدها للسعودية وتترقّى الجوائز بالترتيب. ولو ما كفى عدد الفروع اللي وصلت 100% فعلياً بنهاية الشهر، الجوائز الباقية ما تنصرف ولا تنتقل للشهر اللي بعده — 100% شرط ما فيه استثناء. الفرع الواحد جائزة واحدة، والفائز من الفرع هو الموظف الأعلى مبيعات على حسابه الشخصي.</p>
-    <p>في فرع السيارة: الأول يأخذ السيارة، والثاني جوالاً، والثالث آيباد، وبقية الفريق قسيمة 250 ريال. الأرقام هنا مؤشر يومي مبني على الوتيرة الحالية، والنتيجة الرسمية تُعلن يوم 10 من الشهر التالي بعد التدقيق.</p>
+    <summary data-en="How do you win?">كيف تفوز؟</summary>
+    <p data-en="Achievement = your branch sales ÷ the month's target. No branch enters the race unless it reaches 100% or more. Qualified branches are ranked by achievement: the highest in the company (with a minimum sales size) wins the car, then 40 prizes: 10 phones, 10 iPads, 10 smartwatches, 10 gold bars. In the UAE, Oman, Kuwait and Bahrain: the first in the country gets a phone and the second a gold bar. In Saudi Arabia: 7 phones, 10 iPads, 10 watches and 7 gold bars by rank. If nobody reaches 100% in a country, its seat moves to Saudi Arabia and the prizes move up in order. If not enough branches actually reach 100% by month end, the remaining prizes are not given and do not carry over to the next month — 100% is a must, with no exceptions. One prize per branch, and the winner in the branch is the employee with the highest sales on their own account.">نسبة التحقيق = مبيعات فرعك ÷ مستهدف الشهر. ما يدخل أي فرع السباق إلا إذا بلغ 100% فأكثر. الفروع المؤهلة تُرتَّب بنسبة التحقيق: الأعلى على مستوى الشركة (بشرط حجم مبيعات أدنى) يفوز بالسيارة، وبعدها 40 جائزة: 10 جوالات، 10 آيباد، 10 ساعات ذكية، 10 سبائك ذهب. في الإمارات وعُمان والكويت والبحرين: الأول في الدولة يأخذ جوالاً والثاني سبيكة ذهب. في السعودية: 7 جوالات و10 آيباد و10 ساعات و7 سبائك حسب الترتيب. لو ما بلغ أحد 100% في دولة، ينتقل مقعدها للسعودية وتترقّى الجوائز بالترتيب. ولو ما كفى عدد الفروع اللي وصلت 100% فعلياً بنهاية الشهر، الجوائز الباقية ما تنصرف ولا تنتقل للشهر اللي بعده — 100% شرط ما فيه استثناء. الفرع الواحد جائزة واحدة، والفائز من الفرع هو الموظف الأعلى مبيعات على حسابه الشخصي.</p>
+    <p data-en="In the car branch: 1st place gets the car, 2nd a phone, 3rd an iPad, and the rest of the team a SAR 250 voucher. The figures here are a daily indicator based on the current pace; the official result is announced on the 10th of the next month after review.">في فرع السيارة: الأول يأخذ السيارة، والثاني جوالاً، والثالث آيباد، وبقية الفريق قسيمة 250 ريال. الأرقام هنا مؤشر يومي مبني على الوتيرة الحالية، والنتيجة الرسمية تُعلن يوم 10 من الشهر التالي بعد التدقيق.</p>
   </details>
 </div>
 
@@ -387,8 +396,22 @@ details p{margin:8px 0 0;max-width:72ch;color:var(--fg-2)}
 (function(){
 'use strict';
 const D = JSON.parse(document.getElementById('embed').textContent);
-const AR = {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'};
-const PRIZE = {A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'};
+// Arabic by default; English when the address has ?lang=en (kept when switching months)
+const EN = new URLSearchParams(location.search).get('lang')==='en';
+const t = (ar,en)=>EN?en:ar;
+const LOC = EN?'en-GB':'ar-SA-u-ca-gregory-nu-latn';
+document.documentElement.lang = EN?'en':'ar'; document.documentElement.dir = EN?'ltr':'rtl';
+if(EN){ document.title='Athar Race';
+  document.querySelectorAll('[data-en]').forEach(e=>{ e.textContent=e.dataset.en; });
+  document.querySelectorAll('[data-en-html]').forEach(e=>{ e.innerHTML=e.dataset.enHtml; });
+  document.querySelectorAll('[data-en-ph]').forEach(e=>{ e.placeholder=e.dataset.enPh; });
+  document.querySelectorAll('[data-en-al]').forEach(e=>{ e.setAttribute('aria-label',e.dataset.enAl); }); }
+document.querySelectorAll('#langSeg button').forEach(b=>{ b.setAttribute('aria-pressed',String((b.dataset.l==='en')===EN));
+  b.addEventListener('click',()=>{ const u=new URL(location.href); if(b.dataset.l==='en') u.searchParams.set('lang','en'); else u.searchParams.delete('lang'); if(u.href!==location.href) location.href=u.href; }); });
+const AR = EN ? {KSA:'Saudi Arabia', UAE:'UAE', Oman:'Oman', Kuwait:'Kuwait', Bahrain:'Bahrain', Qatar:'Qatar'}
+              : {KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'};
+const PRIZE = EN ? {A:'Car', B:'Smartphone', C:'iPad', D:'Smartwatch', E:'Gold bar'}
+                 : {A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'};
 const ICO = {A:'🚗', B:'📱', C:'💻', D:'⌚', E:'🥇'};
 const $ = id=>document.getElementById(id);
 const pct = (x,d=1)=>(x*100).toFixed(d)+'%';
@@ -396,9 +419,9 @@ const pts = x=>{const v=x*100; return (v>0?'▲ ':v<0?'▼ ':'') + Math.abs(v).t
 const cls = x=> x>0.0005?'up':x<-0.0005?'down':'flat';
 const bdi = s=>`<bdi dir="ltr">${s}</bdi>`;
 const left = D.dim - D.de;
-const monthAr = new Date(D.asof+'T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+const monthAr = new Date(D.asof+'T00:00:00').toLocaleDateString(LOC,{month:'long',year:'numeric'});
 
-$('sub').textContent = `برنامج حوافز المبيعات · ${monthAr}`;
+$('sub').textContent = `${t('برنامج حوافز المبيعات','Sales incentive programme')} · ${monthAr}`;
 $('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.dim}`; $('pLeft').textContent = left;
 // وقت آخر سحب للبيانات بتوقيت الخليج (يظهر فقط إذا كان مسجّلاً في البيانات)
 // العدّ التنازلي لنهاية الشهر: منتصف ليل أول الشهر القادم بتوقيت الخليج
@@ -412,7 +435,7 @@ $('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.d
     $('cdD').textContent=p2(Math.floor(s/86400)); $('cdH').textContent=p2(Math.floor(s/3600)%24);
     $('cdM').textContent=p2(Math.floor(s/60)%60); $('cdS').textContent=p2(s%60); return true;
   }
-  if(D.results) $('cdDone').textContent='🏁 انتهى السباق — تُعلن النتائج '+new Date(D.results+'T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{day:'numeric',month:'long'});
+  if(D.results) $('cdDone').textContent=t('🏁 انتهى السباق — تُعلن النتائج ','🏁 The race is over — results announced ')+new Date(D.results+'T00:00:00').toLocaleDateString(LOC,{day:'numeric',month:'long'});
   $('cd').hidden=false;
   if(tick()){ const t=setInterval(()=>{ if(!tick()) clearInterval(t); },1000); }
 })();
@@ -420,12 +443,12 @@ $('pAsof').textContent = D.asof; $('pDay').textContent = `${D.day||D.de} / ${D.d
 // always shown: an older build without a month list still gets its own month
 {
   const s=$('msel'), months=(D.months&&D.months.length)?D.months:[D.month||D.asof.slice(0,7)];
-  const mn=m=>new Date(m+'-01T00:00:00').toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{month:'long',year:'numeric'});
+  const mn=m=>new Date(m+'-01T00:00:00').toLocaleDateString(LOC,{month:'long',year:'numeric'});
   s.innerHTML=months.map(m=>`<option value="${m}">${mn(m)}</option>`).join('')
-    +(D.pending||[]).map(m=>`<option value="${m}">${mn(m)} — بانتظار ملف المستهدف</option>`).join('');
-  s.value=D.month||months[0]; s.addEventListener('change',()=>{ location.href=s.value+'.html'; }); $('mselWrap').hidden=false;
+    +(D.pending||[]).map(m=>`<option value="${m}">${mn(m)} — ${t('بانتظار ملف المستهدف','waiting for the target file')}</option>`).join('');
+  s.value=D.month||months[0]; s.addEventListener('change',()=>{ location.href=s.value+'.html'+location.search; }); $('mselWrap').hidden=false;
 }
-if(D.built){ try{ $('pUpd').textContent = new Date(D.built).toLocaleString('ar-SA-u-ca-gregory-nu-latn',{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).replace('،',' ·'); $('pUpdWrap').hidden=false; }catch(e){} }
+if(D.built){ try{ $('pUpd').textContent = new Date(D.built).toLocaleString(LOC,{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).replace(/[،,]/,' ·'); $('pUpdWrap').hidden=false; }catch(e){} }
 
 /* ticker */
 function loop(t, items, speed){
@@ -439,26 +462,26 @@ function loop(t, items, speed){
   const prz=c=>c?`${ICO[c]} ${PRIZE[c]}`:'';
   const ev=[];
   // 🏁 تخطّى خط الـ100% اليوم
-  D.branches.filter(b=>b.a>=1&&b.a-b.d<1).forEach(b=>ev.push({g:'🏁 تخطّوا 100% اليوم',cls:'in',tag:'🏁 تخطّى 100%',u:b.top[0],b:b,p:'الفرع تأهّل رسمياً للسباق'}));
-  N.filter(n=>n.k==='in').forEach(n=>ev.push({g:'🟢 دخلوا التأهيل',cls:'in',tag:'🟢 دخل التأهيل',u:n.u,s:n.s,c:n.c,p:'← '+prz(n.aw)}));
-  N.filter(n=>n.k==='up').forEach(n=>ev.push({g:'🔼 ترقّوا لجائزة أعلى',cls:'up',tag:'🔼 ترقّى',u:n.u,s:n.s,c:n.c,p:prz(n.was)+' ← '+prz(n.aw)}));
+  D.branches.filter(b=>b.a>=1&&b.a-b.d<1).forEach(b=>ev.push({g:t('🏁 تخطّوا 100% اليوم','🏁 Passed 100% today'),cls:'in',tag:t('🏁 تخطّى 100%','🏁 Passed 100%'),u:b.top[0],b:b,p:t('الفرع تأهّل رسمياً للسباق','Branch officially qualified for the race')}));
+  N.filter(n=>n.k==='in').forEach(n=>ev.push({g:t('🟢 دخلوا التأهيل','🟢 Qualified'),cls:'in',tag:t('🟢 دخل التأهيل','🟢 Qualified'),u:n.u,s:n.s,c:n.c,p:'← '+prz(n.aw)}));
+  N.filter(n=>n.k==='up').forEach(n=>ev.push({g:t('🔼 ترقّوا لجائزة أعلى','🔼 Moved up to a bigger prize'),cls:'up',tag:t('🔼 ترقّى','🔼 Moved up'),u:n.u,s:n.s,c:n.c,p:prz(n.was)+' ← '+prz(n.aw)}));
   // 🚀 أكبر قفزات اليوم في نسبة التحقيق، و🔥 أكبر صعود في الترتيب
-  [...D.branches].sort((a,b)=>b.d-a.d).slice(0,3).forEach(b=>ev.push({g:'🚀 أكبر قفزات اليوم',cls:'up',tag:'🚀 قفزة اليوم',u:b.top[0],b:b,p:'+'+(b.d*100).toFixed(1)+' نقطة'}));
-  [...D.branches].map(b=>({b,rc:b.rp-b.r})).filter(x=>x.rc>=10).sort((a,b)=>b.rc-a.rc).slice(0,3).forEach(x=>ev.push({g:'🔥 صعود قوي في الترتيب',cls:'up',tag:'🔥 صعد '+x.rc+' مركز',u:x.b.top[0],b:x.b,p:'الآن المركز '+x.b.r}));
-  N.filter(n=>n.k==='out').forEach(n=>ev.push({g:'🎯 قريبين من العودة',cls:'near',tag:'🎯 قريب من العودة',u:n.u,s:n.s,c:n.c,p:'دفعة بسيطة ويرجع للسباق'}));
+  [...D.branches].sort((a,b)=>b.d-a.d).slice(0,3).forEach(b=>ev.push({g:t('🚀 أكبر قفزات اليوم','🚀 Biggest jumps today'),cls:'up',tag:t('🚀 قفزة اليوم','🚀 Jump today'),u:b.top[0],b:b,p:'+'+(b.d*100).toFixed(1)+t(' نقطة',' pts')}));
+  [...D.branches].map(b=>({b,rc:b.rp-b.r})).filter(x=>x.rc>=10).sort((a,b)=>b.rc-a.rc).slice(0,3).forEach(x=>ev.push({g:t('🔥 صعود قوي في الترتيب','🔥 Big climb in the ranking'),cls:'up',tag:t('🔥 صعد '+x.rc+' مركز','🔥 Up '+x.rc+' places'),u:x.b.top[0],b:x.b,p:t('الآن المركز ','Now rank ')+x.b.r}));
+  N.filter(n=>n.k==='out').forEach(n=>ev.push({g:t('🎯 قريبين من العودة','🎯 Close to coming back'),cls:'near',tag:t('🎯 قريب من العودة','🎯 Close to returning'),u:n.u,s:n.s,c:n.c,p:t('دفعة بسيطة ويرجع للسباق','A small push and it\'s back in the race')}));
   if(!ev.length) return;
   const items=ev.map(e=>{const s=e.b?e.b.s:e.s, c=e.b?e.b.c:e.c; return `<span class="nw ${e.cls}"><span class="tag">${e.tag}</span><span class="u">${e.u?bdi(e.u):''}</span><span class="b">${s} · ${AR[c]}</span><span class="p">${e.p}</span></span>`;}).join('');
   loop($('news'), items, 55);
   const nin=N.filter(n=>n.k==='in').length, nup=N.filter(n=>n.k==='up').length, n100=D.branches.filter(b=>b.a>=1&&b.a-b.d<1).length;
-  $('newsDate').textContent=`يوم ${+D.asof.slice(8)} · دخل ${nin} · ترقّى ${nup}${n100?' · تخطّى 100%: '+n100:''}`;
+  $('newsDate').textContent=EN?`Day ${+D.asof.slice(8)} · in ${nin} · up ${nup}${n100?' · passed 100%: '+n100:''}`:`يوم ${+D.asof.slice(8)} · دخل ${nin} · ترقّى ${nup}${n100?' · تخطّى 100%: '+n100:''}`;
   $('newsBar').hidden=false;
   // القائمة الكاملة: نفس الأخبار مجمّعة حسب النوع
   const groups=[]; ev.forEach(e=>{ let g=groups.find(x=>x.g===e.g); if(!g){ g={g:e.g,it:[]}; groups.push(g);} g.it.push(e); });
   const list=$('newsList'), btn=$('newsAll'), more=$('newsMore');
   list.innerHTML=groups.map(g=>`<div class="g"><h3>${g.g}<small>${g.it.length}</small></h3>${g.it.map(e=>{const s=e.b?e.b.s:e.s, c=e.b?e.b.c:e.c;
-    return `<div class="row"><span class="u">${e.u?bdi(e.u):'—'}</span><span class="b">${s} · ${AR[c]}</span><span class="p">${e.p.replace(/^← /,'متوقع: ')}</span></div>`;}).join('')}</div>`).join('')
-    +'<button type="button" class="close" id="newsClose">إغلاق القائمة ▴</button>';
-  const set=open=>{ list.hidden=!open; btn.setAttribute('aria-expanded',open); more.textContent=open?'▴ إخفاء القائمة':`📋 عرض كل الأخبار (${ev.length})`; };
+    return `<div class="row"><span class="u">${e.u?bdi(e.u):'—'}</span><span class="b">${s} · ${AR[c]}</span><span class="p">${e.p.replace(/^← /,t('متوقع: ','Projected: '))}</span></div>`;}).join('')}</div>`).join('')
+    +`<button type="button" class="close" id="newsClose">${t('إغلاق القائمة ▴','Close the list ▴')}</button>`;
+  const set=open=>{ list.hidden=!open; btn.setAttribute('aria-expanded',open); more.textContent=open?t('▴ إخفاء القائمة','▴ Hide the list'):`📋 ${t('عرض كل الأخبار','Show all news')} (${ev.length})`; };
   btn.addEventListener('click',()=>set(list.hidden));
   $('newsClose').addEventListener('click',()=>{ set(false); btn.focus(); });
   set(false);
@@ -467,19 +490,19 @@ function loop(t, items, speed){
 /* hero */
 (function(){
   const c=D.car[0]; const h=$('hero');
-  if(!c){ h.innerHTML='<div class="lead"><div class="eyebrow">سباق السيارة</div><div class="who">لا يوجد فرع مؤهل بعد — السباق مفتوح</div></div>'; return; }
+  if(!c){ h.innerHTML=`<div class="lead"><div class="eyebrow">${t('سباق السيارة','The car race')}</div><div class="who">${t('لا يوجد فرع مؤهل بعد — السباق مفتوح','No branch has qualified yet — the race is open')}</div></div>`; return; }
   h.innerHTML=`<div class="lead">
-    <div class="eyebrow">🚗 سباق السيارة — المتصدر الآن</div>
+    <div class="eyebrow">${t('🚗 سباق السيارة — المتصدر الآن','🚗 The car race — leader now')}</div>
     <div class="big num">${pct(c.a)}</div>
-    <div class="who">${c.s} <span class="small">${AR[c.c]}</span><small>الموظف المتصدر: ${c.top[0]?bdi(c.top[0]):'—'}${c.top[1]?' · الثاني: '+bdi(c.top[1]):''}${c.top[2]?' · الثالث: '+bdi(c.top[2]):''}</small></div>
-    <div class="small" style="margin-top:14px">${c.a>=1?'تجاوز خط الـ100% — الفرع مؤهل، والمنافسة الآن على الأعلى نسبة':'يحتاج '+((1-c.a)*100).toFixed(1)+' نقطة للوصول إلى 100%'}</div>
+    <div class="who">${c.s} <span class="small">${AR[c.c]}</span><small>${t('الموظف المتصدر: ','Top employee: ')}${c.top[0]?bdi(c.top[0]):'—'}${c.top[1]?t(' · الثاني: ',' · 2nd: ')+bdi(c.top[1]):''}${c.top[2]?t(' · الثالث: ',' · 3rd: ')+bdi(c.top[2]):''}</small></div>
+    <div class="small" style="margin-top:14px">${c.a>=1?t('تجاوز خط الـ100% — الفرع مؤهل، والمنافسة الآن على الأعلى نسبة','Past the 100% line — qualified; now it\'s about the highest %'):t('يحتاج '+((1-c.a)*100).toFixed(1)+' نقطة للوصول إلى 100%','Needs '+((1-c.a)*100).toFixed(1)+' pts to reach 100%')}</div>
   </div>
-  <div class="track4"><div class="th"><b>🏁 حلبة السيارة</b><span>أول من يعدّي خط النهاية بأعلى نسبة ياخذ السيارة</span></div>
+  <div class="track4"><div class="th"><b>${t('🏁 حلبة السيارة','🏁 The car track')}</b><span>${t('أول من يعدّي خط النهاية بأعلى نسبة ياخذ السيارة','Cross the finish line with the highest % and the car is yours')}</span></div>
     ${D.car.slice(0,4).map((x,i)=>{const sc=Math.max(1.25,c.a*1.05), pos=Math.min(100,x.a/sc*100), fin=100/sc;
       return `<div class="lane ${i===0?'lead1':''}"><div class="ln"><span class="r">${i+1}</span><b>${x.s}</b><small>${AR[x.c]}${x.top[0]?' · '+bdi(x.top[0]):''}</small><span class="a num">${pct(x.a)}</span></div>
-        <div class="road"><i style="width:${pos}%"></i><span class="car" style="right:${pos}%">🚗</span><span class="fin" style="right:${fin}%"></span></div>
-        <div class="gap">${x.a>=1?'✅ عدّى خط النهاية':'باقي '+((1-x.a)*100).toFixed(1)+' نقطة على خط النهاية'}</div></div>`;}).join('')}
-    <div class="note">السباق للفروع الكبيرة فقط (حجم مبيعاتها يكفي لجائزة السيارة)</div>
+        <div class="road"><i style="width:${pos}%"></i><span class="car" style="inset-inline-start:${pos}%">🚗</span><span class="fin" style="inset-inline-start:${fin}%"></span></div>
+        <div class="gap">${x.a>=1?t('✅ عدّى خط النهاية','✅ Crossed the finish line'):t('باقي '+((1-x.a)*100).toFixed(1)+' نقطة على خط النهاية',((1-x.a)*100).toFixed(1)+' pts to the finish line')}</div></div>`;}).join('')}
+    <div class="note">${t('السباق للفروع الكبيرة فقط (حجم مبيعاتها يكفي لجائزة السيارة)','Large branches only (sales big enough for the car prize)')}</div>
   </div>`;
 })();
 
@@ -490,10 +513,10 @@ function loop(t, items, speed){
   const inRace=D.branches.filter(b=>b.aw).length;
   // مؤشرات محفّزة فقط — بدون أرقام الشركة السلبية
   $('stats').innerHTML=[
-    {v:'🏁 '+c.at100, l:'فرع عدّى خط الـ100%', d:'تأهّل رسمياً للسباق', cls:'up'},
-    {v:inRace, l:'فرع في مراكز الجوائز الآن', d:'من أصل 41 جائزة'},
-    {v:nearQ, l:'فرع على بُعد خطوة', d:'قريب من مراكز الجوائز — ممكن تكون التالي'},
-    {v:left, l:'يوم باقي', d:'كل يوم يفرق في الترتيب'},
+    {v:'🏁 '+c.at100, l:t('فرع عدّى خط الـ100%','branches past 100%'), d:t('تأهّل رسمياً للسباق','officially qualified for the race'), cls:'up'},
+    {v:inRace, l:t('فرع في مراكز الجوائز الآن','branches in prize places now'), d:t('من أصل 41 جائزة','out of 41 prizes')},
+    {v:nearQ, l:t('فرع على بُعد خطوة','branches one step away'), d:t('قريب من مراكز الجوائز — ممكن تكون التالي','close to the prize places — you could be next')},
+    {v:left, l:t('يوم باقي','days left'), d:t('كل يوم يفرق في الترتيب','every day changes the ranking')},
   ].map(t=>`<div class="stat"><div class="v num ${t.cls||''}">${t.v}</div><div class="l">${t.l}</div><div class="d">${t.d}</div></div>`).join('');
 })();
 
@@ -519,11 +542,12 @@ function loop(t, items, speed){
   const list=D.branches.filter(b=>!b.aw).map(b=>({b,g:need(b)})).sort((x,y)=>x.g-y.g).slice(0,12);
   const shown=new Set(list.map(x=>x.b.s));
   const perC=['UAE','Oman','Kuwait','Bahrain'].map(c=>D.branches.filter(b=>b.c===c&&!b.aw&&!shown.has(b.s)).map(b=>({b,g:need(b)})).sort((x,y)=>x.g-y.g)[0]).filter(Boolean).filter(x=>!list.some(l=>l.b.c===x.b.c));
-  $('nextCountry').innerHTML=perC.length?'<span class="small">الأقرب في كل دولة:</span>'+perC.map(x=>`<span class="pc"><b>${x.b.s}</b> ${AR[x.b.c]}${x.b.top[0]?' · '+bdi(x.b.top[0]):''} · <bdi dir="ltr" class="num">${pct(x.b.a)}</bdi> · <em>ينقصه <bdi dir="ltr">${(x.g*100).toFixed(1)}</bdi> نقطة</em></span>`).join(''):'';
+  $('nextCountry').innerHTML=perC.length?`<span class="small">${t('الأقرب في كل دولة:','Closest in each country:')}</span>`+perC.map(x=>`<span class="pc"><b>${x.b.s}</b> ${AR[x.b.c]}${x.b.top[0]?' · '+bdi(x.b.top[0]):''} · <bdi dir="ltr" class="num">${pct(x.b.a)}</bdi> · <em>${t('ينقصه','needs')} <bdi dir="ltr">${(x.g*100).toFixed(1)}</bdi> ${t('نقطة','pts')}</em></span>`).join(''):'';
   // كم فرع في الطابور ينقصه أقل من مبيعات يوم واحد عادي له (نسبته ÷ الأيام المنقضية)
   const oneDay=list.filter(x=>x.g < x.b.a/D.de).length;
-  $('pushBanner').innerHTML=`<span class="bolt">⚡</span><span class="t"><b>بينك وبين الجوائز يوم واحد قوي!</b><span>${oneDay===list.length?'كل الفروع اللي تحت':oneDay+' من الفروع اللي تحت'} ينقصها أقل من مبيعات يوم واحد عادي. اقفل اليوم بقوة، وبكرة يطلع اسمك في «أخبار التأهيل» 🚀</span></span>`;
-  $('nextList').innerHTML=list.map((x,i)=>`<div class="nx"><span class="r">${i+1}</span><span class="n"><b>${x.b.s} <span class="small">${AR[x.b.c]}</span></b><small>${x.b.top[0]?bdi(x.b.top[0]):x.b.city}</small></span><span class="g"><span class="a num">${pct(x.b.a)}</span><small>+${(x.g*100).toFixed(1)} نقطة وتدخل</small></span></div>`).join('');
+  $('pushBanner').innerHTML=EN?`<span class="bolt">⚡</span><span class="t"><b>One strong day stands between you and a prize!</b><span>${oneDay===list.length?'Every branch below':oneDay+' of the branches below'} need less than one normal day of sales. Close today strong, and tomorrow your name shows up in “Qualification news” 🚀</span></span>`
+    :`<span class="bolt">⚡</span><span class="t"><b>بينك وبين الجوائز يوم واحد قوي!</b><span>${oneDay===list.length?'كل الفروع اللي تحت':oneDay+' من الفروع اللي تحت'} ينقصها أقل من مبيعات يوم واحد عادي. اقفل اليوم بقوة، وبكرة يطلع اسمك في «أخبار التأهيل» 🚀</span></span>`;
+  $('nextList').innerHTML=list.map((x,i)=>`<div class="nx"><span class="r">${i+1}</span><span class="n"><b>${x.b.s} <span class="small">${AR[x.b.c]}</span></b><small>${x.b.top[0]?bdi(x.b.top[0]):x.b.city}</small></span><span class="g"><span class="a num">${pct(x.b.a)}</span><small>+${(x.g*100).toFixed(1)} ${t('نقطة وتدخل','pts and it\'s in')}</small></span></div>`).join('');
 })();
 
 /* my branch: أين فرعي وكم باقي لي — بلا مبالغ */
@@ -536,46 +560,51 @@ function loop(t, items, speed){
     if(m==='KSA') return Math.max(1, w.length?Math.min(...w.map(x=>x.p))+0.001:1);
     return (D.fill&&D.fill[m]<2) ? 1 : Math.max(1, Math.min(...w.map(x=>x.p))+0.001); }
   const fmt=x=>Math.round(x*100);
-  const times=n=>n===1?'مرة وحدة':n===2?'مرتين':n<=10?n+' مرات':n+' مرة';
-  const places=n=>n===1?'مركز واحد':n===2?'مركزين':n<=10?n+' مراكز':n+' مركز';
+  const times=n=>EN?(n===1?'once':n===2?'twice':n+' times'):n===1?'مرة وحدة':n===2?'مرتين':n<=10?n+' مرات':n+' مرة';
+  const places=n=>EN?(n===1?'1 place':n+' places'):n===1?'مركز واحد':n===2?'مركزين':n<=10?n+' مراكز':n+' مركز';
   // بدون أي أرقام مبيعات: وصف بالكلام + شريطين للمقارنة
-  const lvl=inc=> inc<0.10?'<b>شوي بس</b> فوق بيعكم المعتاد'
+  const lvl=inc=> EN ? (inc<0.10?'<b>just a little</b> above your usual sales':inc<0.25?'<b>a small increase</b> on your usual sales':inc<0.50?'<b>a clear increase</b> — the coming days need to be strong'
+                : inc<0.90?'<b>a big increase</b> — the coming days need to be among your best':inc<1.20?'<b>about double</b> your usual sales':'<b>more than double</b> your usual sales')
+                : inc<0.10?'<b>شوي بس</b> فوق بيعكم المعتاد'
                 : inc<0.25?'<b>زيادة بسيطة</b> على بيعكم المعتاد'
                 : inc<0.50?'<b>زيادة واضحة</b> — الأيام الجاية لازم تكون أيام قوية'
                 : inc<0.90?'<b>زيادة كبيرة</b> — الأيام الجاية لازم تكون من أقوى أيامكم'
                 : inc<1.20?'<b>ضعف</b> بيعكم المعتاد تقريباً'
                 : '<b>أكثر من ضعف</b> بيعكم المعتاد';
-  const bars=inc=>`<div class="cmp"><div><span>بيعكم المعتاد</span><i style="width:${Math.min(100,100/(1+inc))}%"></i></div><div><span>المطلوب</span><i class="need" style="width:100%"></i></div></div>`;
-  function plain(inc, goal){ return `<div class="tip">${goal}<br>تحتاجون كل يوم ${lvl(inc)}.${bars(inc)}</div>`; }
+  const bars=inc=>`<div class="cmp"><div><span>${t('بيعكم المعتاد','Your usual')}</span><i style="width:${Math.min(100,100/(1+inc))}%"></i></div><div><span>${t('المطلوب','Needed')}</span><i class="need" style="width:100%"></i></div></div>`;
+  function plain(inc, goal){ return `<div class="tip">${goal}<br>${t('تحتاجون كل يوم','Every day you need')} ${lvl(inc)}.${bars(inc)}</div>`; }
   function card(b){
     const r=b.a/D.de;                     // معدل الفرع اليومي بالنقاط
     const rc=b.rp-b.r;
-    const team=b.top.length?`<div class="team">⭐ المتصدر في فرعكم: ${bdi(b.top[0])}${b.top[1]?' · الثاني: '+bdi(b.top[1]):''}${b.top[2]?' · الثالث: '+bdi(b.top[2]):''}</div>`:'';
+    const team=b.top.length?`<div class="team">⭐ ${t('المتصدر في فرعكم:','Top in your branch:')} ${bdi(b.top[0])}${b.top[1]?t(' · الثاني: ',' · 2nd: ')+bdi(b.top[1]):''}${b.top[2]?t(' · الثالث: ',' · 3rd: ')+bdi(b.top[2]):''}</div>`:'';
     let status, tips=[];
-    if(b.aw==='A'){ status='<span class="status car">🚗 متصدرين سباق السيارة!</span>'; }
-    else if(b.aw){ status=`<span class="status in">✅ داخلين: ${ICO[b.aw]} ${PRIZE[b.aw]}</span>`; }
-    else { status='<span class="status out">🎯 لسا ما دخلتوا الجوائز</span>'; }
+    if(b.aw==='A'){ status=`<span class="status car">${t('🚗 متصدرين سباق السيارة!','🚗 You lead the car race!')}</span>`; }
+    else if(b.aw){ status=`<span class="status in">${t('✅ داخلين:','✅ You\'re in:')} ${ICO[b.aw]} ${PRIZE[b.aw]}</span>`; }
+    else { status=`<span class="status out">${t('🎯 لسا ما دخلتوا الجوائز','🎯 Not in the prizes yet')}</span>`; }
     if(b.aw){
       // هامش الأمان لبلوغ 100%
       const slow=1-((1-b.a)/R)/r;
-      if(b.a>=1) tips.push(`<div class="tip good">🏁 <b>عدّيتوا 100%!</b> الحين كل يوم يرفع نسبتكم ويثبّت مركزكم.</div>`);
-      else if(slow>0){ const h=slow<0.10?'<b>هامشكم صغير</b> — أي نزول في البيع يطلعكم من 100%، حافظوا على نفس المستوى كل يوم.'
+      if(b.a>=1) tips.push(`<div class="tip good">🏁 ${t('<b>عدّيتوا 100%!</b> الحين كل يوم يرفع نسبتكم ويثبّت مركزكم.','<b>You passed 100%!</b> Now every day raises your % and locks in your place.')}</div>`);
+      else if(slow>0){ const h=EN ? (slow<0.10?'<b>Your margin is small</b> — any drop in sales takes you below 100%; keep the same level every day.'
+                          : slow<0.30?'You have <b>a small margin</b>: if sales dip a little you\'ll stay above 100%, but don\'t ease off.'
+                          : 'You have <b>a comfortable margin</b>: even if sales dip you\'ll stay above 100%. But the branches below you are close — keep going!')
+                          : slow<0.10?'<b>هامشكم صغير</b> — أي نزول في البيع يطلعكم من 100%، حافظوا على نفس المستوى كل يوم.'
                           : slow<0.30?'عندكم <b>هامش بسيط</b>: لو نزل بيعكم شوي بتظلون فوق 100%، بس لا تتراخون.'
                           : 'عندكم <b>هامش مريح</b>: حتى لو نزل بيعكم بتظلون فوق 100%. بس الفروع اللي تحتكم قريبة، كمّلوا!';
         tips.push(`<div class="tip good">🛡️ ${h}</div>`); }
     } else {
       const F=needP(b), gap=F-b.a, need=gap/R, inc=need/r-1;
-      if(inc<=0) tips.push(`<div class="tip good">على سرعتكم الحالية أنتم قريبين جداً — <b>زيادة بسيطة</b> وتدخلون.</div>`);
-      else tips.push(plain(inc, `📈 <b>عشان تدخلون الجوائز</b> خلال الـ${R} يوم الباقية:`));
+      if(inc<=0) tips.push(`<div class="tip good">${t('على سرعتكم الحالية أنتم قريبين جداً — <b>زيادة بسيطة</b> وتدخلون.','At your current pace you\'re very close — <b>a small increase</b> and you\'re in.')}</div>`);
+      else tips.push(plain(inc, EN?`📈 <b>To get into the prizes</b> in the ${R} days left:`:`📈 <b>عشان تدخلون الجوائز</b> خلال الـ${R} يوم الباقية:`));
       // كرروا أحسن يوم
       const short=gap-r*R;
       if(b.bd>r && short>0){ const n=Math.ceil(short/(b.bd-r));
-        if(n<=R) tips.push(`<div class="tip">🔥 أحسن يوم لكم هالشهر كان <b>يوم ${b.bdd}</b>. لو كررتوه <b>${times(n)}</b> من الأيام الباقية، تدخلون الجوائز.</div>`); }
+        if(n<=R) tips.push(EN?`<div class="tip">🔥 Your best day this month was <b>day ${b.bdd}</b>. Repeat it <b>${times(n)}</b> in the days left and you\'re in the prizes.</div>`:`<div class="tip">🔥 أحسن يوم لكم هالشهر كان <b>يوم ${b.bdd}</b>. لو كررتوه <b>${times(n)}</b> من الأيام الباقية، تدخلون الجوائز.</div>`); }
       const inc100=((1-b.a)/R)/r-1;
-      if(F>1.001 && inc100>0) tips.push(`<div class="tip">🏁 وعشان توصلون 100% بس: تحتاجون ${lvl(inc100)}.</div>`);
+      if(F>1.001 && inc100>0) tips.push(`<div class="tip">${t('🏁 وعشان توصلون 100% بس: تحتاجون','🏁 And just to reach 100% you need')} ${lvl(inc100)}.</div>`);
     }
-    if(rc>0) tips.push(`<div class="tip good">🔼 تقدمتوا <b>${places(rc)}</b> من أمس — كمّلوا!</div>`);
-    return `<div class="mygrid"><div class="mybig"><span class="n">${b.s} <small>${AR[b.c]} · ${b.city}</small></span><span class="v num ${b.a>=1?'up':''}">${pct(b.a)}</span><span class="pj">تحقيقكم اليوم · المتوقع بنهاية الشهر <b class="num">${pct(b.p,0)}</b></span></div>
+    if(rc>0) tips.push(EN?`<div class="tip good">🔼 You moved up <b>${places(rc)}</b> since yesterday — keep going!</div>`:`<div class="tip good">🔼 تقدمتوا <b>${places(rc)}</b> من أمس — كمّلوا!</div>`);
+    return `<div class="mygrid"><div class="mybig"><span class="n">${b.s} <small>${AR[b.c]} · ${b.city}</small></span><span class="v num ${b.a>=1?'up':''}">${pct(b.a)}</span><span class="pj">${t('تحقيقكم اليوم · المتوقع بنهاية الشهر','Your achievement today · projected at month end')} <b class="num">${pct(b.p,0)}</b></span></div>
       <div class="mymsg">${status}${tips.join('')}${team}</div></div>`;
   }
   const idx={}; D.branches.forEach(b=>{ idx[b.s.toUpperCase()]=b; b.top.forEach(u=>{ const m=u.match(/\((\d+)\)/); if(m) idx[m[1]]=b; idx[u.split(' (')[0].toUpperCase()]=b; }); });
@@ -584,7 +613,7 @@ function loop(t, items, speed){
     const k=Object.keys(idx).find(k=>k.includes(q)); return k?idx[k]:null; }
   function show(q, save){
     const b=find(q);
-    if(!b){ $('myCard').innerHTML = q? '<div class="empty-mine">ما لقيت فرع بهالاسم. جرّب كود الفرع مثل <b>ZAHRAN</b> أو رقم اليوزر.</div>' : '<div class="empty-mine">اكتب فرعك فوق، وبتشوف وين أنتم، وكم باقي لكم على الجوائز، ومين المتصدر عندكم.</div>'; $('myClear').hidden=true; return; }
+    if(!b){ $('myCard').innerHTML = q? `<div class="empty-mine">${t('ما لقيت فرع بهالاسم. جرّب كود الفرع مثل <b>ZAHRAN</b> أو رقم اليوزر.','No branch found with that name. Try a branch code like <b>ZAHRAN</b> or a user number.')}</div>` : `<div class="empty-mine">${t('اكتب فرعك فوق، وبتشوف وين أنتم، وكم باقي لكم على الجوائز، ومين المتصدر عندكم.','Type your branch above to see where you stand, how far you are from a prize, and who leads in your branch.')}</div>`; $('myClear').hidden=true; return; }
     $('myCard').innerHTML=card(b); $('myIn').value=b.s; $('myClear').hidden=false;
     if(save){ try{ localStorage.setItem('athar_my', b.s); }catch(e){} }
   }
@@ -603,10 +632,10 @@ function loop(t, items, speed){
     if(q) cur.sort((x,y)=>x[0]-y[0]||x[1].s.localeCompare(y[1].s));
     cur=cur.map(x=>x[1]);
     let html='', last=null;
-    cur.forEach((b,i)=>{ if(!q && b.c!==last){ html+=`<div class="g">${AR[b.c]} · ${all.filter(x=>x.c===b.c).length} فرع</div>`; last=b.c; }
+    cur.forEach((b,i)=>{ if(!q && b.c!==last){ html+=`<div class="g">${AR[b.c]} · ${all.filter(x=>x.c===b.c).length} ${t('فرع','branches')}</div>`; last=b.c; }
       const hit = q && !b.s.toUpperCase().includes(q) ? (b.top.find(u=>u.toUpperCase().includes(q))||'') : '';
       html+=`<div class="o${i===act?' act':''}" role="option" data-s="${b.s}"><b>${b.s}</b><small>${hit?bdi(hit)+' · ':''}${AR[b.c]} · ${b.city}</small></div>`; });
-    sug.innerHTML = html || '<div class="none">ما لقيت فرع بهالاسم — جرّب كود الفرع أو المدينة أو رقم اليوزر</div>';
+    sug.innerHTML = html || `<div class="none">${t('ما لقيت فرع بهالاسم — جرّب كود الفرع أو المدينة أو رقم اليوزر','No branch found — try a branch code, city or user number')}</div>`;
     sug.hidden=false; inp.setAttribute('aria-expanded','true');
   }
   function close(){ sug.hidden=true; act=-1; inp.setAttribute('aria-expanded','false'); }
@@ -629,13 +658,13 @@ function loop(t, items, speed){
     const list=D.branches.filter(b=>b.aw===c).sort((a,b)=>b.p-a.p);
     const cap=c==='A'?1:10, vac=cap-list.length;
     // المقاعد الشاغرة تظهر كفرصة مفتوحة، مو كفراغ
-    const open = vac>0 ? `<li class="vac"><span class="r">🔓</span><span class="s"><b>${vac===1?'مقعد شاغر':vac+' مقاعد شاغرة'}</b><small>${c==='A'?'أول فرع كبير يعدّي 100% ياخذ السيارة':'أول فرع يوصل 100% ياخذه — ممكن يكون فرعك'}</small></span><span class="p">؟</span></li>` : '';
-    const items=list.map((b,i)=>`<li class="${i>=3?'more':''}"><span class="r num">${i+1}</span><span class="s"><b>${b.s} <span class="small">${AR[b.c]}</span>${b.mv?' <span class="chip mv">منقولة</span>':''}</b><small>${b.top[0]?bdi(b.top[0]):'—'}</small></span><span class="p num">${pct(b.a)}<small>متوقع ${pct(b.p,0)}</small></span></li>`).join('')+open;
-    const btn = list.length>3 ? `<button class="morebtn" data-n="${list.length}">عرض الكل (${list.length})</button>` : '';
+    const open = vac>0 ? `<li class="vac"><span class="r">🔓</span><span class="s"><b>${EN?(vac===1?'1 open seat':vac+' open seats'):(vac===1?'مقعد شاغر':vac+' مقاعد شاغرة')}</b><small>${c==='A'?t('أول فرع كبير يعدّي 100% ياخذ السيارة','The first large branch past 100% takes the car'):t('أول فرع يوصل 100% ياخذه — ممكن يكون فرعك','The first branch to reach 100% takes it — could be yours')}</small></span><span class="p">${t('؟','?')}</span></li>` : '';
+    const items=list.map((b,i)=>`<li class="${i>=3?'more':''}"><span class="r num">${i+1}</span><span class="s"><b>${b.s} <span class="small">${AR[b.c]}</span>${b.mv?` <span class="chip mv">${t('منقولة','moved')}</span>`:''}</b><small>${b.top[0]?bdi(b.top[0]):'—'}</small></span><span class="p num">${pct(b.a)}<small>${t('متوقع','proj.')} ${pct(b.p,0)}</small></span></li>`).join('')+open;
+    const btn = list.length>3 ? `<button class="morebtn" data-n="${list.length}">${t('عرض الكل','Show all')} (${list.length})</button>` : '';
     return `<div class="cat"><div class="ch"><b><span class="ico">${ICO[c]}</span> ${PRIZE[c]}</b><span class="small">${c==='A'?'1':list.length+' / 10'}</span></div><ol>${items}</ol>${btn}</div>`;
   }).join('');
-  $('prizes').querySelectorAll('.morebtn').forEach(bt=>bt.addEventListener('click',()=>{const c=bt.closest('.cat'); const o=c.classList.toggle('open'); bt.textContent=o?'أقل':`عرض الكل (${bt.dataset.n})`;}));
-  $('prizeSub').textContent=`لو استمرت الوتيرة الحالية إلى نهاية الشهر · ${D.branches.filter(b=>b.aw).length} جائزة مرشّحة من 41`;
+  $('prizes').querySelectorAll('.morebtn').forEach(bt=>bt.addEventListener('click',()=>{const c=bt.closest('.cat'); const o=c.classList.toggle('open'); bt.textContent=o?t('أقل','Less'):`${t('عرض الكل','Show all')} (${bt.dataset.n})`;}));
+  $('prizeSub').textContent=EN?`If the current pace holds to month end · ${D.branches.filter(b=>b.aw).length} of 41 prizes projected`:`لو استمرت الوتيرة الحالية إلى نهاية الشهر · ${D.branches.filter(b=>b.aw).length} جائزة مرشّحة من 41`;
 })();
 
 
@@ -645,7 +674,9 @@ function loop(t, items, speed){
 (function(){
   var root=document.documentElement, btn=document.getElementById('themeBtn');
   function label(){ var light=root.getAttribute('data-theme')==='light';
-    btn.innerHTML = light ? '🌙 <span class="tl">الوضع الداكن</span><span class="ts">داكن</span>' : '☀️ <span class="tl">الوضع الفاتح</span><span class="ts">فاتح</span>';
+    var en=root.lang==='en';
+    btn.innerHTML = light ? (en?'🌙 <span class="tl">Dark mode</span><span class="ts">Dark</span>':'🌙 <span class="tl">الوضع الداكن</span><span class="ts">داكن</span>')
+                          : (en?'☀️ <span class="tl">Light mode</span><span class="ts">Light</span>':'☀️ <span class="tl">الوضع الفاتح</span><span class="ts">فاتح</span>');
     btn.setAttribute('aria-pressed', light ? 'true' : 'false'); }
   btn.addEventListener('click', function(){
     var light = root.getAttribute('data-theme')!=='light';

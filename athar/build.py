@@ -97,7 +97,12 @@ def public_data(stores, daily, targets, asof, elapsed=None):
         us.sort(key=lambda u: -u[1])
         return [pretty(u[0]) for u in us[:n]]
 
-    def best_day(k):                         # best single day as points of target (a ratio, not money)
+    def staff(k):                            # car branch: every employee in rank order with their share of the branch (a ratio)
+        tot = stores.get(k, {}).get("sales") or 0
+        us = sorted((u for u in stores.get(k, {}).get("users", []) if EMP_RE.search(u[0].strip())), key=lambda u: -u[1])
+        return [{"n": pretty(u[0]), "sh": round(u[1] / tot, 4) if tot else 0} for u in us]
+
+    def best_day(k):                       # best single day as points of target (a ratio, not money)
         t = targets[k]["target"]
         if not t or len(days) < 2:
             return {"bd": 0, "bdd": None}
@@ -149,7 +154,8 @@ def public_data(stores, daily, targets, asof, elapsed=None):
                         "at100": sum(1 for b in branches if b["a"] >= 1), "n": len(branches)},
             "markets": markets, "fill": fill, "moved": len(moved), "branches": branches, "trend": trend,
             "car": [{"s": k, "c": targets[k]["country"], "a": round(ach(asof, k), 4), "p": round(projected(k), 3),
-                     "top": top_names(k)} for k in car_list]}
+                     "top": top_names(k)} for k in car_list],
+            "staff": staff(next((k for k, v in award.items() if v == "A"), None))}
     blob = json.dumps(data, ensure_ascii=False)
     assert "sales" not in blob and "target" not in blob, "public data must never contain amounts"
     return data
