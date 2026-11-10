@@ -50,7 +50,6 @@ h1{font-size:30px} h2{font-size:20px}
 .sec{border-top-width:1px}
 .sec::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--gold),var(--brand))}
 .sec h2{color:var(--fg)} .chip{border-color:color-mix(in srgb,var(--brand) 45%,var(--line))}
-.ceo .mic{background:var(--brand);color:#fff}
 .sign{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
 /* language option: Arabic is always the starting view */
 .seg{padding:3px;gap:2px}
@@ -160,15 +159,6 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 .hero .n{background:linear-gradient(90deg,var(--fg),var(--gold),var(--fg));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
 @keyframes shine{to{background-position:200% center}}
 .sec{position:relative;background:linear-gradient(180deg,var(--sec-top),var(--surface) 140px);border-top:3px solid var(--gold)}
-/* CEO voice note */
-.ceo{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;border:1px solid var(--gold);background:linear-gradient(90deg,var(--sec-top),var(--surface))}
-.ceo .mic{width:52px;height:52px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-size:26px;flex:none}
-.ceo.playing .mic{animation:pulse 1.4s ease-in-out infinite}
-@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(230,182,74,.25)}}
-.ceo .txt{flex:1 1 180px}
-.ceo audio{flex:1 1 260px;max-width:100%}
-.ceo .tap{color:var(--gold);font-weight:600}
-@media (prefers-reduced-motion: reduce){ .ceo.playing .mic{animation:none} }
 @media (prefers-reduced-motion: reduce){ #intro{display:none} body::before,.deco span,.hero::before,.hero .n{animation:none} .deco{display:none} }
 @media (max-width:640px){
   .hero .ico{font-size:48px} .hero .n{font-size:32px} .hero .pct{font-size:42px}
@@ -205,13 +195,6 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
   </header>
 
   <section class="hero" id="car"></section>
-
-  <section class="card ceo" id="ceoCard" hidden>
-    <div class="mic" aria-hidden="true">🎙️</div>
-    <div class="txt"><h2 data-i="ceo">كلمة الرئيس التنفيذي</h2><div class="small" id="ceoHint">رسالة تهنئة للفائزين</div></div>
-    <!-- the real recording (mp3) wins; ceo-voice.wav is a placeholder until it is added -->
-    <audio id="ceoAudio" preload="auto" controls><source src="media/ceo-voice.mp3" type="audio/mpeg"><source src="media/ceo-voice.wav" type="audio/wav"></audio>
-  </section>
   <div id="cats"></div>
 
   <section class="card thanks">
@@ -241,7 +224,7 @@ const D = JSON.parse(document.getElementById('embed').textContent);
 // Arabic / English: the choice is remembered per viewer; Arabic is the default
 const T = {
   ar:{tag:'إبراق بالطيب سباق', title:'الفائزون', month:'الشهر', final:'النتائج النهائية', preview:'معاينة للمراجعة — الإعلان الرسمي',
-      nwin:'الفروع الفائزة', ceo:'كلمة الرئيس التنفيذي', ceoSub:'رسالة تهنئة للفائزين', tap:'🔊 اضغط في أي مكان لسماع الكلمة',
+      nwin:'الفروع الفائزة',
       congrats:'مبروك لكل الفروع الفائزة', rank:'الترتيب حسب نسبة تحقيق المستهدف الفعلية لكامل الشهر. شكراً لكل الفرق على جهودهم.',
       sign:'مع تحيات إدارة إبراق', race:'مسابقة أثر', champs:'أبطال مسابقة أثر', noCar:'لم تُمنح هذا الشهر', noCarSub:'لم يحقق أي فرع شروط السيارة',
       winners:n=>`${n} فائز`, none:'لا يوجد فائزون في هذه الفئة', waiting:'بانتظار ملف المستهدف', pickMonth:'اختر الشهر', langLabel:'اللغة',
@@ -249,7 +232,7 @@ const T = {
       prize:{A:'سيارة', B:'جوال ذكي', C:'آيباد', D:'ساعة ذكية', E:'سبيكة ذهب'},
       country:{KSA:'السعودية', UAE:'الإمارات', Oman:'عُمان', Kuwait:'الكويت', Bahrain:'البحرين', Qatar:'قطر'}, loc:'ar-SA-u-ca-gregory-nu-latn'},
   en:{tag:'IBRAQ — leading in fragrance', title:'Winners', month:'Month', final:'Final results', preview:'Preview for review — official announcement',
-      nwin:'Winning branches', ceo:'A word from the CEO', ceoSub:'A congratulations message to the winners', tap:'🔊 Tap anywhere to play the message',
+      nwin:'Winning branches',
       congrats:'Congratulations to all winning branches', rank:'Ranked by actual target achievement for the whole month. Thank you to every team for their effort.',
       sign:'With regards, IBRAQ management', race:'Athar Race', champs:'Athar Race champions', noCar:'Not awarded this month', noCarSub:'No branch met the car conditions',
       winners:n=>`${n} ${n===1?'winner':'winners'}`, none:'No winners in this category', waiting:'waiting for the target file', pickMonth:'Choose month', langLabel:'Language',
@@ -277,7 +260,6 @@ function paint(){
   $('langSeg').setAttribute('aria-label', L.langLabel);
   $('langSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.l===lang)));
   $('msel').setAttribute('aria-label', L.pickMonth);
-  if($('ceoCard').classList.contains('tapping')) $('ceoHint').innerHTML = `<span class="tap">${L.tap}</span>`; else $('ceoHint').textContent = L.ceoSub;
   $('sub').textContent = `${L.race} · ${monthName(M)}`;
   if($('introT')){ $('introT').textContent = L.intro; $('introSkip').textContent = L.skip; $('introR').textContent = L.reveal(monthName(M)); }   // gone once the intro has played
   $('nWin').textContent = won.length;
@@ -308,24 +290,6 @@ paint();
 $('msel').addEventListener('change',e=>{ location.href=e.target.value+'.html'+location.search; });
 $('langSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b && b.dataset.l!==lang){ lang=b.dataset.l; paint();
   const u=new URL(location.href); if(lang==='en') u.searchParams.set('lang','en'); else u.searchParams.delete('lang'); history.replaceState(null,'',u); } });
-
-// CEO voice note: shown only when the file exists, starts by itself once per visit.
-// Browsers block sound until the visitor touches the page; then it starts on the first click/tap.
-(function(){
-  const au=$('ceoAudio'), card=$('ceoCard');
-  au.addEventListener('canplay',()=>{ card.hidden=false; },{once:true});
-  au.addEventListener('play',()=>{ card.classList.add('playing'); window.atharNoReload=true; try{ sessionStorage.setItem('athar_ceo','1'); }catch(e){} });   // no auto-reload mid-message
-  ['pause','ended'].forEach(e=>au.addEventListener(e,()=>{ card.classList.remove('playing'); window.atharNoReload=false; }));
-  let seen=false; try{ seen=sessionStorage.getItem('athar_ceo')==='1'; }catch(e){}
-  if(seen) return;   // the page reloads itself every few minutes: don't replay each time
-  atharReveal(()=>au.play().catch(err=>{
-    if(err.name!=='NotAllowedError') return;   // e.g. no file yet
-    card.classList.add('tapping'); paint();
-    const stop=()=>['pointerdown','keydown'].forEach(n=>document.removeEventListener(n,go));
-    const go=e=>{ if(e.target.closest&&e.target.closest('#langSeg')) return; au.play().catch(()=>{}); card.classList.remove('tapping'); paint(); stop(); };
-    ['pointerdown','keydown'].forEach(n=>document.addEventListener(n,go));
-  }));
-})();
 
 // intro: once per visit (the page reloads itself), tap to skip, none for reduced motion
 (function(){
