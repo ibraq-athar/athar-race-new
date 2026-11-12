@@ -26,6 +26,10 @@ PRIZE = {"A": "سيارة", "B": "جوال ذكي", "C": "آيباد", "D": "س�
 # Branches that never take part (EXBUAE = temporary UAE exhibition, closed)
 EXCLUDE = {"EXBUAE"}
 
+# Prize withdrawn after the month's review: the branch loses its prize, the seat stays empty
+# and the others in that category move up (Oct 2026: RYDANUDPRK removed from smart watches)
+WITHDRAWN = {"2026-10": {"RYDANUDPRK"}}
+
 # Personal employee POS accounts look like "1238-Abdellah", "6253 -WAlotibi" or "Aalzhrani-6563".
 # Anything else (shared/branch accounts) is ignored when picking the branch's winner.
 EMP_PATTERN = r"(^\d{3,}\s*-)|(-\s*\d{3,}$)"
