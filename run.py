@@ -33,6 +33,7 @@ from athar.readers import read_pos, read_targets          # noqa: E402
 from athar.api import read_pos_api, gcc_today            # noqa: E402
 from athar.build import internal_data, public_data, summary  # noqa: E402
 from athar.render import render                          # noqa: E402
+from athar.config import WITHDRAWN                       # noqa: E402
 
 REFRESH_MINUTES = 5          # --every with no number: rebuild from Odoo every 5 minutes
 SERVE_PORT = 8000            # --serve with no number
@@ -274,6 +275,9 @@ def build_one(a, refresh, target, asof_in, page, extra, internal):
     pub["built"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())   # shown as "last updated" (GCC time)
     pub["tz"] = os.environ.get("ODOO_TZ") or "Asia/Riyadh"
     pub.update(extra or {})
+    for b in pub["branches"]:
+        if b["s"] in WITHDRAWN.get(pub.get("month") or asof[:7], ()):
+            b["aw"] = None
     tpl = "winners.html" if pub.get("winners") else "public.html"
     render(os.path.join(ROOT, "templates", tpl), pub, os.path.join(a.out, page), refresh)
     if extra and extra["month"] < gcc_today().strftime("%Y-%m"):   # finished month: winners at YYYY-MM-winners.html too (check before results day)
